@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FinTrack — Students</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f5f5f0; --surface: #ffffff; --surface2: #f0f0eb;
+  --border: #e2e2da; --border2: #d0d0c8;
+  --text: #1a1a18; --muted: #6b6b65; --muted2: #9b9b95;
+  --accent: #1a6b4a; --accent-light: #e8f4ee; --accent-mid: #2d9068;
+  --red: #c0392b; --red-light: #fdf0ef;
+  --yellow: #b07d00; --yellow-light: #fdf8e8;
+  --blue: #1a4a8a; --blue-light: #eef3fb;
+  --sans: 'IBM Plex Sans', sans-serif; --mono: 'IBM Plex Mono', monospace;
+  --sidebar-collapsed: 56px; --sidebar-expanded: 210px; --topbar: 52px;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:var(--bg); color:var(--text); font-family:var(--sans); min-height:100vh; font-size:14px; }
+.shell { display:flex; min-height:100vh; }
+
+/* SIDEBAR */
+.sidebar { width:var(--sidebar-collapsed); background:var(--surface); border-right:1px solid var(--border); display:flex; flex-direction:column; position:fixed; top:0; left:0; bottom:0; z-index:100; transition:width 0.22s ease; overflow:hidden; }
+.sidebar.open { width:var(--sidebar-expanded); }
+.sidebar-top { height:var(--topbar); display:flex; align-items:center; padding:0 14px; border-bottom:1px solid var(--border); flex-shrink:0; gap:12px; }
+.hamburger { width:28px; height:28px; border:none; background:none; cursor:pointer; display:flex; flex-direction:column; justify-content:center; gap:5px; flex-shrink:0; padding:0; }
+.hamburger span { display:block; height:1.5px; background:var(--muted); border-radius:2px; }
+.hamburger:hover span { background:var(--text); }
+.sidebar-logo { font-size:13px; font-weight:700; color:var(--accent); white-space:nowrap; opacity:0; transition:opacity 0.15s; letter-spacing:0.05em; }
+.sidebar.open .sidebar-logo { opacity:1; }
+.nav-section { padding:16px 0 8px; border-bottom:1px solid var(--border); }
+.nav-section:last-of-type { border-bottom:none; }
+.nav-item { display:flex; align-items:center; gap:12px; padding:9px 14px; cursor:pointer; color:var(--muted); font-size:13px; font-weight:500; white-space:nowrap; transition:all 0.15s; border-left:2px solid transparent; text-decoration:none; }
+.nav-item:hover { background:var(--surface2); color:var(--text); }
+.nav-item.active { color:var(--accent); border-left-color:var(--accent); background:var(--accent-light); }
+.nav-icon { width:20px; height:20px; display:flex; align-items:center; justify-content:center; font-size:15px; flex-shrink:0; }
+.nav-label { opacity:0; transition:opacity 0.15s; }
+.sidebar.open .nav-label { opacity:1; }
+
+/* MAIN */
+.main { margin-left:var(--sidebar-collapsed); flex:1; display:flex; flex-direction:column; transition:margin-left 0.22s ease; }
+.sidebar.open ~ .main { margin-left:var(--sidebar-expanded); }
+
+/* TOPBAR */
+.topbar { height:var(--topbar); background:var(--surface); border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; padding:0 28px; position:sticky; top:0; z-index:50; }
+.page-title { font-size:15px; font-weight:600; }
+.breadcrumb { font-family:var(--mono); font-size:11px; color:var(--muted2); margin-top:1px; }
+.breadcrumb span { color:var(--muted); }
+.topbar-actions { display:flex; gap:8px; align-items:center; }
+.btn { display:inline-flex; align-items:center; gap:6px; padding:7px 14px; border-radius:6px; font-family:var(--sans); font-size:13px; font-weight:500; cursor:pointer; border:none; transition:all 0.15s; white-space:nowrap; }
+.btn-primary { background:var(--accent); color:#fff; }
+.btn-primary:hover { background:var(--accent-mid); }
+.btn-ghost { background:transparent; color:var(--muted); border:1px solid var(--border2); }
+.btn-ghost:hover { background:var(--surface2); color:var(--text); }
+.btn-sm { padding:5px 10px; font-size:12px; }
+
+/* CONTENT */
+.content { padding:24px 28px; flex:1; }
+
+/* LAYOUT */
+.two-col { display:grid; grid-template-columns:340px 1fr; gap:20px; align-items:start; }
+
+/* STUDENT LIST */
+.student-list { background:var(--surface); border:1px solid var(--border); border-radius:10px; overflow:hidden; }
+.list-header { padding:12px 16px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; }
+.list-header-title { font-size:13px; font-weight:600; }
+
+.search-box { display:flex; align-items:center; gap:8px; padding:10px 14px; border-bottom:1px solid var(--border); }
+.search-box input { flex:1; border:none; background:none; font-family:var(--sans); font-size:13px; color:var(--text); outline:none; }
+.search-box input::placeholder { color:var(--muted2); }
+.search-ic { color:var(--muted2); font-size:14px; }
+
+.student-item { display:flex; align-items:center; gap:12px; padding:11px 16px; border-bottom:1px solid var(--border); cursor:pointer; transition:background 0.12s; }
+.student-item:last-child { border-bottom:none; }
+.student-item:hover { background:var(--surface2); }
+.student-item.active { background:var(--accent-light); }
+.avatar { width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; color:#fff; flex-shrink:0; }
+.av-green { background:var(--accent); }
+.av-blue { background:var(--blue); }
+.av-orange { background:#c0622b; }
+.student-item-name { font-size:13px; font-weight:600; }
+.student-item-meta { font-size:11.5px; color:var(--muted); margin-top:1px; }
+.student-item-right { margin-left:auto; text-align:right; }
+.student-bal { font-family:var(--mono); font-size:12px; }
+.bal-owed { color:var(--red); }
+.bal-ok { color:var(--accent); }
+.bal-none { color:var(--muted2); }
+
+/* DETAIL PANEL */
+.detail-panel { background:var(--surface); border:1px solid var(--border); border-radius:10px; overflow:hidden; }
+
+/* TABS */
+.tabs { display:flex; border-bottom:1px solid var(--border); padding:0 20px; }
+.tab { padding:13px 16px; font-size:13px; font-weight:500; color:var(--muted); cursor:pointer; border-bottom:2px solid transparent; transition:all 0.15s; white-space:nowrap; }
+.tab:hover { color:var(--text); }
+.tab.active { color:var(--accent); border-bottom-color:var(--accent); }
+
+.tab-body { padding:20px; }
+.tab-pane { display:none; }
+.tab-pane.active { display:block; }
+
+/* PROFILE HEADER */
+.profile-header { display:flex; align-items:center; gap:16px; padding:20px; border-bottom:1px solid var(--border); }
+.profile-avatar { width:52px; height:52px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:18px; font-weight:700; color:#fff; background:var(--accent); flex-shrink:0; }
+.profile-name { font-size:17px; font-weight:700; }
+.profile-meta { font-size:12.5px; color:var(--muted); margin-top:3px; }
+.profile-badges { display:flex; gap:6px; margin-top:6px; flex-wrap:wrap; }
+.profile-actions { margin-left:auto; display:flex; gap:8px; }
+
+/* BADGE */
+.badge { display:inline-flex; align-items:center; padding:2px 8px; border-radius:4px; font-family:var(--mono); font-size:10.5px; font-weight:500; }
+.b-green { background:var(--accent-light); color:var(--accent); }
+.b-yellow { background:var(--yellow-light); color:var(--yellow); }
+.b-red { background:var(--red-light); color:var(--red); }
+.b-blue { background:var(--blue-light); color:var(--blue); }
+.b-gray { background:var(--surface2); color:var(--muted); border:1px solid var(--border2); }
+
+/* INFO GRID */
+.info-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:20px; }
+.info-field { display:flex; flex-direction:column; gap:4px; }
+.info-label { font-size:11px; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:0.06em; }
+.info-value { font-size:13.5px; color:var(--text); }
+.info-value.mono { font-family:var(--mono); }
+
+/* DIVIDER */
+.divider { height:1px; background:var(--border); margin:16px 0; }
+.section-label { font-size:12px; font-weight:700; color:var(--text); margin-bottom:12px; display:flex; align-items:center; justify-content:space-between; }
+
+/* RELATED CONTACTS */
+.related-card {
+  display:flex; align-items:center; gap:12px;
+  padding:11px 14px;
+  border:1px solid var(--border);
+  border-radius:8px;
+  margin-bottom:8px;
+  background:var(--bg);
+  cursor:pointer;
+  transition:border-color 0.15s;
+}
+.related-card:hover { border-color:var(--accent); background:var(--accent-light); }
+.related-av { width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; color:#fff; flex-shrink:0; }
+.related-name { font-size:13px; font-weight:600; }
+.related-role { font-size:11.5px; color:var(--muted); margin-top:1px; }
+.related-right { margin-left:auto; display:flex; align-items:center; gap:8px; }
+.add-related-btn { display:flex; align-items:center; gap:6px; padding:8px 12px; border:1px dashed var(--border2); border-radius:8px; font-size:12.5px; color:var(--muted); cursor:pointer; transition:all 0.15s; background:none; width:100%; }
+.add-related-btn:hover { border-color:var(--accent); color:var(--accent); background:var(--accent-light); }
+
+/* BALANCE TABLE */
+.bal-table { width:100%; border-collapse:collapse; font-size:13px; }
+.bal-table th { font-size:11px; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:0.06em; padding:6px 10px; text-align:left; border-bottom:1px solid var(--border); }
+.bal-table td { padding:10px 10px; border-bottom:1px solid var(--border); }
+.bal-table tr:last-child td { border-bottom:none; }
+.bal-table tr:hover td { background:var(--surface2); }
+.mono { font-family:var(--mono); }
+
+/* TIMELINE */
+.timeline { position:relative; padding-left:22px; }
+.timeline::before { content:''; position:absolute; left:6px; top:6px; bottom:0; width:1px; background:var(--border); }
+.tl-item { position:relative; margin-bottom:14px; }
+.tl-dot { position:absolute; left:-19px; top:4px; width:9px; height:9px; border-radius:50%; border:2px solid var(--surface); }
+.tl-date { font-family:var(--mono); font-size:10.5px; color:var(--muted2); margin-bottom:2px; }
+.tl-text { font-size:12.5px; font-weight:600; }
+.tl-meta { font-size:11.5px; color:var(--muted); margin-top:2px; }
+
+/* FORM */
+.input { height:36px; padding:0 10px; background:var(--bg); border:1px solid var(--border2); border-radius:6px; font-family:var(--sans); font-size:13px; color:var(--text); outline:none; transition:border-color 0.15s; width:100%; }
+.input:focus { border-color:var(--accent); background:#fff; }
+.field { display:flex; flex-direction:column; gap:5px; }
+.field label { font-size:11px; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:0.06em; }
+.form-row2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px; }
+
+/* MODAL */
+.modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.4); z-index:200; display:none; align-items:center; justify-content:center; padding:16px; }
+.modal-overlay.open { display:flex; }
+.modal { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:24px; width:460px; max-width:100%; max-height:90vh; overflow-y:auto; }
+.modal-hd { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; }
+.modal-title { font-size:15px; font-weight:700; }
+.modal-close { width:28px; height:28px; border-radius:6px; background:var(--surface2); border:none; cursor:pointer; font-size:16px; display:flex; align-items:center; justify-content:center; color:var(--muted); }
+.modal-footer { display:flex; gap:8px; justify-content:flex-end; margin-top:20px; }
+
+@keyframes fadeIn { from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:translateY(0)} }
+.fade-in { animation:fadeIn 0.2s ease both; }
+</style>
+</head>
+<body>
+<div class="shell">
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-top">
+    <button class="hamburger" onclick="document.getElementById('sidebar').classList.toggle('open')">
+      <span></span><span></span><span></span>
+    </button>
+    <div class="sidebar-logo">FinTrack</div>
+  </div>
+  <div class="nav-section">
+    <a class="nav-item" href="dashboard.html"><span class="nav-icon">⊞</span><span class="nav-label">Dashboard</span></a>
+  </div>
+  <div class="nav-section">
+    <a class="nav-item" href="invoice.html"><span class="nav-icon">📄</span><span class="nav-label">Tuition</span></a>
+    <a class="nav-item" href="donations.html"><span class="nav-icon">🤝</span><span class="nav-label">Donations</span></a>
+    <a class="nav-item" href="payments.html"><span class="nav-icon">💳</span><span class="nav-label">Payments</span></a>
+    <a class="nav-item" href="vendors.html"><span class="nav-icon">🏢</span><span class="nav-label">Vendors</span></a>
+  </div>
+  <div class="nav-section">
+    <a class="nav-item active" href="students.html"><span class="nav-icon">🎓</span><span class="nav-label">Students</span></a>
+    <a class="nav-item" href="parents.html"><span class="nav-icon">👨‍👩‍👧</span><span class="nav-label">Parents</span></a>
+  </div>
+  <div class="nav-section">
+    <a class="nav-item" href="reports.html"><span class="nav-icon">↗</span><span class="nav-label">Reports</span></a>
+    <a class="nav-item" href="settings.html"><span class="nav-icon">⚙</span><span class="nav-label">Settings</span></a>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main" id="main">
+  <div class="topbar">
+    <div>
+      <div class="page-title">Students</div>
+      <div class="breadcrumb">Contacts <span>/ Students</span></div>
+    </div>
+    <div class="topbar-actions">
+      <button class="btn btn-ghost">⬇ Export</button>
+      <button class="btn btn-primary" onclick="openAddModal()">+ Add Student</button>
+    </div>
+  </div>
+
+  <div class="content">
+    <div class="two-col">
+
+      <!-- LEFT: STUDENT LIST -->
+      <div class="student-list fade-in">
+        <div class="list-header">
+          <div class="list-header-title">All Students <span style="font-family:var(--mono);font-size:11px;color:var(--muted);font-weight:400;margin-left:6px;">142</span></div>
+          <select style="font-size:12px;border:1px solid var(--border2);background:var(--surface2);border-radius:5px;padding:4px 8px;color:var(--muted);outline:none;">
+            <option>All Grades</option>
+            <option>Grade 5</option><option>Grade 6</option><option>Grade 7</option>
+            <option>Grade 8</option><option>Grade 11</option>
+          </select>
+        </div>
+        <div class="search-box">
+          <span class="search-ic">⌕</span>
+          <input type="text" placeholder="Search students...">
+        </div>
+        <div id="student-list-items">
+          <div class="student-item active" onclick="selectStudent('david', this)">
+            <div class="avatar av-green">DC</div>
+            <div>
+              <div class="student-item-name">David Cohen</div>
+              <div class="student-item-meta">Grade 8</div>
+            </div>
+            <div class="student-item-right">
+              <div class="student-bal bal-owed">$9,474</div>
+              <div style="font-size:10.5px;color:var(--muted2);margin-top:1px;">balance</div>
+            </div>
+          </div>
+          <div class="student-item" onclick="selectStudent('sara', this)">
+            <div class="avatar av-blue">SG</div>
+            <div>
+              <div class="student-item-name">Sara Goldstein</div>
+              <div class="student-item-meta">Grade 5</div>
+            </div>
+            <div class="student-item-right">
+              <div class="student-bal bal-ok">Paid</div>
+            </div>
+          </div>
+          <div class="student-item" onclick="selectStudent('yossi', this)">
+            <div class="avatar av-orange">YK</div>
+            <div>
+              <div class="student-item-name">Yossi Katz</div>
+              <div class="student-item-meta">Grade 11</div>
+            </div>
+            <div class="student-item-right">
+              <div class="student-bal bal-owed">$20,300</div>
+              <div style="font-size:10.5px;color:var(--red);margin-top:1px;">overdue</div>
+            </div>
+          </div>
+          <div class="student-item" onclick="selectStudent('rivka', this)">
+            <div class="avatar" style="background:#7b52ab;">RS</div>
+            <div>
+              <div class="student-item-name">Rivka Shapiro</div>
+              <div class="student-item-meta">Grade 3</div>
+            </div>
+            <div class="student-item-right">
+              <div class="student-bal bal-owed">$10,150</div>
+              <div style="font-size:10.5px;color:var(--muted2);margin-top:1px;">balance</div>
+            </div>
+          </div>
+          <div class="student-item" onclick="selectStudent('moshe', this)">
+            <div class="avatar" style="background:#2980b9;">MF</div>
+            <div>
+              <div class="student-item-name">Moshe Friedman</div>
+              <div class="student-item-meta">Grade 7</div>
+            </div>
+            <div class="student-item-right">
+              <div class="student-bal bal-ok">Paid</div>
+            </div>
+          </div>
+          <div class="student-item" onclick="selectStudent('chana', this)">
+            <div class="avatar" style="background:#16a085;">CW</div>
+            <div>
+              <div class="student-item-name">Chana Weiss</div>
+              <div class="student-item-meta">Grade 10</div>
+            </div>
+            <div class="student-item-right">
+              <div class="student-bal bal-owed">$3,400</div>
+              <div style="font-size:10.5px;color:var(--muted2);margin-top:1px;">balance</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: DETAIL PANEL -->
+      <div class="detail-panel fade-in" id="detail-panel">
+        <!-- PROFILE HEADER -->
+        <div class="profile-header">
+          <div class="profile-avatar" id="det-avatar">DC</div>
+          <div>
+            <div class="profile-name" id="det-name">David Cohen</div>
+            <div class="profile-meta" id="det-meta">Grade 8 · Student ID #1042</div>
+            <div class="profile-badges">
+              <span class="badge b-green">Active</span>
+              <span class="badge b-yellow" id="det-bal-badge">Balance: $9,474</span>
+            </div>
+          </div>
+          <div class="profile-actions">
+            <button class="btn btn-ghost btn-sm" onclick="window.location='invoice.html'">+ Invoice</button>
+            <button class="btn btn-ghost btn-sm">⋯</button>
+          </div>
+        </div>
+
+        <!-- TABS -->
+        <div class="tabs">
+          <div class="tab active" onclick="showTab('profile', this)">Profile</div>
+          <div class="tab" onclick="showTab('related', this)">Related Contacts</div>
+          <div class="tab" onclick="showTab('balance', this)">Balance & Invoices</div>
+          <div class="tab" onclick="showTab('history', this)">History</div>
+        </div>
+
+        <!-- TAB: PROFILE -->
+        <div class="tab-body">
+          <div class="tab-pane active" id="tab-profile">
+            <div class="info-grid">
+              <div class="info-field">
+                <div class="info-label">Full Name</div>
+                <div class="info-value" id="pf-name">David Cohen</div>
+              </div>
+              <div class="info-field">
+                <div class="info-label">Student ID</div>
+                <div class="info-value mono">#1042</div>
+              </div>
+              <div class="info-field">
+                <div class="info-label">Grade</div>
+                <div class="info-value" id="pf-grade">Grade 8</div>
+              </div>
+              <div class="info-field">
+                <div class="info-label">Enrollment Year</div>
+                <div class="info-value">2022</div>
+              </div>
+              <div class="info-field">
+                <div class="info-label">Date of Birth</div>
+                <div class="info-value mono">Mar 14, 2012</div>
+              </div>
+              <div class="info-field">
+                <div class="info-label">Gender</div>
+                <div class="info-value">Male</div>
+              </div>
+              <div class="info-field">
+                <div class="info-label">Email</div>
+                <div class="info-value">david.cohen@email.com</div>
+              </div>
+              <div class="info-field">
+                <div class="info-label">Phone</div>
+                <div class="info-value mono">+1 (646) 555-0142</div>
+              </div>
+            </div>
+            <div class="divider"></div>
+            <div class="section-label">Financial Notes</div>
+            <div style="font-size:13px;color:var(--muted);line-height:1.6;">Merit scholarship applied. Credit card payment authorized. Previous year balance cleared Aug 2025.</div>
+          </div>
+
+          <!-- TAB: RELATED CONTACTS -->
+          <div class="tab-pane" id="tab-related">
+            <div class="section-label">
+              Parents / Guardians
+              <button class="btn btn-ghost btn-sm" onclick="openRelatedModal('parent')">+ Add</button>
+            </div>
+            <div id="related-parents">
+              <div class="related-card" onclick="window.location='parents.html'">
+                <div class="related-av" style="background:var(--blue);">JC</div>
+                <div>
+                  <div class="related-name">Jonathan Cohen</div>
+                  <div class="related-role">Father · Primary payer</div>
+                </div>
+                <div class="related-right">
+                  <span class="badge b-blue">Parent</span>
+                  <span style="color:var(--muted2);font-size:14px;">›</span>
+                </div>
+              </div>
+              <div class="related-card" onclick="window.location='parents.html'">
+                <div class="related-av" style="background:#8e44ad;">MC</div>
+                <div>
+                  <div class="related-name">Miriam Cohen</div>
+                  <div class="related-role">Mother · Secondary contact</div>
+                </div>
+                <div class="related-right">
+                  <span class="badge b-blue">Parent</span>
+                  <span style="color:var(--muted2);font-size:14px;">›</span>
+                </div>
+              </div>
+            </div>
+            <button class="add-related-btn" onclick="openRelatedModal('parent')" style="margin-bottom:20px;">
+              + Link a parent or guardian
+            </button>
+
+            <div class="divider"></div>
+
+            <div class="section-label">
+              Siblings
+              <button class="btn btn-ghost btn-sm" onclick="openRelatedModal('sibling')">+ Add</button>
+            </div>
+            <div id="related-siblings">
+              <div class="related-card" onclick="selectStudent('rachel_placeholder', null)">
+                <div class="related-av" style="background:var(--accent);">RC</div>
+                <div>
+                  <div class="related-name">Rachel Cohen</div>
+                  <div class="related-role">Sister · Grade 5 · Same family account</div>
+                </div>
+                <div class="related-right">
+                  <span class="badge b-green">Sibling</span>
+                  <span style="color:var(--muted2);font-size:14px;">›</span>
+                </div>
+              </div>
+            </div>
+            <button class="add-related-btn" onclick="openRelatedModal('sibling')" style="margin-bottom:20px;">
+              + Link a sibling
+            </button>
+
+            <div class="divider"></div>
+
+            <div class="section-label">Emergency Contact</div>
+            <div class="related-card">
+              <div class="related-av" style="background:#7f8c8d;">GC</div>
+              <div>
+                <div class="related-name">Grandma Cohen</div>
+                <div class="related-role">Emergency contact only · +1 (646) 555-0199</div>
+              </div>
+              <div class="related-right">
+                <span class="badge b-gray">Emergency</span>
+              </div>
+            </div>
+            <button class="add-related-btn" onclick="openRelatedModal('emergency')">
+              + Add emergency contact
+            </button>
+          </div>
+
+          <!-- TAB: BALANCE -->
+          <div class="tab-pane" id="tab-balance">
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:20px;">
+              <div style="padding:12px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;">
+                <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px;">Total Invoiced</div>
+                <div style="font-family:var(--mono);font-size:18px;font-weight:700;">$18,948</div>
+              </div>
+              <div style="padding:12px 14px;background:var(--accent-light);border:1px solid #b8dece;border-radius:8px;">
+                <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px;">Paid</div>
+                <div style="font-family:var(--mono);font-size:18px;font-weight:700;color:var(--accent);">$9,474</div>
+              </div>
+              <div style="padding:12px 14px;background:var(--yellow-light);border:1px solid #f0d88a;border-radius:8px;">
+                <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px;">Balance</div>
+                <div style="font-family:var(--mono);font-size:18px;font-weight:700;color:var(--yellow);">$9,474</div>
+              </div>
+            </div>
+            <div class="section-label">Invoices</div>
+            <table class="bal-table">
+              <thead>
+                <tr>
+                  <th>Invoice</th><th>Year</th><th>Total</th><th>Paid</th><th>Balance</th><th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="mono">#INV-1042</td>
+                  <td style="color:var(--muted);">2025–26</td>
+                  <td class="mono">$18,948</td>
+                  <td class="mono" style="color:var(--accent);">$9,474</td>
+                  <td class="mono" style="color:var(--yellow);">$9,474</td>
+                  <td><span class="badge b-yellow">◑ Partial</span></td>
+                </tr>
+                <tr>
+                  <td class="mono">#INV-0891</td>
+                  <td style="color:var(--muted);">2024–25</td>
+                  <td class="mono">$17,200</td>
+                  <td class="mono" style="color:var(--accent);">$17,200</td>
+                  <td class="mono" style="color:var(--muted2);">$0</td>
+                  <td><span class="badge b-green">● Paid</span></td>
+                </tr>
+              </tbody>
+            </table>
+
+            <div class="divider"></div>
+            <div class="section-label">
+              Account Credits
+              <span class="badge b-blue" style="font-size:11px;">$340 available</span>
+            </div>
+            <div style="padding:11px 14px;background:var(--blue-light);border:1px solid #c0d4f0;border-radius:8px;font-size:12.5px;color:var(--blue);">
+              $340 unallocated credit from Apr 12 overpayment. <a href="payments.html" style="color:var(--blue);font-weight:600;">Apply or convert to donation →</a>
+            </div>
+          </div>
+
+          <!-- TAB: HISTORY -->
+          <div class="tab-pane" id="tab-history">
+            <div class="section-label">Activity Log</div>
+            <div class="timeline">
+              <div class="tl-item">
+                <div class="tl-dot" style="background:var(--accent);"></div>
+                <div class="tl-date">Apr 12, 2026</div>
+                <div class="tl-text">Payment received — $5,482.92</div>
+                <div class="tl-meta">Credit card · Applied to Deposit installment</div>
+              </div>
+              <div class="tl-item">
+                <div class="tl-dot" style="background:var(--blue);"></div>
+                <div class="tl-date">Mar 15, 2026</div>
+                <div class="tl-text">Invoice #INV-1042 created</div>
+                <div class="tl-meta">$18,948.75 · 3 installments · Merit scholarship applied</div>
+              </div>
+              <div class="tl-item">
+                <div class="tl-dot" style="background:var(--accent);"></div>
+                <div class="tl-date">Mar 1, 2026</div>
+                <div class="tl-text">Payment received — $3,991.46</div>
+                <div class="tl-meta">Bank transfer · Applied to Installment 2 (partial)</div>
+              </div>
+              <div class="tl-item">
+                <div class="tl-dot" style="background:var(--muted2);"></div>
+                <div class="tl-date">Sep 1, 2025</div>
+                <div class="tl-text">Enrolled for 2025–26</div>
+                <div class="tl-meta">Grade 8 · Continuing student</div>
+              </div>
+              <div class="tl-item">
+                <div class="tl-dot" style="background:var(--accent);"></div>
+                <div class="tl-date">Aug 20, 2025</div>
+                <div class="tl-text">2024–25 balance cleared</div>
+                <div class="tl-meta">Final payment of $2,100 received</div>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- /tab-body -->
+      </div><!-- /detail-panel -->
+    </div>
+  </div>
+</main>
+
+<!-- ADD RELATED MODAL -->
+<div class="modal-overlay" id="related-modal" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="modal-hd">
+      <div class="modal-title" id="rel-modal-title">Link a Parent / Guardian</div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div style="margin-bottom:14px;">
+      <div class="field" style="margin-bottom:12px;">
+        <label>Search existing contact</label>
+        <input class="input" placeholder="Type name to search...">
+      </div>
+      <div style="text-align:center;font-size:12px;color:var(--muted2);margin:10px 0;">— or create new —</div>
+      <div class="form-row2">
+        <div class="field"><label>First Name</label><input class="input" placeholder="First name"></div>
+        <div class="field"><label>Last Name</label><input class="input" placeholder="Last name"></div>
+      </div>
+      <div class="form-row2">
+        <div class="field"><label>Relationship</label>
+          <select class="input" id="rel-type">
+            <option>Father</option><option>Mother</option><option>Guardian</option>
+            <option>Sibling</option><option>Grandparent</option><option>Emergency Contact</option>
+          </select>
+        </div>
+        <div class="field"><label>Phone</label><input class="input" placeholder="+1 (___) ___-____"></div>
+      </div>
+      <div class="field" style="margin-top:10px;">
+        <label>Email</label>
+        <input class="input" placeholder="email@example.com">
+      </div>
+      <div style="margin-top:12px;display:flex;align-items:center;gap:8px;">
+        <input type="checkbox" id="is-payer" style="accent-color:var(--accent);width:15px;height:15px;">
+        <label for="is-payer" style="font-size:13px;cursor:pointer;">This contact is a financial payer (can receive invoices)</label>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="closeModal()">Link Contact</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD STUDENT MODAL -->
+<div class="modal-overlay" id="add-modal" onclick="if(event.target===this)closeAddModal()">
+  <div class="modal">
+    <div class="modal-hd">
+      <div class="modal-title">Add New Student</div>
+      <button class="modal-close" onclick="closeAddModal()">✕</button>
+    </div>
+    <div class="form-row2">
+      <div class="field"><label>First Name</label><input class="input" placeholder="First name"></div>
+      <div class="field"><label>Last Name</label><input class="input" placeholder="Last name"></div>
+    </div>
+    <div class="form-row2" style="margin-top:12px;">
+      <div class="field"><label>Grade</label>
+        <select class="input">
+          <option>Grade 1</option><option>Grade 2</option><option>Grade 3</option>
+          <option>Grade 4</option><option>Grade 5</option><option>Grade 6</option>
+          <option>Grade 7</option><option>Grade 8</option><option>Grade 9</option>
+          <option>Grade 10</option><option>Grade 11</option><option>Grade 12</option>
+        </select>
+      </div>
+      <div class="field"><label>Enrollment Year</label>
+        <select class="input"><option>2025–2026</option><option>2026–2027</option></select>
+      </div>
+    </div>
+    <div class="form-row2" style="margin-top:12px;">
+      <div class="field"><label>Date of Birth</label><input type="date" class="input"></div>
+      <div class="field"><label>Student ID</label><input class="input" placeholder="Auto-generated" readonly style="color:var(--muted2);"></div>
+    </div>
+    <div style="margin-top:12px;" class="field">
+      <label>Link to existing family</label>
+      <select class="input"><option>— New family —</option><option>Cohen Family</option><option>Katz Family</option><option>Goldstein Family</option></select>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeAddModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="closeAddModal()">Add Student</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const studentData = {
+  david: { av:'DC', name:'David Cohen', meta:'Grade 8 · Student ID #1042', grade:'Grade 8', bal:'$9,474', balBadge:'Balance: $9,474', balClass:'b-yellow', avBg:'' },
+  sara:  { av:'SG', name:'Sara Goldstein', meta:'Grade 5 · Student ID #1043', grade:'Grade 5', bal:'Paid', balBadge:'Paid in full', balClass:'b-green', avBg:'background:var(--blue)' },
+  yossi: { av:'YK', name:'Yossi Katz', meta:'Grade 11 · Student ID #1044', grade:'Grade 11', bal:'$20,300 overdue', balBadge:'Overdue: $20,300', balClass:'b-red', avBg:'background:#c0622b' },
+  rivka: { av:'RS', name:'Rivka Shapiro', meta:'Grade 3 · Student ID #1045', grade:'Grade 3', bal:'$10,150', balBadge:'Balance: $10,150', balClass:'b-yellow', avBg:'background:#7b52ab' },
+  moshe: { av:'MF', name:'Moshe Friedman', meta:'Grade 7 · Student ID #1046', grade:'Grade 7', bal:'Paid', balBadge:'Paid in full', balClass:'b-green', avBg:'background:#2980b9' },
+  chana: { av:'CW', name:'Chana Weiss', meta:'Grade 10 · Student ID #1047', grade:'Grade 10', bal:'$3,400', balBadge:'Balance: $3,400', balClass:'b-yellow', avBg:'background:#16a085' },
+};
+
+function selectStudent(id, el) {
+  if (!studentData[id]) return;
+  document.querySelectorAll('.student-item').forEach(i => i.classList.remove('active'));
+  if (el) el.classList.add('active');
+  const s = studentData[id];
+  document.getElementById('det-avatar').textContent = s.av;
+  if (s.avBg) document.getElementById('det-avatar').style.cssText = s.avBg;
+  document.getElementById('det-name').textContent = s.name;
+  document.getElementById('det-meta').textContent = s.meta;
+  const badge = document.getElementById('det-bal-badge');
+  badge.textContent = s.balBadge;
+  badge.className = 'badge ' + s.balClass;
+  document.getElementById('pf-name').textContent = s.name;
+  document.getElementById('pf-grade').textContent = s.grade;
+}
+
+function showTab(tab, el) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('tab-' + tab).classList.add('active');
+}
+
+function openRelatedModal(type) {
+  const titles = { parent:'Link a Parent / Guardian', sibling:'Link a Sibling', emergency:'Add Emergency Contact' };
+  document.getElementById('rel-modal-title').textContent = titles[type] || 'Link Contact';
+  document.getElementById('related-modal').classList.add('open');
+}
+function closeModal() { document.getElementById('related-modal').classList.remove('open'); }
+function openAddModal() { document.getElementById('add-modal').classList.add('open'); }
+function closeAddModal() { document.getElementById('add-modal').classList.remove('open'); }
+</script>
+</body>
+</html>

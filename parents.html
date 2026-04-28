@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FinTrack — Parents</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f5f5f0; --surface:#fff; --surface2:#f0f0eb;
+  --border:#e2e2da; --border2:#d0d0c8;
+  --text:#1a1a18; --muted:#6b6b65; --muted2:#9b9b95;
+  --accent:#1a6b4a; --accent-light:#e8f4ee; --accent-mid:#2d9068;
+  --red:#c0392b; --red-light:#fdf0ef;
+  --yellow:#b07d00; --yellow-light:#fdf8e8;
+  --blue:#1a4a8a; --blue-light:#eef3fb;
+  --sans:'IBM Plex Sans',sans-serif; --mono:'IBM Plex Mono',monospace;
+  --sc:56px; --se:210px; --tb:52px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;font-size:14px;}
+.shell{display:flex;min-height:100vh;}
+
+/* SIDEBAR */
+.sidebar{width:var(--sc);background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100;transition:width .22s ease;overflow:hidden;}
+.sidebar.open{width:var(--se);}
+.sidebar-top{height:var(--tb);display:flex;align-items:center;padding:0 14px;border-bottom:1px solid var(--border);flex-shrink:0;gap:12px;}
+.hbg{width:28px;height:28px;border:none;background:none;cursor:pointer;display:flex;flex-direction:column;justify-content:center;gap:5px;flex-shrink:0;padding:0;}
+.hbg span{display:block;height:1.5px;background:var(--muted);border-radius:2px;}
+.hbg:hover span{background:var(--text);}
+.s-logo{font-size:13px;font-weight:700;color:var(--accent);white-space:nowrap;opacity:0;transition:opacity .15s;letter-spacing:.05em;}
+.sidebar.open .s-logo{opacity:1;}
+.nav-sec{padding:16px 0 8px;border-bottom:1px solid var(--border);}
+.nav-sec:last-of-type{border-bottom:none;}
+.ni{display:flex;align-items:center;gap:12px;padding:9px 14px;cursor:pointer;color:var(--muted);font-size:13px;font-weight:500;white-space:nowrap;transition:all .15s;border-left:2px solid transparent;text-decoration:none;}
+.ni:hover{background:var(--surface2);color:var(--text);}
+.ni.active{color:var(--accent);border-left-color:var(--accent);background:var(--accent-light);}
+.nic{width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
+.nl{opacity:0;transition:opacity .15s;}
+.sidebar.open .nl{opacity:1;}
+
+/* MAIN */
+.main{margin-left:var(--sc);flex:1;display:flex;flex-direction:column;transition:margin-left .22s ease;}
+.sidebar.open~.main{margin-left:var(--se);}
+
+/* TOPBAR */
+.topbar{height:var(--tb);background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 28px;position:sticky;top:0;z-index:50;}
+.pt{font-size:15px;font-weight:600;}
+.bc{font-family:var(--mono);font-size:11px;color:var(--muted2);margin-top:1px;}
+.ta{display:flex;gap:8px;align-items:center;}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:6px;font-family:var(--sans);font-size:13px;font-weight:500;cursor:pointer;border:none;transition:all .15s;white-space:nowrap;}
+.btn-p{background:var(--accent);color:#fff;}.btn-p:hover{background:var(--accent-mid);}
+.btn-g{background:transparent;color:var(--muted);border:1px solid var(--border2);}.btn-g:hover{background:var(--surface2);color:var(--text);}
+.btn-sm{padding:5px 10px;font-size:12px;}
+
+/* CONTENT */
+.content{padding:24px 28px;flex:1;}
+.two-col{display:grid;grid-template-columns:320px 1fr;gap:20px;align-items:start;}
+
+/* LIST */
+.list-panel{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;}
+.list-hd{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.list-hd-title{font-size:13px;font-weight:600;}
+.search-box{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--border);}
+.search-box input{flex:1;border:none;background:none;font-family:var(--sans);font-size:13px;color:var(--text);outline:none;}
+.search-box input::placeholder{color:var(--muted2);}
+
+.parent-item{display:flex;align-items:center;gap:11px;padding:11px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .12s;}
+.parent-item:last-child{border-bottom:none;}
+.parent-item:hover{background:var(--surface2);}
+.parent-item.active{background:var(--accent-light);}
+.av{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0;}
+.pi-name{font-size:13px;font-weight:600;}
+.pi-meta{font-size:11.5px;color:var(--muted);margin-top:1px;}
+.pi-right{margin-left:auto;text-align:right;}
+
+/* DETAIL */
+.detail{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;}
+.prof-hd{display:flex;align-items:center;gap:16px;padding:20px;border-bottom:1px solid var(--border);}
+.prof-av{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:19px;font-weight:700;color:#fff;flex-shrink:0;}
+.prof-name{font-size:17px;font-weight:700;}
+.prof-meta{font-size:12.5px;color:var(--muted);margin-top:3px;}
+.prof-badges{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;}
+.prof-actions{margin-left:auto;display:flex;gap:8px;}
+
+/* TABS */
+.tabs{display:flex;border-bottom:1px solid var(--border);padding:0 20px;}
+.tab{padding:13px 16px;font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;white-space:nowrap;}
+.tab:hover{color:var(--text);}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent);}
+.tab-body{padding:20px;}
+.tab-pane{display:none;}
+.tab-pane.active{display:block;}
+
+/* BADGES */
+.badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:4px;font-family:var(--mono);font-size:10.5px;font-weight:500;}
+.b-g{background:var(--accent-light);color:var(--accent);}
+.b-y{background:var(--yellow-light);color:var(--yellow);}
+.b-r{background:var(--red-light);color:var(--red);}
+.b-b{background:var(--blue-light);color:var(--blue);}
+.b-gr{background:var(--surface2);color:var(--muted);border:1px solid var(--border2);}
+
+/* INFO GRID */
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px;}
+.if{display:flex;flex-direction:column;gap:4px;}
+.il{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;}
+.iv{font-size:13.5px;color:var(--text);}
+.iv.mono{font-family:var(--mono);}
+
+/* DIVIDER */
+.divider{height:1px;background:var(--border);margin:16px 0;}
+.sec-lbl{font-size:12px;font-weight:700;color:var(--text);margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;}
+
+/* RELATED CARDS */
+.rel-card{display:flex;align-items:center;gap:12px;padding:11px 14px;border:1px solid var(--border);border-radius:8px;margin-bottom:8px;background:var(--bg);cursor:pointer;transition:border-color .15s;}
+.rel-card:hover{border-color:var(--accent);background:var(--accent-light);}
+.rel-av{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0;}
+.rel-name{font-size:13px;font-weight:600;}
+.rel-role{font-size:11.5px;color:var(--muted);margin-top:1px;}
+.rel-right{margin-left:auto;display:flex;align-items:center;gap:8px;}
+.add-rel{display:flex;align-items:center;gap:6px;padding:9px 13px;border:1px dashed var(--border2);border-radius:8px;font-size:12.5px;color:var(--muted);cursor:pointer;transition:all .15s;background:none;width:100%;margin-bottom:16px;}
+.add-rel:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-light);}
+
+/* SPOUSE CARD - special highlight */
+.spouse-card{display:flex;align-items:center;gap:14px;padding:14px 16px;border:1px solid #c0d4f0;border-radius:10px;background:var(--blue-light);margin-bottom:12px;}
+.spouse-av{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#fff;background:var(--blue);flex-shrink:0;}
+.spouse-name{font-size:14px;font-weight:700;}
+.spouse-role{font-size:12px;color:var(--muted);margin-top:2px;}
+.spouse-right{margin-left:auto;display:flex;align-items:center;gap:8px;}
+
+/* STUDENT CHIPS */
+.student-chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;}
+.chip{display:flex;align-items:center;gap:8px;padding:7px 12px;border:1px solid var(--border);border-radius:8px;background:var(--bg);cursor:pointer;transition:all .15s;font-size:12.5px;}
+.chip:hover{border-color:var(--accent);background:var(--accent-light);}
+.chip-av{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff;flex-shrink:0;}
+.chip-name{font-weight:600;}
+.chip-grade{font-size:11px;color:var(--muted);}
+
+/* PAYMENT HISTORY */
+.pay-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);}
+.pay-row:last-child{border-bottom:none;}
+.pay-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;background:var(--accent-light);flex-shrink:0;}
+.pay-name{font-size:12.5px;font-weight:600;}
+.pay-meta{font-size:11.5px;color:var(--muted);margin-top:1px;}
+.pay-amt{margin-left:auto;font-family:var(--mono);font-size:13px;font-weight:600;color:var(--accent);}
+
+/* TABLE */
+.tbl{width:100%;border-collapse:collapse;font-size:12.5px;}
+.tbl th{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;padding:6px 10px;text-align:left;border-bottom:1px solid var(--border);}
+.tbl td{padding:10px;border-bottom:1px solid var(--border);vertical-align:middle;}
+.tbl tr:last-child td{border-bottom:none;}
+.tbl tr:hover td{background:var(--surface2);}
+.mono{font-family:var(--mono);}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200;display:none;align-items:center;justify-content:center;padding:16px;}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;width:480px;max-width:100%;max-height:90vh;overflow-y:auto;}
+.modal-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
+.modal-title{font-size:15px;font-weight:700;}
+.modal-close{width:28px;height:28px;border-radius:6px;background:var(--surface2);border:none;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;color:var(--muted);}
+.modal-footer{display:flex;gap:8px;justify-content:flex-end;margin-top:20px;}
+.field{display:flex;flex-direction:column;gap:5px;margin-bottom:12px;}
+.field label{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;}
+.input{height:36px;padding:0 10px;background:var(--bg);border:1px solid var(--border2);border-radius:6px;font-family:var(--sans);font-size:13px;color:var(--text);outline:none;transition:border-color .15s;width:100%;}
+.input:focus{border-color:var(--accent);background:#fff;}
+.form-row2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+.fi{animation:fadeIn .2s ease both;}
+</style>
+</head>
+<body>
+<div class="shell">
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-top">
+    <button class="hbg" onclick="document.getElementById('sidebar').classList.toggle('open')">
+      <span></span><span></span><span></span>
+    </button>
+    <div class="s-logo">FinTrack</div>
+  </div>
+  <div class="nav-sec">
+    <a class="ni" href="dashboard.html"><span class="nic">⊞</span><span class="nl">Dashboard</span></a>
+  </div>
+  <div class="nav-sec">
+    <a class="ni" href="invoice.html"><span class="nic">📄</span><span class="nl">Tuition</span></a>
+    <a class="ni" href="donations.html"><span class="nic">🤝</span><span class="nl">Donations</span></a>
+    <a class="ni" href="payments.html"><span class="nic">💳</span><span class="nl">Payments</span></a>
+    <a class="ni" href="vendors.html"><span class="nic">🏢</span><span class="nl">Vendors</span></a>
+  </div>
+  <div class="nav-sec">
+    <a class="ni" href="students.html"><span class="nic">🎓</span><span class="nl">Students</span></a>
+    <a class="ni active" href="parents.html"><span class="nic">👨‍👩‍👧</span><span class="nl">Parents</span></a>
+  </div>
+  <div class="nav-sec">
+    <a class="ni" href="reports.html"><span class="nic">↗</span><span class="nl">Reports</span></a>
+    <a class="ni" href="settings.html"><span class="nic">⚙</span><span class="nl">Settings</span></a>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+  <div class="topbar">
+    <div>
+      <div class="pt">Parents & Contacts</div>
+      <div class="bc">Contacts / Parents</div>
+    </div>
+    <div class="ta">
+      <button class="btn btn-g">⬇ Export</button>
+      <button class="btn btn-p" onclick="openAddModal()">+ Add Parent</button>
+    </div>
+  </div>
+
+  <div class="content">
+    <div class="two-col">
+
+      <!-- LEFT: LIST -->
+      <div class="list-panel fi">
+        <div class="list-hd">
+          <div class="list-hd-title">All Parents <span style="font-family:var(--mono);font-size:11px;color:var(--muted);font-weight:400;margin-left:6px;">84</span></div>
+          <select style="font-size:12px;border:1px solid var(--border2);background:var(--surface2);border-radius:5px;padding:4px 8px;color:var(--muted);outline:none;">
+            <option>All</option><option>Primary Payers</option><option>Has Balance</option>
+          </select>
+        </div>
+        <div class="search-box">
+          <span style="color:var(--muted2);font-size:14px;">⌕</span>
+          <input type="text" placeholder="Search parents...">
+        </div>
+
+        <div class="parent-item active" onclick="select('jonathan',this)">
+          <div class="av" style="background:var(--blue);">JC</div>
+          <div>
+            <div class="pi-name">Jonathan Cohen</div>
+            <div class="pi-meta">Father · 2 students</div>
+          </div>
+          <div class="pi-right">
+            <span class="badge b-y">$9,134 due</span>
+          </div>
+        </div>
+
+        <div class="parent-item" onclick="select('miriam_cohen',this)">
+          <div class="av" style="background:#8e44ad;">MC</div>
+          <div>
+            <div class="pi-name">Miriam Cohen</div>
+            <div class="pi-meta">Mother · 2 students</div>
+          </div>
+          <div class="pi-right">
+            <span class="badge b-gr">Secondary</span>
+          </div>
+        </div>
+
+        <div class="parent-item" onclick="select('reuven',this)">
+          <div class="av" style="background:#c0622b;">RK</div>
+          <div>
+            <div class="pi-name">Reuven Katz</div>
+            <div class="pi-meta">Father · 1 student</div>
+          </div>
+          <div class="pi-right">
+            <span class="badge b-r">$20,300 overdue</span>
+          </div>
+        </div>
+
+        <div class="parent-item" onclick="select('devorah',this)">
+          <div class="av" style="background:#16a085;">DK</div>
+          <div>
+            <div class="pi-name">Devorah Katz</div>
+            <div class="pi-meta">Mother · 1 student</div>
+          </div>
+          <div class="pi-right">
+            <span class="badge b-gr">Secondary</span>
+          </div>
+        </div>
+
+        <div class="parent-item" onclick="select('avraham',this)">
+          <div class="av" style="background:#7b52ab;">AS</div>
+          <div>
+            <div class="pi-name">Avraham Shapiro</div>
+            <div class="pi-meta">Father · 1 student</div>
+          </div>
+          <div class="pi-right">
+            <span class="badge b-y">$10,150 due</span>
+          </div>
+        </div>
+
+        <div class="parent-item" onclick="select('miriam_levy',this)">
+          <div class="av" style="background:var(--accent);">ML</div>
+          <div>
+            <div class="pi-name">Miriam Levy</div>
+            <div class="pi-meta">Donor only</div>
+          </div>
+          <div class="pi-right">
+            <span class="badge b-b">Donor</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- RIGHT: DETAIL -->
+      <div class="detail fi" id="detail">
+
+        <!-- PROFILE HEADER -->
+        <div class="prof-hd">
+          <div class="prof-av" id="d-av" style="background:var(--blue);">JC</div>
+          <div>
+            <div class="prof-name" id="d-name">Jonathan Cohen</div>
+            <div class="prof-meta" id="d-meta">Father · Primary Payer · Cohen Family</div>
+            <div class="prof-badges">
+              <span class="badge b-b">Parent</span>
+              <span class="badge b-y" id="d-bal">Balance: $9,134</span>
+            </div>
+          </div>
+          <div class="prof-actions">
+            <button class="btn btn-g btn-sm" onclick="window.location='invoice.html'">+ Invoice</button>
+            <button class="btn btn-g btn-sm" onclick="window.location='payments.html'">💳 Pay</button>
+          </div>
+        </div>
+
+        <!-- TABS -->
+        <div class="tabs">
+          <div class="tab active" onclick="showTab('profile',this)">Profile</div>
+          <div class="tab" onclick="showTab('related',this)">Related Contacts</div>
+          <div class="tab" onclick="showTab('billing',this)">Billing</div>
+          <div class="tab" onclick="showTab('notes',this)">Notes</div>
+        </div>
+
+        <div class="tab-body">
+
+          <!-- PROFILE TAB -->
+          <div class="tab-pane active" id="tab-profile">
+            <div class="info-grid">
+              <div class="if"><div class="il">Full Name</div><div class="iv">Jonathan Cohen</div></div>
+              <div class="if"><div class="il">Role</div><div class="iv">Father / Primary Payer</div></div>
+              <div class="if"><div class="il">Email</div><div class="iv">jonathan.cohen@email.com</div></div>
+              <div class="if"><div class="il">Phone</div><div class="iv mono">+1 (646) 555-0142</div></div>
+              <div class="if"><div class="il">Preferred Contact</div><div class="iv">Email</div></div>
+              <div class="if"><div class="il">Language</div><div class="iv">English</div></div>
+              <div class="if"><div class="il">Address</div><div class="iv">42 Maple St, Brooklyn NY 11201</div></div>
+              <div class="if"><div class="il">Member Since</div><div class="iv mono">Sep 2022</div></div>
+            </div>
+            <div class="divider"></div>
+            <div class="sec-lbl">Linked Students</div>
+            <div class="student-chips" id="student-chips">
+              <div class="chip" onclick="window.location='students.html'">
+                <div class="chip-av" style="background:var(--accent);">DC</div>
+                <div><div class="chip-name">David Cohen</div><div class="chip-grade">Grade 8</div></div>
+              </div>
+              <div class="chip" onclick="window.location='students.html'">
+                <div class="chip-av" style="background:var(--blue);">RC</div>
+                <div><div class="chip-name">Rachel Cohen</div><div class="chip-grade">Grade 5</div></div>
+              </div>
+              <div class="chip" onclick="openLinkStudentModal()" style="border-style:dashed;color:var(--accent);">
+                + Link student
+              </div>
+            </div>
+          </div>
+
+          <!-- RELATED CONTACTS TAB -->
+          <div class="tab-pane" id="tab-related">
+
+            <div class="sec-lbl">
+              Spouse / Partner
+              <button class="btn btn-g btn-sm" onclick="openSpouseModal()">Edit</button>
+            </div>
+            <div class="spouse-card" id="spouse-card">
+              <div class="spouse-av">MC</div>
+              <div>
+                <div class="spouse-name">Miriam Cohen</div>
+                <div class="spouse-role">Wife · Secondary contact · miriam.cohen@email.com</div>
+              </div>
+              <div class="spouse-right">
+                <span class="badge b-b">Spouse</span>
+                <button class="btn btn-g btn-sm" onclick="select('miriam_cohen', null)">View →</button>
+              </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="sec-lbl">
+              Children / Students
+              <button class="btn btn-g btn-sm" onclick="openLinkStudentModal()">+ Link</button>
+            </div>
+            <div class="rel-card" onclick="window.location='students.html'">
+              <div class="rel-av" style="background:var(--accent);">DC</div>
+              <div>
+                <div class="rel-name">David Cohen</div>
+                <div class="rel-role">Son · Grade 8 · Balance: $9,474</div>
+              </div>
+              <div class="rel-right">
+                <span class="badge b-y">$9,474</span>
+                <span style="color:var(--muted2);font-size:14px;">›</span>
+              </div>
+            </div>
+            <div class="rel-card" onclick="window.location='students.html'">
+              <div class="rel-av" style="background:var(--blue);">RC</div>
+              <div>
+                <div class="rel-name">Rachel Cohen</div>
+                <div class="rel-role">Daughter · Grade 5 · Paid in full</div>
+              </div>
+              <div class="rel-right">
+                <span class="badge b-g">Paid</span>
+                <span style="color:var(--muted2);font-size:14px;">›</span>
+              </div>
+            </div>
+            <button class="add-rel" onclick="openLinkStudentModal()">+ Link another student</button>
+
+            <div class="divider"></div>
+
+            <div class="sec-lbl">
+              Other Contacts
+              <button class="btn btn-g btn-sm" onclick="openRelatedModal()">+ Add</button>
+            </div>
+            <div class="rel-card">
+              <div class="rel-av" style="background:#7f8c8d;">GC</div>
+              <div>
+                <div class="rel-name">Grandma Cohen</div>
+                <div class="rel-role">Emergency contact · +1 (646) 555-0199</div>
+              </div>
+              <div class="rel-right">
+                <span class="badge b-gr">Emergency</span>
+              </div>
+            </div>
+            <button class="add-rel" onclick="openRelatedModal()">+ Add another contact</button>
+          </div>
+
+          <!-- BILLING TAB -->
+          <div class="tab-pane" id="tab-billing">
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:20px;">
+              <div style="padding:12px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;">
+                <div class="il" style="margin-bottom:5px;">Total Invoiced</div>
+                <div style="font-family:var(--mono);font-size:18px;font-weight:700;">$34,500</div>
+                <div style="font-size:11px;color:var(--muted);margin-top:2px;">Both children</div>
+              </div>
+              <div style="padding:12px 14px;background:var(--accent-light);border:1px solid #b8dece;border-radius:8px;">
+                <div class="il" style="margin-bottom:5px;">Paid</div>
+                <div style="font-family:var(--mono);font-size:18px;font-weight:700;color:var(--accent);">$25,366</div>
+              </div>
+              <div style="padding:12px 14px;background:var(--yellow-light);border:1px solid #f0d88a;border-radius:8px;">
+                <div class="il" style="margin-bottom:5px;">Balance</div>
+                <div style="font-family:var(--mono);font-size:18px;font-weight:700;color:var(--yellow);">$9,134</div>
+              </div>
+            </div>
+
+            <div class="sec-lbl">Open Invoices</div>
+            <table class="tbl" style="margin-bottom:18px;">
+              <thead><tr><th>Student</th><th>Invoice</th><th>Total</th><th>Balance</th><th>Status</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><b>David Cohen</b></td>
+                  <td class="mono">#INV-1042</td>
+                  <td class="mono">$18,948</td>
+                  <td class="mono" style="color:var(--yellow);">$9,474</td>
+                  <td><span class="badge b-y">◑ Partial</span></td>
+                </tr>
+                <tr>
+                  <td><b>Rachel Cohen</b></td>
+                  <td class="mono">#INV-1043</td>
+                  <td class="mono">$15,552</td>
+                  <td class="mono" style="color:var(--accent);">$0</td>
+                  <td><span class="badge b-g">● Paid</span></td>
+                </tr>
+              </tbody>
+            </table>
+
+            <div class="sec-lbl">Recent Payments</div>
+            <div class="pay-row">
+              <div class="pay-icon">💳</div>
+              <div>
+                <div class="pay-name">Payment — David Cohen invoice</div>
+                <div class="pay-meta">Apr 12 · Credit card · Deposit installment</div>
+              </div>
+              <div class="pay-amt">$5,482</div>
+            </div>
+            <div class="pay-row">
+              <div class="pay-icon" style="background:var(--blue-light);">🏦</div>
+              <div>
+                <div class="pay-name">Payment — Rachel Cohen invoice</div>
+                <div class="pay-meta">Mar 1 · Bank transfer · Full payment</div>
+              </div>
+              <div class="pay-amt">$15,552</div>
+            </div>
+            <div class="pay-row">
+              <div class="pay-icon">💳</div>
+              <div>
+                <div class="pay-name">Payment — David Cohen invoice</div>
+                <div class="pay-meta">Jan 15 · Bank transfer · Partial</div>
+              </div>
+              <div class="pay-amt">$3,991</div>
+            </div>
+
+            <div style="margin-top:16px;display:flex;gap:8px;">
+              <button class="btn btn-p" onclick="window.location='payments.html'">💳 Record Payment</button>
+              <button class="btn btn-g">📄 View All Invoices</button>
+            </div>
+          </div>
+
+          <!-- NOTES TAB -->
+          <div class="tab-pane" id="tab-notes">
+            <div class="sec-lbl">
+              Internal Notes
+              <button class="btn btn-g btn-sm" onclick="addNote()">+ Add Note</button>
+            </div>
+            <div id="notes-list">
+              <div style="padding:12px 14px;background:var(--yellow-light);border:1px solid #f0d88a;border-radius:8px;margin-bottom:10px;">
+                <div style="font-size:11px;font-weight:600;color:var(--muted);margin-bottom:5px;">Apr 10, 2026 — Admin</div>
+                <div style="font-size:13px;line-height:1.6;">Father called to discuss installment 3. Requested extension to December 1. Approved by director.</div>
+              </div>
+              <div style="padding:12px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;margin-bottom:10px;">
+                <div style="font-size:11px;font-weight:600;color:var(--muted);margin-bottom:5px;">Sep 5, 2025 — Admin</div>
+                <div style="font-size:13px;line-height:1.6;">Scholarship application submitted. Merit scholarship of $2,500 approved for David Cohen.</div>
+              </div>
+            </div>
+            <textarea id="new-note" style="width:100%;height:80px;padding:10px;background:var(--bg);border:1px solid var(--border2);border-radius:8px;font-family:var(--sans);font-size:13px;color:var(--text);outline:none;resize:vertical;margin-top:8px;" placeholder="Add a note..."></textarea>
+            <div style="margin-top:8px;display:flex;justify-content:flex-end;">
+              <button class="btn btn-p btn-sm" onclick="saveNote()">Save Note</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- ADD PARENT MODAL -->
+<div class="modal-overlay" id="add-modal" onclick="if(event.target===this)closeModal('add-modal')">
+  <div class="modal">
+    <div class="modal-hd">
+      <div class="modal-title">Add New Parent / Contact</div>
+      <button class="modal-close" onclick="closeModal('add-modal')">✕</button>
+    </div>
+    <div class="form-row2">
+      <div class="field"><label>First Name</label><input class="input" placeholder="First name"></div>
+      <div class="field"><label>Last Name</label><input class="input" placeholder="Last name"></div>
+    </div>
+    <div class="form-row2">
+      <div class="field"><label>Role</label>
+        <select class="input"><option>Father</option><option>Mother</option><option>Guardian</option><option>Donor</option><option>Other</option></select>
+      </div>
+      <div class="field"><label>Phone</label><input class="input" placeholder="+1 (___) ___-____"></div>
+    </div>
+    <div class="field"><label>Email</label><input class="input" placeholder="email@example.com"></div>
+    <div class="field"><label>Link to Family</label>
+      <select class="input"><option>— Create new family —</option><option>Cohen Family</option><option>Katz Family</option><option>Goldstein Family</option></select>
+    </div>
+    <div class="field"><label>Link Spouse / Partner (optional)</label>
+      <select class="input"><option>— None —</option><option>Miriam Cohen</option><option>Devorah Katz</option></select>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;margin-top:4px;">
+      <input type="checkbox" id="is-payer" checked style="accent-color:var(--accent);width:15px;height:15px;">
+      <label for="is-payer" style="font-size:13px;cursor:pointer;">This contact is a financial payer</label>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-g" onclick="closeModal('add-modal')">Cancel</button>
+      <button class="btn btn-p" onclick="closeModal('add-modal')">Add Contact</button>
+    </div>
+  </div>
+</div>
+
+<!-- SPOUSE MODAL -->
+<div class="modal-overlay" id="spouse-modal" onclick="if(event.target===this)closeModal('spouse-modal')">
+  <div class="modal">
+    <div class="modal-hd">
+      <div class="modal-title">Link Spouse / Partner</div>
+      <button class="modal-close" onclick="closeModal('spouse-modal')">✕</button>
+    </div>
+    <div class="field"><label>Search existing contact</label><input class="input" placeholder="Type name..."></div>
+    <div style="text-align:center;font-size:12px;color:var(--muted2);margin:10px 0;">— or create new —</div>
+    <div class="form-row2">
+      <div class="field"><label>First Name</label><input class="input" value="Miriam"></div>
+      <div class="field"><label>Last Name</label><input class="input" value="Cohen"></div>
+    </div>
+    <div class="form-row2">
+      <div class="field"><label>Relationship</label>
+        <select class="input"><option>Wife</option><option>Husband</option><option>Partner</option></select>
+      </div>
+      <div class="field"><label>Phone</label><input class="input" placeholder="+1 (___) ___-____"></div>
+    </div>
+    <div class="field"><label>Email</label><input class="input" value="miriam.cohen@email.com"></div>
+    <div style="display:flex;align-items:center;gap:8px;margin-top:4px;">
+      <input type="checkbox" style="accent-color:var(--accent);width:15px;height:15px;">
+      <label style="font-size:13px;cursor:pointer;">Also receives invoices and payment reminders</label>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-g" onclick="closeModal('spouse-modal')">Cancel</button>
+      <button class="btn btn-p" onclick="closeModal('spouse-modal')">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- LINK STUDENT MODAL -->
+<div class="modal-overlay" id="link-modal" onclick="if(event.target===this)closeModal('link-modal')">
+  <div class="modal">
+    <div class="modal-hd">
+      <div class="modal-title">Link Student to this Parent</div>
+      <button class="modal-close" onclick="closeModal('link-modal')">✕</button>
+    </div>
+    <div class="field"><label>Search Student</label><input class="input" placeholder="Type student name..."></div>
+    <div style="margin-top:12px;">
+      <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">Or select from list</div>
+      <div style="display:flex;flex-direction:column;gap:6px;">
+        <label style="display:flex;align-items:center;gap:10px;padding:9px 12px;border:1px solid var(--border);border-radius:7px;cursor:pointer;background:var(--bg);">
+          <input type="checkbox" checked style="accent-color:var(--accent);">
+          <div class="chip-av" style="background:var(--accent);width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff;">DC</div>
+          <span style="font-size:13px;font-weight:600;">David Cohen</span>
+          <span style="font-size:11.5px;color:var(--muted);">Grade 8</span>
+        </label>
+        <label style="display:flex;align-items:center;gap:10px;padding:9px 12px;border:1px solid var(--border);border-radius:7px;cursor:pointer;background:var(--bg);">
+          <input type="checkbox" checked style="accent-color:var(--accent);">
+          <div class="chip-av" style="background:var(--blue);width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff;">RC</div>
+          <span style="font-size:13px;font-weight:600;">Rachel Cohen</span>
+          <span style="font-size:11.5px;color:var(--muted);">Grade 5</span>
+        </label>
+        <label style="display:flex;align-items:center;gap:10px;padding:9px 12px;border:1px solid var(--border);border-radius:7px;cursor:pointer;background:var(--bg);">
+          <input type="checkbox" style="accent-color:var(--accent);">
+          <div class="chip-av" style="background:#16a085;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff;">CW</div>
+          <span style="font-size:13px;font-weight:600;">Chana Weiss</span>
+          <span style="font-size:11.5px;color:var(--muted);">Grade 10</span>
+        </label>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-g" onclick="closeModal('link-modal')">Cancel</button>
+      <button class="btn btn-p" onclick="closeModal('link-modal')">Link Selected</button>
+    </div>
+  </div>
+</div>
+
+<!-- RELATED MODAL -->
+<div class="modal-overlay" id="related-modal" onclick="if(event.target===this)closeModal('related-modal')">
+  <div class="modal">
+    <div class="modal-hd">
+      <div class="modal-title">Add Related Contact</div>
+      <button class="modal-close" onclick="closeModal('related-modal')">✕</button>
+    </div>
+    <div class="form-row2">
+      <div class="field"><label>First Name</label><input class="input" placeholder="First name"></div>
+      <div class="field"><label>Last Name</label><input class="input" placeholder="Last name"></div>
+    </div>
+    <div class="form-row2">
+      <div class="field"><label>Relationship</label>
+        <select class="input"><option>Grandparent</option><option>Aunt/Uncle</option><option>Emergency Contact</option><option>Other</option></select>
+      </div>
+      <div class="field"><label>Phone</label><input class="input" placeholder="+1 (___) ___-____"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-g" onclick="closeModal('related-modal')">Cancel</button>
+      <button class="btn btn-p" onclick="closeModal('related-modal')">Add Contact</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const parents = {
+  jonathan:    { av:'JC', name:'Jonathan Cohen',  meta:'Father · Primary Payer · Cohen Family',   bal:'Balance: $9,134',  balClass:'b-y', bg:'background:var(--blue)' },
+  miriam_cohen:{ av:'MC', name:'Miriam Cohen',    meta:'Mother · Secondary Contact · Cohen Family', bal:'Secondary contact', balClass:'b-gr', bg:'background:#8e44ad' },
+  reuven:      { av:'RK', name:'Reuven Katz',     meta:'Father · Primary Payer · Katz Family',    bal:'Overdue: $20,300', balClass:'b-r', bg:'background:#c0622b' },
+  devorah:     { av:'DK', name:'Devorah Katz',    meta:'Mother · Secondary Contact · Katz Family', bal:'Secondary contact', balClass:'b-gr', bg:'background:#16a085' },
+  avraham:     { av:'AS', name:'Avraham Shapiro', meta:'Father · Primary Payer · Shapiro Family',  bal:'Balance: $10,150', balClass:'b-y', bg:'background:#7b52ab' },
+  miriam_levy: { av:'ML', name:'Miriam Levy',     meta:'Donor · No students enrolled',            bal:'Donor',            balClass:'b-b', bg:'background:var(--accent)' },
+};
+
+function select(id, el) {
+  const p = parents[id]; if (!p) return;
+  document.querySelectorAll('.parent-item').forEach(i => i.classList.remove('active'));
+  if (el) el.classList.add('active');
+  const av = document.getElementById('d-av');
+  av.textContent = p.av;
+  av.style.cssText = p.bg;
+  document.getElementById('d-name').textContent = p.name;
+  document.getElementById('d-meta').textContent = p.meta;
+  const bal = document.getElementById('d-bal');
+  bal.textContent = p.bal;
+  bal.className = 'badge ' + p.balClass;
+}
+
+function showTab(tab, el) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('tab-' + tab).classList.add('active');
+}
+
+function openAddModal()       { document.getElementById('add-modal').classList.add('open'); }
+function openSpouseModal()    { document.getElementById('spouse-modal').classList.add('open'); }
+function openLinkStudentModal(){ document.getElementById('link-modal').classList.add('open'); }
+function openRelatedModal()   { document.getElementById('related-modal').classList.add('open'); }
+function closeModal(id)       { document.getElementById(id).classList.remove('open'); }
+
+function addNote() { document.getElementById('new-note').focus(); }
+function saveNote() {
+  const txt = document.getElementById('new-note').value.trim();
+  if (!txt) return;
+  const list = document.getElementById('notes-list');
+  const d = document.createElement('div');
+  d.style.cssText = 'padding:12px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;margin-bottom:10px;';
+  d.innerHTML = `<div style="font-size:11px;font-weight:600;color:var(--muted);margin-bottom:5px;">Now — Admin</div><div style="font-size:13px;line-height:1.6;">${txt}</div>`;
+  list.prepend(d);
+  document.getElementById('new-note').value = '';
+}
+</script>
+</body>
+</html>

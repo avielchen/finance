@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FinTrack — Donations</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f5f5f0;--surface:#fff;--surface2:#f0f0eb;
+  --border:#e2e2da;--border2:#d0d0c8;
+  --text:#1a1a18;--muted:#6b6b65;--muted2:#9b9b95;
+  --accent:#1a6b4a;--accent-light:#e8f4ee;--accent-mid:#2d9068;
+  --red:#c0392b;--red-light:#fdf0ef;
+  --yellow:#b07d00;--yellow-light:#fdf8e8;
+  --blue:#1a4a8a;--blue-light:#eef3fb;
+  --purple:#5b2d8e;--purple-light:#f3eeff;
+  --sans:'IBM Plex Sans',sans-serif;--mono:'IBM Plex Mono',monospace;
+  --sc:56px;--se:210px;--tb:52px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;min-height:100vh;}
+.shell{display:flex;min-height:100vh;}
+.sidebar{width:var(--sc);background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100;transition:width .22s ease;overflow:hidden;}
+.sidebar.open{width:var(--se);}
+.sidebar-top{height:var(--tb);display:flex;align-items:center;padding:0 14px;border-bottom:1px solid var(--border);flex-shrink:0;gap:12px;}
+.hbg{width:28px;height:28px;border:none;background:none;cursor:pointer;display:flex;flex-direction:column;justify-content:center;gap:5px;flex-shrink:0;padding:0;}
+.hbg span{display:block;height:1.5px;background:var(--muted);border-radius:2px;}
+.hbg:hover span{background:var(--text);}
+.s-logo{font-size:13px;font-weight:700;color:var(--accent);white-space:nowrap;opacity:0;transition:opacity .15s;}
+.sidebar.open .s-logo{opacity:1;}
+.nav-sec{padding:16px 0 8px;border-bottom:1px solid var(--border);}
+.nav-sec:last-of-type{border-bottom:none;}
+.ni{display:flex;align-items:center;gap:12px;padding:9px 14px;cursor:pointer;color:var(--muted);font-size:13px;font-weight:500;white-space:nowrap;transition:all .15s;border-left:2px solid transparent;text-decoration:none;}
+.ni:hover{background:var(--surface2);color:var(--text);}
+.ni.active{color:var(--accent);border-left-color:var(--accent);background:var(--accent-light);}
+.nic{width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
+.nl{opacity:0;transition:opacity .15s;}
+.sidebar.open .nl{opacity:1;}
+.main{margin-left:var(--sc);flex:1;display:flex;flex-direction:column;transition:margin-left .22s ease;}
+.sidebar.open~.main{margin-left:var(--se);}
+.topbar{height:var(--tb);background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 28px;position:sticky;top:0;z-index:50;}
+.pt{font-size:15px;font-weight:600;}
+.bc{font-family:var(--mono);font-size:11px;color:var(--muted2);margin-top:1px;}
+.ta{display:flex;gap:8px;align-items:center;}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:6px;font-family:var(--sans);font-size:13px;font-weight:500;cursor:pointer;border:none;transition:all .15s;white-space:nowrap;}
+.btn-p{background:var(--accent);color:#fff;}.btn-p:hover{background:var(--accent-mid);}
+.btn-g{background:transparent;color:var(--muted);border:1px solid var(--border2);}.btn-g:hover{background:var(--surface2);color:var(--text);}
+.btn-sm{padding:5px 10px;font-size:12px;}
+.content{padding:24px 28px;flex:1;}
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px;}
+.kpi{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px 20px;}
+.kpi-l{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;}
+.kpi-v{font-size:24px;font-weight:700;letter-spacing:-.5px;margin-bottom:4px;font-family:var(--mono);}
+.kpi-d{font-size:12px;color:var(--muted);}
+.kpi-d.up{color:var(--accent);}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;}
+.card-hd{padding:14px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.card-t{font-size:13px;font-weight:600;}
+.card-s{font-size:11px;color:var(--muted);margin-top:2px;}
+.card-body{padding:20px;}
+.badge{display:inline-flex;align-items:center;padding:2px 7px;border-radius:4px;font-family:var(--mono);font-size:10.5px;font-weight:500;}
+.b-g{background:var(--accent-light);color:var(--accent);}
+.b-y{background:var(--yellow-light);color:var(--yellow);}
+.b-r{background:var(--red-light);color:var(--red);}
+.b-b{background:var(--blue-light);color:var(--blue);}
+.b-p{background:var(--purple-light);color:var(--purple);}
+.b-gr{background:var(--surface2);color:var(--muted);border:1px solid var(--border2);}
+.prog{height:7px;background:var(--surface2);border-radius:4px;overflow:hidden;border:1px solid var(--border);margin-top:8px;}
+.prog-fill{height:100%;border-radius:4px;transition:width .5s ease;}
+.tbl{width:100%;border-collapse:collapse;font-size:12.5px;}
+.tbl th{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;padding:7px 12px;text-align:left;border-bottom:1px solid var(--border);}
+.tbl td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:middle;}
+.tbl tr:last-child td{border-bottom:none;}
+.tbl tr:hover td{background:var(--surface2);cursor:pointer;}
+.mono{font-family:var(--mono);}
+.field{display:flex;flex-direction:column;gap:5px;}
+.field label{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;}
+.input{height:36px;padding:0 10px;background:var(--bg);border:1px solid var(--border2);border-radius:6px;font-family:var(--sans);font-size:13px;color:var(--text);outline:none;transition:border-color .15s;width:100%;}
+.input:focus{border-color:var(--accent);background:#fff;}
+.form-row2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.form-row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+.divider{height:1px;background:var(--border);margin:16px 0;}
+.sec-lbl{font-size:12px;font-weight:700;color:var(--text);margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200;display:none;align-items:center;justify-content:center;padding:16px;}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;width:500px;max-width:100%;max-height:90vh;overflow-y:auto;}
+.modal-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
+.modal-title{font-size:15px;font-weight:700;}
+.modal-close{width:28px;height:28px;border-radius:6px;background:var(--surface2);border:none;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;color:var(--muted);}
+.modal-footer{display:flex;gap:8px;justify-content:flex-end;margin-top:20px;}
+.input-pfx{position:relative;}
+.input-pfx .pfx{position:absolute;left:10px;top:50%;transform:translateY(-50%);font-family:var(--mono);font-size:12px;color:var(--muted2);pointer-events:none;}
+.input-pfx .input{padding-left:24px;}
+@keyframes fi{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+.fi{animation:fi .2s ease both;}
+</style>
+</head>
+<body>
+<div class="shell">
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-top">
+    <button class="hbg" onclick="document.getElementById('sidebar').classList.toggle('open')"><span></span><span></span><span></span></button>
+    <div class="s-logo">FinTrack</div>
+  </div>
+  <div class="nav-sec"><a class="ni" href="index.html"><span class="nic">⊞</span><span class="nl">Dashboard</span></a></div>
+  <div class="nav-sec">
+    <a class="ni" href="invoice.html"><span class="nic">📄</span><span class="nl">Tuition</span></a>
+    <a class="ni active" href="donations.html"><span class="nic">🤝</span><span class="nl">Donations</span></a>
+    <a class="ni" href="payments.html"><span class="nic">💳</span><span class="nl">Payments</span></a>
+    <a class="ni" href="vendors.html"><span class="nic">🏢</span><span class="nl">Vendors</span></a>
+  </div>
+  <div class="nav-sec">
+    <a class="ni" href="students.html"><span class="nic">🎓</span><span class="nl">Students</span></a>
+    <a class="ni" href="parents.html"><span class="nic">👨‍👩‍👧</span><span class="nl">Parents</span></a>
+  </div>
+  <div class="nav-sec">
+    <a class="ni" href="reports.html"><span class="nic">↗</span><span class="nl">Reports</span></a>
+    <a class="ni" href="settings.html"><span class="nic">⚙</span><span class="nl">Settings</span></a>
+  </div>
+</aside>
+<main class="main">
+  <div class="topbar">
+    <div><div class="pt">Donations</div><div class="bc">Fundraising / Donations</div></div>
+    <div class="ta">
+      <button class="btn btn-g" onclick="openCampaignModal()">+ New Campaign</button>
+      <button class="btn btn-p" onclick="openDonationModal()">+ Add Donation</button>
+    </div>
+  </div>
+  <div class="content">
+
+    <div class="kpi-row fi">
+      <div class="kpi"><div class="kpi-l">Total Raised</div><div class="kpi-v">$24,820</div><div class="kpi-d up">▲ 18% vs last month</div></div>
+      <div class="kpi"><div class="kpi-l">Active Campaigns</div><div class="kpi-v">3</div><div class="kpi-d">$42,000 combined goal</div></div>
+      <div class="kpi"><div class="kpi-l">Open Pledges</div><div class="kpi-v">$8,500</div><div class="kpi-d">6 outstanding</div></div>
+      <div class="kpi"><div class="kpi-l">Credits Converted</div><div class="kpi-v">$1,200</div><div class="kpi-d">4 overpayments</div></div>
+    </div>
+
+    <!-- Campaigns -->
+    <div class="card fi" style="margin-bottom:16px;">
+      <div class="card-hd">
+        <div><div class="card-t">Campaigns & Funds</div><div class="card-s">Active fundraising campaigns</div></div>
+        <button class="btn btn-g btn-sm" onclick="openCampaignModal()">+ New Campaign</button>
+      </div>
+      <div class="card-body">
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;">
+          <div style="padding:16px;border:1px solid var(--border);border-radius:9px;background:var(--bg);">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
+              <div style="font-size:14px;font-weight:700;">General Fund</div>
+              <span class="badge b-g">Active</span>
+            </div>
+            <div style="font-family:var(--mono);font-size:20px;font-weight:700;color:var(--accent);">$8,420</div>
+            <div style="font-size:11.5px;color:var(--muted);margin-top:2px;">of $10,000 goal</div>
+            <div class="prog"><div class="prog-fill" style="width:84%;background:var(--accent);"></div></div>
+            <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:6px;"><span>24 donors</span><span>84%</span></div>
+          </div>
+          <div style="padding:16px;border:1px solid var(--border);border-radius:9px;background:var(--bg);">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
+              <div style="font-size:14px;font-weight:700;">Scholarship Fund</div>
+              <span class="badge b-g">Active</span>
+            </div>
+            <div style="font-family:var(--mono);font-size:20px;font-weight:700;color:var(--blue);">$9,200</div>
+            <div style="font-size:11.5px;color:var(--muted);margin-top:2px;">of $15,000 goal</div>
+            <div class="prog"><div class="prog-fill" style="width:61%;background:var(--blue);"></div></div>
+            <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:6px;"><span>28 donors</span><span>61%</span></div>
+          </div>
+          <div style="padding:16px;border:1px solid var(--border);border-radius:9px;background:var(--bg);">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
+              <div style="font-size:14px;font-weight:700;">Building Fund</div>
+              <span class="badge b-g">Active</span>
+            </div>
+            <div style="font-family:var(--mono);font-size:20px;font-weight:700;color:var(--purple);">$7,200</div>
+            <div style="font-size:11.5px;color:var(--muted);margin-top:2px;">of $17,000 goal</div>
+            <div class="prog"><div class="prog-fill" style="width:42%;background:var(--purple);"></div></div>
+            <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:6px;"><span>14 donors</span><span>42%</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid2 fi">
+      <!-- Donations Table -->
+      <div class="card">
+        <div class="card-hd">
+          <div><div class="card-t">All Donations</div><div class="card-s">This month</div></div>
+          <div style="display:flex;gap:8px;">
+            <select style="font-size:12px;border:1px solid var(--border2);border-radius:6px;padding:4px 8px;background:var(--surface2);color:var(--muted);outline:none;">
+              <option>All Funds</option><option>General</option><option>Scholarship</option><option>Building</option>
+            </select>
+            <span style="font-family:var(--mono);font-size:10px;color:var(--accent);cursor:pointer;border:1px solid rgba(26,107,74,.2);padding:4px 9px;border-radius:6px;">Export</span>
+          </div>
+        </div>
+        <div class="card-body" style="padding:0;">
+          <table class="tbl">
+            <thead><tr><th>Donor</th><th>Fund</th><th>Amount</th><th>Type</th><th>Date</th></tr></thead>
+            <tbody>
+              <tr><td><b>Miriam Levy</b></td><td style="color:var(--muted);">General</td><td class="mono" style="color:var(--accent);">$2,000</td><td><span class="badge b-g">Gift</span></td><td class="mono" style="color:var(--muted2);">Apr 12</td></tr>
+              <tr><td><b>Cohen Family</b><div style="font-size:10px;color:var(--purple);font-family:var(--mono);">credit converted</div></td><td style="color:var(--muted);">Scholarship</td><td class="mono" style="color:var(--purple);">$340</td><td><span class="badge b-p">Credit→Gift</span></td><td class="mono" style="color:var(--muted2);">Apr 12</td></tr>
+              <tr><td><b>Reuven Marcus</b></td><td style="color:var(--muted);">Scholarship</td><td class="mono" style="color:var(--yellow);">$500</td><td><span class="badge b-y">Pledge</span></td><td class="mono" style="color:var(--muted2);">Apr 9</td></tr>
+              <tr><td><b>Anonymous</b></td><td style="color:var(--muted);">Building</td><td class="mono" style="color:var(--accent);">$1,000</td><td><span class="badge b-g">Gift</span></td><td class="mono" style="color:var(--muted2);">Apr 7</td></tr>
+              <tr><td><b>Adina Berger</b></td><td style="color:var(--muted);">General</td><td class="mono" style="color:var(--accent);">$1,200</td><td><span class="badge b-g">Gift</span></td><td class="mono" style="color:var(--muted2);">Apr 5</td></tr>
+              <tr><td><b>Yitzchak Stern</b></td><td style="color:var(--muted);">Building</td><td class="mono" style="color:var(--yellow);">$750</td><td><span class="badge b-y">Pledge</span></td><td class="mono" style="color:var(--muted2);">Apr 3</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Open Pledges -->
+      <div class="card">
+        <div class="card-hd">
+          <div><div class="card-t">Open Pledges</div><div class="card-s">Committed, not yet paid</div></div>
+          <button class="btn btn-g btn-sm" onclick="openDonationModal()">+ Add Pledge</button>
+        </div>
+        <div class="card-body" style="padding:0;">
+          <table class="tbl">
+            <thead><tr><th>Donor</th><th>Amount</th><th>Due</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td><b>Reuven Marcus</b><div style="font-size:10px;color:var(--muted);">Scholarship Fund</div></td><td class="mono" style="color:var(--yellow);">$500</td><td class="mono" style="font-size:11px;color:var(--muted2);">May 1</td><td><span class="badge b-y">Pending</span></td></tr>
+              <tr><td><b>Yitzchak Stern</b><div style="font-size:10px;color:var(--muted);">Building Fund</div></td><td class="mono" style="color:var(--yellow);">$750</td><td class="mono" style="font-size:11px;color:var(--muted2);">May 15</td><td><span class="badge b-y">Pending</span></td></tr>
+              <tr><td><b>Chana Weiss</b><div style="font-size:10px;color:var(--muted);">General Fund</div></td><td class="mono" style="color:var(--yellow);">$2,000</td><td class="mono" style="font-size:11px;color:var(--red);">Apr 1</td><td><span class="badge b-r">Overdue</span></td></tr>
+              <tr><td><b>David Blum</b><div style="font-size:10px;color:var(--muted);">Scholarship Fund</div></td><td class="mono" style="color:var(--yellow);">$1,500</td><td class="mono" style="font-size:11px;color:var(--muted2);">Jun 1</td><td><span class="badge b-y">Pending</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+</div>
+
+<!-- ADD DONATION MODAL -->
+<div class="modal-overlay" id="don-modal" onclick="if(event.target===this)closeModal('don-modal')">
+  <div class="modal">
+    <div class="modal-hd">
+      <div class="modal-title">Add Donation / Pledge</div>
+      <button class="modal-close" onclick="closeModal('don-modal')">✕</button>
+    </div>
+    <div class="field" style="margin-bottom:12px;">
+      <label>Type</label>
+      <select class="input">
+        <option>One-time Gift</option><option>Pledge (pay later)</option><option>Recurring</option>
+      </select>
+    </div>
+    <div class="field" style="margin-bottom:12px;">
+      <label>Donor Name</label>
+      <input class="input" placeholder="Search or type name...">
+    </div>
+    <div class="form-row3" style="margin-bottom:12px;">
+      <div class="field">
+        <label>Amount</label>
+        <div class="input-pfx"><span class="pfx">$</span><input class="input" type="number" placeholder="0.00" style="padding-left:24px;"></div>
+      </div>
+      <div class="field">
+        <label>Fund / Campaign</label>
+        <select class="input"><option>General Fund</option><option>Scholarship Fund</option><option>Building Fund</option></select>
+      </div>
+      <div class="field">
+        <label>Date</label>
+        <input type="date" class="input" value="2026-04-28">
+      </div>
+    </div>
+    <div class="form-row2" style="margin-bottom:12px;">
+      <div class="field">
+        <label>Payment Method</label>
+        <select class="input"><option>Bank Wire</option><option>Check</option><option>Credit Card</option><option>Cash</option></select>
+      </div>
+      <div class="field">
+        <label>Pledge Due Date (if pledge)</label>
+        <input type="date" class="input">
+      </div>
+    </div>
+    <div class="field" style="margin-bottom:10px;">
+      <label>Notes</label>
+      <input class="input" placeholder="Optional note...">
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <input type="checkbox" checked style="accent-color:var(--accent);width:15px;height:15px;">
+      <label style="font-size:13px;cursor:pointer;">Send donation receipt to donor</label>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-g" onclick="closeModal('don-modal')">Cancel</button>
+      <button class="btn btn-p" onclick="closeModal('don-modal')">Save Donation</button>
+    </div>
+  </div>
+</div>
+
+<!-- NEW CAMPAIGN MODAL -->
+<div class="modal-overlay" id="camp-modal" onclick="if(event.target===this)closeModal('camp-modal')">
+  <div class="modal">
+    <div class="modal-hd">
+      <div class="modal-title">New Campaign</div>
+      <button class="modal-close" onclick="closeModal('camp-modal')">✕</button>
+    </div>
+    <div class="field" style="margin-bottom:12px;">
+      <label>Campaign Name</label>
+      <input class="input" placeholder="e.g. Annual Scholarship Drive 2026">
+    </div>
+    <div class="form-row2" style="margin-bottom:12px;">
+      <div class="field">
+        <label>Goal Amount</label>
+        <div class="input-pfx"><span class="pfx">$</span><input class="input" type="number" placeholder="0.00" style="padding-left:24px;"></div>
+      </div>
+      <div class="field">
+        <label>Fund</label>
+        <select class="input"><option>General Fund</option><option>Scholarship Fund</option><option>Building Fund</option><option>+ New Fund</option></select>
+      </div>
+    </div>
+    <div class="form-row2" style="margin-bottom:12px;">
+      <div class="field"><label>Start Date</label><input type="date" class="input" value="2026-04-28"></div>
+      <div class="field"><label>End Date</label><input type="date" class="input"></div>
+    </div>
+    <div class="field" style="margin-bottom:12px;">
+      <label>Description</label>
+      <textarea class="input" style="height:70px;padding:8px 10px;resize:vertical;" placeholder="Campaign description..."></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-g" onclick="closeModal('camp-modal')">Cancel</button>
+      <button class="btn btn-p" onclick="closeModal('camp-modal')">Create Campaign</button>
+    </div>
+  </div>
+</div>
+
+<script>
+function openDonationModal(){ document.getElementById('don-modal').classList.add('open'); }
+function openCampaignModal(){ document.getElementById('camp-modal').classList.add('open'); }
+function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+</script>
+</body>
+</html>

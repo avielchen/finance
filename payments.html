@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FinTrack — Record Payment</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f5f5f0; --surface:#fff; --surface2:#f0f0eb;
+  --border:#e2e2da; --border2:#d0d0c8;
+  --text:#1a1a18; --muted:#6b6b65; --muted2:#9b9b95;
+  --accent:#1a6b4a; --accent-light:#e8f4ee; --accent-mid:#2d9068;
+  --red:#c0392b; --red-light:#fdf0ef;
+  --yellow:#b07d00; --yellow-light:#fdf8e8;
+  --blue:#1a4a8a; --blue-light:#eef3fb;
+  --purple:#5b2d8e; --purple-light:#f3eeff;
+  --sans:'IBM Plex Sans',sans-serif; --mono:'IBM Plex Mono',monospace;
+  --sc:56px; --se:210px; --tb:52px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;font-size:14px;}
+.shell{display:flex;min-height:100vh;}
+
+/* SIDEBAR */
+.sidebar{width:var(--sc);background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100;transition:width .22s ease;overflow:hidden;}
+.sidebar.open{width:var(--se);}
+.sidebar-top{height:var(--tb);display:flex;align-items:center;padding:0 14px;border-bottom:1px solid var(--border);flex-shrink:0;gap:12px;}
+.hbg{width:28px;height:28px;border:none;background:none;cursor:pointer;display:flex;flex-direction:column;justify-content:center;gap:5px;flex-shrink:0;padding:0;}
+.hbg span{display:block;height:1.5px;background:var(--muted);border-radius:2px;}
+.hbg:hover span{background:var(--text);}
+.s-logo{font-size:13px;font-weight:700;color:var(--accent);white-space:nowrap;opacity:0;transition:opacity .15s;}
+.sidebar.open .s-logo{opacity:1;}
+.nav-sec{padding:16px 0 8px;border-bottom:1px solid var(--border);}
+.nav-sec:last-of-type{border-bottom:none;}
+.ni{display:flex;align-items:center;gap:12px;padding:9px 14px;cursor:pointer;color:var(--muted);font-size:13px;font-weight:500;white-space:nowrap;transition:all .15s;border-left:2px solid transparent;text-decoration:none;}
+.ni:hover{background:var(--surface2);color:var(--text);}
+.ni.active{color:var(--accent);border-left-color:var(--accent);background:var(--accent-light);}
+.nic{width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
+.nl{opacity:0;transition:opacity .15s;}
+.sidebar.open .nl{opacity:1;}
+
+/* MAIN */
+.main{margin-left:var(--sc);flex:1;display:flex;flex-direction:column;transition:margin-left .22s ease;}
+.sidebar.open~.main{margin-left:var(--se);}
+
+/* TOPBAR */
+.topbar{height:var(--tb);background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 28px;position:sticky;top:0;z-index:50;}
+.pt{font-size:15px;font-weight:600;}
+.bc{font-family:var(--mono);font-size:11px;color:var(--muted2);margin-top:1px;}
+.ta{display:flex;gap:8px;align-items:center;}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:6px;font-family:var(--sans);font-size:13px;font-weight:500;cursor:pointer;border:none;transition:all .15s;white-space:nowrap;}
+.btn-p{background:var(--accent);color:#fff;}.btn-p:hover{background:var(--accent-mid);}
+.btn-g{background:transparent;color:var(--muted);border:1px solid var(--border2);}.btn-g:hover{background:var(--surface2);color:var(--text);}
+.btn-sm{padding:5px 10px;font-size:12px;}
+
+/* CONTENT */
+.content{padding:24px 28px;flex:1;}
+.two-col{display:grid;grid-template-columns:1fr 340px;gap:20px;align-items:start;}
+
+/* SECTIONS */
+.section{background:var(--surface);border:1px solid var(--border);border-radius:10px;margin-bottom:16px;overflow:hidden;}
+.sec-hd{padding:14px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.sec-title{font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px;}
+.sec-title .step{color:var(--muted2);}
+.sec-body{padding:20px;}
+
+/* FORM */
+.field{display:flex;flex-direction:column;gap:5px;margin-bottom:0;}
+.field label{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;}
+.input{height:36px;padding:0 10px;background:var(--bg);border:1px solid var(--border2);border-radius:6px;font-family:var(--sans);font-size:13px;color:var(--text);outline:none;transition:border-color .15s;width:100%;}
+.input:focus{border-color:var(--accent);background:#fff;}
+select.input{cursor:pointer;}
+.input.mono{font-family:var(--mono);}
+.form-grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;}
+.form-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.input-pfx{position:relative;}
+.input-pfx .pfx{position:absolute;left:10px;top:50%;transform:translateY(-50%);font-family:var(--mono);font-size:12px;color:var(--muted2);pointer-events:none;}
+.input-pfx .input{padding-left:24px;}
+
+/* SIBLING SWITCHER */
+.sibling-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;}
+.sib-chip{padding:6px 13px;border-radius:6px;font-size:12.5px;font-weight:500;cursor:pointer;border:1px solid var(--border2);background:var(--surface2);color:var(--muted);transition:all .15s;}
+.sib-chip:hover{border-color:var(--accent);color:var(--accent);}
+.sib-chip.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+
+/* ALLOCATION ITEMS */
+.alloc-item{display:flex;align-items:center;gap:12px;padding:12px 14px;border:1px solid var(--border);border-radius:8px;margin-bottom:8px;cursor:pointer;transition:all .15s;background:var(--bg);}
+.alloc-item:hover{border-color:var(--border2);}
+.alloc-item.selected{border-color:var(--accent);background:var(--accent-light);}
+.alloc-item.selected .alloc-check{background:var(--accent);border-color:var(--accent);}
+.alloc-item.selected .alloc-check::after{content:'✓';color:#fff;font-size:10px;}
+.alloc-check{width:18px;height:18px;border-radius:4px;border:1.5px solid var(--border2);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;}
+.alloc-name{font-size:13px;font-weight:600;flex:1;}
+.alloc-meta{font-size:11.5px;color:var(--muted);margin-top:1px;}
+.alloc-bal{font-family:var(--mono);font-size:13px;font-weight:600;color:var(--red);white-space:nowrap;}
+.alloc-bal.paid{color:var(--accent);}
+
+/* SUMMARY CARD */
+.summary-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;position:sticky;top:72px;}
+.sum-hd{padding:14px 18px;border-bottom:1px solid var(--border);font-size:13px;font-weight:600;}
+.sum-row{display:flex;justify-content:space-between;align-items:center;padding:11px 18px;border-bottom:1px solid var(--border);font-size:13px;}
+.sum-row:last-child{border-bottom:none;}
+.sum-row .lbl{color:var(--muted);}
+.sum-row .val{font-family:var(--mono);font-weight:600;}
+.sum-row.total{background:var(--accent-light);}
+.sum-row.total .lbl{color:var(--text);font-weight:700;}
+.sum-row.total .val{color:var(--accent);font-size:16px;}
+
+/* PROGRESS BAR */
+.prog-wrap{margin:0 18px 14px;padding-top:14px;}
+.prog-lbl{display:flex;justify-content:space-between;font-size:11.5px;color:var(--muted);margin-bottom:6px;}
+.prog{height:6px;background:var(--surface2);border-radius:3px;overflow:hidden;border:1px solid var(--border);}
+.prog-fill{height:100%;background:var(--accent);border-radius:3px;transition:width .3s ease;}
+.prog-fill.over{background:var(--red);}
+
+/* CREDIT OPTIONS */
+.credit-options{display:flex;flex-direction:column;gap:8px;}
+.credit-opt{display:flex;align-items:flex-start;gap:10px;padding:12px 14px;border:1px solid var(--border);border-radius:8px;cursor:pointer;background:var(--bg);transition:all .15s;}
+.credit-opt:hover{border-color:var(--border2);}
+.credit-opt.selected{border-color:var(--accent);background:var(--accent-light);}
+.credit-opt input[type=radio]{margin-top:2px;accent-color:var(--accent);flex-shrink:0;}
+.credit-opt-title{font-size:13px;font-weight:600;margin-bottom:2px;}
+.credit-opt-desc{font-size:11.5px;color:var(--muted);line-height:1.5;}
+
+/* BADGE */
+.badge{display:inline-flex;align-items:center;padding:2px 7px;border-radius:4px;font-family:var(--mono);font-size:10.5px;font-weight:500;}
+.b-g{background:var(--accent-light);color:var(--accent);}
+.b-y{background:var(--yellow-light);color:var(--yellow);}
+.b-r{background:var(--red-light);color:var(--red);}
+.b-b{background:var(--blue-light);color:var(--blue);}
+.b-p{background:var(--purple-light);color:var(--purple);}
+
+/* DIVIDER */
+.divider{height:1px;background:var(--border);margin:16px 0;}
+.sec-lbl{font-size:12px;font-weight:700;color:var(--text);margin-bottom:10px;}
+.hint{font-size:11.5px;color:var(--muted2);margin-top:4px;line-height:1.5;}
+
+/* ACTION BAR */
+.action-bar{background:var(--surface);border-top:1px solid var(--border);padding:14px 28px;display:flex;align-items:center;gap:10px;position:sticky;bottom:0;}
+.action-bar-r{display:flex;gap:8px;margin-left:auto;}
+
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+.fi{animation:fadeIn .2s ease both;}
+</style>
+</head>
+<body>
+<div class="shell">
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-top">
+    <button class="hbg" onclick="document.getElementById('sidebar').classList.toggle('open')">
+      <span></span><span></span><span></span>
+    </button>
+    <div class="s-logo">FinTrack</div>
+  </div>
+  <div class="nav-sec">
+    <a class="ni" href="dashboard.html"><span class="nic">⊞</span><span class="nl">Dashboard</span></a>
+  </div>
+  <div class="nav-sec">
+    <a class="ni" href="invoice.html"><span class="nic">📄</span><span class="nl">Tuition</span></a>
+    <a class="ni" href="donations.html"><span class="nic">🤝</span><span class="nl">Donations</span></a>
+    <a class="ni active" href="payments.html"><span class="nic">💳</span><span class="nl">Payments</span></a>
+    <a class="ni" href="vendors.html"><span class="nic">🏢</span><span class="nl">Vendors</span></a>
+  </div>
+  <div class="nav-sec">
+    <a class="ni" href="students.html"><span class="nic">🎓</span><span class="nl">Students</span></a>
+    <a class="ni" href="parents.html"><span class="nic">👨‍👩‍👧</span><span class="nl">Parents</span></a>
+  </div>
+  <div class="nav-sec">
+    <a class="ni" href="reports.html"><span class="nic">↗</span><span class="nl">Reports</span></a>
+    <a class="ni" href="settings.html"><span class="nic">⚙</span><span class="nl">Settings</span></a>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+  <div class="topbar">
+    <div>
+      <div class="pt">Record Payment</div>
+      <div class="bc">Payments / New</div>
+    </div>
+    <div class="ta">
+      <button class="btn btn-g">Cancel</button>
+      <button class="btn btn-p" onclick="recordPayment()">✅ Record Payment</button>
+    </div>
+  </div>
+
+  <div class="content">
+    <div class="two-col">
+
+      <!-- LEFT COLUMN -->
+      <div>
+
+        <!-- STEP 1: PAYER -->
+        <div class="section fi">
+          <div class="sec-hd">
+            <div class="sec-title"><span class="step">①</span> Who is Paying?</div>
+          </div>
+          <div class="sec-body">
+            <div class="form-grid-2" style="margin-bottom:12px;">
+              <div class="field">
+                <label>Family</label>
+                <select class="input" id="family-select" onchange="updateFamily()">
+                  <option value="">— Select family —</option>
+                  <option value="cohen" selected>Cohen Family</option>
+                  <option value="katz">Katz Family</option>
+                  <option value="shapiro">Shapiro Family</option>
+                  <option value="goldstein">Goldstein Family</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>Payer Name</label>
+                <select class="input" id="payer-select">
+                  <option>Jonathan Cohen (Father)</option>
+                  <option>Miriam Cohen (Mother)</option>
+                </select>
+              </div>
+            </div>
+            <div class="field" style="margin-bottom:12px;">
+              <label>Select Student (switch between siblings)</label>
+            </div>
+            <div class="sibling-row" id="sibling-row">
+              <div class="sib-chip active" onclick="selectSibling(this,'david')">David Cohen</div>
+              <div class="sib-chip" onclick="selectSibling(this,'rachel')">Rachel Cohen</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- STEP 2: PAYMENT DETAILS -->
+        <div class="section fi">
+          <div class="sec-hd">
+            <div class="sec-title"><span class="step">②</span> Payment Details</div>
+          </div>
+          <div class="sec-body">
+            <div class="form-grid-3" style="margin-bottom:14px;">
+              <div class="field">
+                <label>Amount</label>
+                <div class="input-pfx">
+                  <span class="pfx">$</span>
+                  <input class="input mono" id="pay-amount" type="number" value="6000" step="0.01" oninput="updateAlloc()">
+                </div>
+              </div>
+              <div class="field">
+                <label>Payment Method</label>
+                <select class="input" id="pay-method">
+                  <option>Bank Transfer</option>
+                  <option>Credit Card</option>
+                  <option>Check</option>
+                  <option>Cash</option>
+                  <option>Zelle / Venmo</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>Payment Date</label>
+                <input type="date" class="input" value="2026-04-28">
+              </div>
+            </div>
+            <div class="form-grid-2">
+              <div class="field">
+                <label>Reference / Check #</label>
+                <input class="input" placeholder="Optional reference...">
+              </div>
+              <div class="field">
+                <label>Exchange Rate (if non-USD)</label>
+                <div class="input-pfx">
+                  <span class="pfx">×</span>
+                  <input class="input mono" value="1.00" type="number" step="0.01" style="padding-left:22px;">
+                </div>
+                <div class="hint">Leave as 1.00 for USD</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- STEP 3: ALLOCATE -->
+        <div class="section fi">
+          <div class="sec-hd">
+            <div class="sec-title"><span class="step">③</span> Allocate Payment</div>
+            <div style="font-size:12px;color:var(--muted);">Select items to pay. Remaining shown below.</div>
+          </div>
+          <div class="sec-body">
+            <div class="sec-lbl">Outstanding — David Cohen (#INV-1042)</div>
+
+            <div class="alloc-item selected" id="a1" onclick="toggleAlloc('a1',2000)" data-amt="2000">
+              <div class="alloc-check"></div>
+              <div style="flex:1;">
+                <div class="alloc-name">Meal Plan</div>
+                <div class="alloc-meta">Invoice #INV-1042 · Line item</div>
+              </div>
+              <div class="alloc-bal">$2,000.00</div>
+            </div>
+
+            <div class="alloc-item selected" id="a2" onclick="toggleAlloc('a2',500)" data-amt="500">
+              <div class="alloc-check"></div>
+              <div style="flex:1;">
+                <div class="alloc-name">Laundry Service</div>
+                <div class="alloc-meta">Invoice #INV-1042 · Line item</div>
+              </div>
+              <div class="alloc-bal">$500.00</div>
+            </div>
+
+            <div class="alloc-item" id="a3" onclick="toggleAlloc('a3',1491.46)" data-amt="1491.46">
+              <div class="alloc-check"></div>
+              <div style="flex:1;">
+                <div class="alloc-name">Installment 2 — Remaining Balance</div>
+                <div class="alloc-meta">Invoice #INV-1042 · Due Aug 1 · Partial</div>
+              </div>
+              <div class="alloc-bal">$1,491.46</div>
+            </div>
+
+            <div class="alloc-item" id="a4" onclick="toggleAlloc('a4',5482.91)" data-amt="5482.91">
+              <div class="alloc-check"></div>
+              <div style="flex:1;">
+                <div class="alloc-name">Installment 3</div>
+                <div class="alloc-meta">Invoice #INV-1042 · Due Nov 1</div>
+              </div>
+              <div class="alloc-bal">$5,482.91</div>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- CREDIT OPTIONS -->
+            <div class="sec-lbl" id="credit-lbl">Remaining: <span id="remaining-amt" style="font-family:var(--mono);color:var(--yellow);">$3,500.00</span> — What should we do with it?</div>
+            <div class="credit-options" id="credit-opts">
+              <label class="credit-opt selected" onclick="selectCreditOpt(this)">
+                <input type="radio" name="credit" value="hold" checked>
+                <div>
+                  <div class="credit-opt-title">Leave as account credit</div>
+                  <div class="credit-opt-desc">Carries forward. Can be applied to future invoices or converted later.</div>
+                </div>
+              </label>
+              <label class="credit-opt" onclick="selectCreditOpt(this)">
+                <input type="radio" name="credit" value="donate">
+                <div>
+                  <div class="credit-opt-title">Convert to donation</div>
+                  <div class="credit-opt-desc">Move this amount to a fund or campaign.</div>
+                  <select class="input" style="width:220px;margin-top:8px;height:32px;font-size:12px;" onclick="event.stopPropagation()">
+                    <option>General Fund</option>
+                    <option>Scholarship Fund</option>
+                    <option>Building Fund</option>
+                  </select>
+                </div>
+              </label>
+              <label class="credit-opt" onclick="selectCreditOpt(this)">
+                <input type="radio" name="credit" value="refund">
+                <div>
+                  <div class="credit-opt-title">Issue refund</div>
+                  <div class="credit-opt-desc">Return the overpayment to the payer.</div>
+                </div>
+              </label>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- RIGHT: SUMMARY -->
+      <div>
+        <div class="summary-card fi">
+          <div class="sum-hd">Payment Summary</div>
+
+          <div class="prog-wrap">
+            <div class="prog-lbl">
+              <span>Allocated</span>
+              <span id="prog-lbl-val">$2,500 of $6,000</span>
+            </div>
+            <div class="prog">
+              <div class="prog-fill" id="prog-fill" style="width:41.7%;"></div>
+            </div>
+          </div>
+
+          <div class="sum-row">
+            <span class="lbl">Payment In</span>
+            <span class="val" id="s-total" style="color:var(--accent);">$6,000.00</span>
+          </div>
+          <div class="sum-row">
+            <span class="lbl">Allocated</span>
+            <span class="val" id="s-alloc" style="color:var(--blue);">$2,500.00</span>
+          </div>
+          <div class="sum-row">
+            <span class="lbl">Unallocated</span>
+            <span class="val" id="s-remain" style="color:var(--yellow);">$3,500.00</span>
+          </div>
+          <div class="sum-row total">
+            <span class="lbl">After this payment</span>
+            <span class="val" id="s-after">$6,974.37</span>
+          </div>
+
+          <div style="padding:14px 18px;border-top:1px solid var(--border);">
+            <div style="font-size:11.5px;color:var(--muted);margin-bottom:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;">Selected Items</div>
+            <div id="selected-list" style="display:flex;flex-direction:column;gap:6px;font-size:12px;">
+              <div style="display:flex;justify-content:space-between;">
+                <span>Meal Plan</span>
+                <span style="font-family:var(--mono);color:var(--accent);">$2,000.00</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;">
+                <span>Laundry Service</span>
+                <span style="font-family:var(--mono);color:var(--accent);">$500.00</span>
+              </div>
+            </div>
+          </div>
+
+          <div style="padding:14px 18px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:8px;">
+            <button class="btn btn-p" style="width:100%;justify-content:center;" onclick="recordPayment()">✅ Record Payment</button>
+            <button class="btn btn-g" style="width:100%;justify-content:center;">🖨 Print Receipt</button>
+            <button class="btn btn-g" style="width:100%;justify-content:center;">✉ Email Receipt</button>
+          </div>
+        </div>
+
+        <!-- ACCOUNT CREDITS BOX -->
+        <div style="margin-top:14px;padding:14px 16px;background:var(--purple-light);border:1px solid #d0b8f0;border-radius:10px;" class="fi">
+          <div style="font-size:12px;font-weight:700;color:var(--purple);margin-bottom:6px;">💜 Existing Account Credit</div>
+          <div style="font-family:var(--mono);font-size:20px;font-weight:700;color:var(--purple);">$340.00</div>
+          <div style="font-size:11.5px;color:var(--muted);margin-top:4px;line-height:1.5;">Unallocated from Apr 12 overpayment. Apply to this invoice?</div>
+          <button class="btn btn-g btn-sm" style="margin-top:10px;border-color:#d0b8f0;color:var(--purple);">Apply Credit →</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ACTION BAR -->
+  <div class="action-bar">
+    <div style="font-size:12.5px;color:var(--muted);">
+      Recording payment for <strong style="color:var(--text);">David Cohen</strong> — Cohen Family
+    </div>
+    <div class="action-bar-r">
+      <button class="btn btn-g">Cancel</button>
+      <button class="btn btn-g">💾 Save Draft</button>
+      <button class="btn btn-p" onclick="recordPayment()">✅ Record Payment</button>
+    </div>
+  </div>
+</main>
+</div>
+
+<script>
+// Selected alloc items: id -> amount
+const allocData = {
+  a1: { name:'Meal Plan', amt:2000 },
+  a2: { name:'Laundry Service', amt:500 },
+  a3: { name:'Installment 2 Remaining', amt:1491.46 },
+  a4: { name:'Installment 3', amt:5482.91 },
+};
+const selected = new Set(['a1','a2']);
+
+function toggleAlloc(id) {
+  const el = document.getElementById(id);
+  if (selected.has(id)) { selected.delete(id); el.classList.remove('selected'); }
+  else { selected.add(id); el.classList.add('selected'); }
+  updateAlloc();
+}
+
+function updateAlloc() {
+  const total = parseFloat(document.getElementById('pay-amount').value) || 0;
+  let alloc = 0;
+  selected.forEach(id => { alloc += allocData[id].amt; });
+  alloc = Math.min(alloc, total);
+  const remain = Math.max(total - alloc, 0);
+
+  document.getElementById('s-total').textContent = fmt(total);
+  document.getElementById('s-alloc').textContent = fmt(alloc);
+  document.getElementById('s-remain').textContent = fmt(remain);
+  document.getElementById('s-after').textContent = fmt(Math.max(9474.37 - alloc, 0));
+  document.getElementById('remaining-amt').textContent = fmt(remain);
+  document.getElementById('prog-lbl-val').textContent = fmt(alloc) + ' of ' + fmt(total);
+
+  const pct = total > 0 ? Math.min((alloc / total) * 100, 100) : 0;
+  const fill = document.getElementById('prog-fill');
+  fill.style.width = pct + '%';
+  fill.className = 'prog-fill' + (alloc > total ? ' over' : '');
+
+  // show/hide credit options
+  const creditSection = document.getElementById('credit-lbl');
+  const creditOpts = document.getElementById('credit-opts');
+  const show = remain > 0;
+  creditSection.style.display = show ? '' : 'none';
+  creditOpts.style.display = show ? '' : 'none';
+
+  // update selected list
+  const list = document.getElementById('selected-list');
+  list.innerHTML = '';
+  if (selected.size === 0) {
+    list.innerHTML = '<div style="color:var(--muted2);font-size:12px;">No items selected</div>';
+    return;
+  }
+  selected.forEach(id => {
+    const d = allocData[id];
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex;justify-content:space-between;';
+    row.innerHTML = `<span>${d.name}</span><span style="font-family:var(--mono);color:var(--accent);">${fmt(Math.min(d.amt, total))}</span>`;
+    list.appendChild(row);
+  });
+}
+
+function fmt(n) {
+  return '$' + n.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+}
+
+function selectCreditOpt(el) {
+  document.querySelectorAll('.credit-opt').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  el.querySelector('input[type=radio]').checked = true;
+}
+
+function selectSibling(el, student) {
+  document.querySelectorAll('.sib-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  // In a real app, would reload outstanding items for selected student
+}
+
+function updateFamily() {
+  // In real app, update payers and students based on family
+}
+
+function recordPayment() {
+  alert('Payment recorded! (Demo)\n\nIn production this would save to the database, send receipt, and update balances.');
+}
+
+// Init
+updateAlloc();
+</script>
+</body>
+</html>
