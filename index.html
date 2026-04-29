@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FinTrack</title>
+<title>FinTrack — Dashboard</title>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#f5f5f0;--surface:#fff;--surface2:#f0f0eb;--border:#e2e2da;--border2:#d0d0c8;--text:#1a1a18;--muted:#6b6b65;--muted2:#9b9b95;--accent:#1a6b4a;--accent-light:#e8f4ee;--accent-mid:#2d9068;--red:#c0392b;--red-light:#fdf0ef;--yellow:#b07d00;--yellow-light:#fdf8e8;--blue:#1a4a8a;--blue-light:#eef3fb;--purple:#5b2d8e;--purple-light:#f3eeff;--sans:'IBM Plex Sans',sans-serif;--mono:'IBM Plex Mono',monospace;--sc:56px;--se:210px;--tb:52px;}
+:root{--bg:#f7f7f3;--surface:#fff;--s2:#f0f0eb;--s3:#e6e6e0;--border:#e0e0d8;--border2:#ccccc4;--text:#1c1c1a;--muted:#686860;--muted2:#a0a098;--accent:#1a6b4a;--al:#e6f4ee;--am:#2d9068;--red:#b83232;--rl:#fdf0f0;--rb:#e8b8b8;--yellow:#a07000;--yl:#fdf8e6;--yb:#e8d890;--blue:#1a4a8a;--bl:#eef3fc;--purple:#5b2d8e;--pl:#f3eeff;--sans:'IBM Plex Sans',sans-serif;--mono:'IBM Plex Mono',monospace;--sc:56px;--se:210px;--tb:52px;}
 *{margin:0;padding:0;box-sizing:border-box;}
 body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;min-height:100vh;}
 .shell{display:flex;min-height:100vh;}
@@ -21,67 +21,88 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
 .nav-sec{padding:16px 0 8px;border-bottom:1px solid var(--border);}
 .nav-sec:last-of-type{border-bottom:none;}
 .ni{display:flex;align-items:center;gap:12px;padding:9px 14px;cursor:pointer;color:var(--muted);font-size:13px;font-weight:500;white-space:nowrap;transition:all .15s;border-left:2px solid transparent;text-decoration:none;}
-.ni:hover{background:var(--surface2);color:var(--text);}
-.ni.active{color:var(--accent);border-left-color:var(--accent);background:var(--accent-light);}
+.ni:hover{background:var(--s2);color:var(--text);}
+.ni.active{color:var(--accent);border-left-color:var(--accent);background:var(--al);}
 .nic{width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
 .nl{opacity:0;transition:opacity .15s;}
 .sidebar.open .nl{opacity:1;}
-.main{margin-left:var(--sc);flex:1;display:flex;flex-direction:column;transition:margin-left .22s ease;}
+.main{margin-left:var(--sc);flex:1;display:flex;flex-direction:column;min-height:100vh;transition:margin-left .22s ease;}
 .sidebar.open~.main{margin-left:var(--se);}
-.topbar{height:var(--tb);background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 28px;position:sticky;top:0;z-index:50;}
+.topbar{height:var(--tb);background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 24px;position:sticky;top:0;z-index:50;}
 .pt{font-size:15px;font-weight:600;}
 .bc{font-family:var(--mono);font-size:11px;color:var(--muted2);margin-top:1px;}
-.ta{display:flex;gap:8px;}
-.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:6px;font-family:var(--sans);font-size:13px;font-weight:500;cursor:pointer;border:none;transition:all .15s;white-space:nowrap;text-decoration:none;}
-.btn-p{background:var(--accent);color:#fff;}.btn-p:hover{background:var(--accent-mid);}
-.btn-g{background:transparent;color:var(--muted);border:1px solid var(--border2);}.btn-g:hover{background:var(--surface2);color:var(--text);}
-.content{padding:24px 28px;flex:1;}
+.btn{display:inline-flex;align-items:center;gap:5px;padding:6px 13px;border-radius:6px;font-family:var(--sans);font-size:12.5px;font-weight:500;cursor:pointer;border:none;transition:all .15s;white-space:nowrap;text-decoration:none;}
+.btn-p{background:var(--accent);color:#fff;}.btn-p:hover{background:var(--am);}
+.btn-g{background:var(--surface);color:var(--muted);border:1px solid var(--border2);}.btn-g:hover{background:var(--s2);color:var(--text);}
+.content{padding:24px;flex:1;}
 .kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px;}
-.kpi{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px 20px;text-decoration:none;display:block;transition:all .15s;color:var(--text);}
-.kpi:hover{border-color:var(--accent);transform:translateY(-1px);}
-.kpi-l{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;}
-.kpi-v{font-size:24px;font-weight:700;letter-spacing:-.5px;margin-bottom:4px;font-family:var(--mono);}
+.kpi{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px 20px;text-decoration:none;display:block;color:var(--text);transition:border-color .15s;}
+.kpi:hover{border-color:var(--accent);}
+.kpi-l{font-size:10.5px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;}
+.kpi-v{font-family:var(--mono);font-size:22px;font-weight:700;letter-spacing:-.5px;margin-bottom:4px;}
 .kpi-d{font-size:12px;color:var(--muted);}
-.kpi-d.up{color:var(--accent);}
-.kpi-d.down{color:var(--red);}
+.kpi-d.up{color:var(--accent);}.kpi-d.dn{color:var(--red);}
 .grid2r{display:grid;grid-template-columns:1fr 300px;gap:16px;margin-bottom:16px;}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
 .card{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;}
 .card-hd{padding:13px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
-.card-t{font-size:13px;font-weight:600;}
+.card-t{font-size:13px;font-weight:700;}
 .card-s{font-size:11px;color:var(--muted);margin-top:2px;}
 .lnk{font-family:var(--mono);font-size:10.5px;color:var(--accent);cursor:pointer;border:1px solid rgba(26,107,74,.2);padding:3px 8px;border-radius:5px;text-decoration:none;}
-.lnk:hover{background:var(--accent-light);}
+.lnk:hover{background:var(--al);}
 .tbl{width:100%;border-collapse:collapse;font-size:12.5px;}
 .tbl th{font-size:10.5px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;padding:7px 14px;text-align:left;border-bottom:1px solid var(--border);}
 .tbl td{padding:10px 14px;border-bottom:1px solid var(--border);vertical-align:middle;}
 .tbl tr:last-child td{border-bottom:none;}
-.tbl tr:hover td{background:var(--surface2);cursor:pointer;}
+.tbl tr:hover td{background:var(--s2);cursor:pointer;}
 .mono{font-family:var(--mono);}
 .badge{display:inline-flex;align-items:center;padding:2px 7px;border-radius:4px;font-family:var(--mono);font-size:10.5px;font-weight:500;}
-.b-g{background:var(--accent-light);color:var(--accent);}
-.b-y{background:var(--yellow-light);color:var(--yellow);}
-.b-r{background:var(--red-light);color:var(--red);}
-.b-b{background:var(--blue-light);color:var(--blue);}
+.b-g{background:var(--al);color:var(--accent);}
+.b-y{background:var(--yl);color:var(--yellow);}
+.b-r{background:var(--rl);color:var(--red);}
+.b-b{background:var(--bl);color:var(--blue);}
+.b-gr{background:var(--s3);color:var(--muted);}
 .qa-item{display:flex;align-items:center;gap:11px;padding:11px 14px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .12s;text-decoration:none;color:var(--text);}
 .qa-item:last-child{border-bottom:none;}
-.qa-item:hover{background:var(--surface2);}
+.qa-item:hover{background:var(--s2);}
 .qa-ic{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
 .alert-item{display:flex;gap:10px;padding:11px 14px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .12s;text-decoration:none;color:var(--text);}
 .alert-item:last-child{border-bottom:none;}
-.alert-item:hover{background:var(--surface2);}
+.alert-item:hover{background:var(--s2);}
 .alert-dot{width:7px;height:7px;border-radius:50%;margin-top:5px;flex-shrink:0;}
-.prog{height:5px;background:var(--surface2);border-radius:3px;overflow:hidden;border:1px solid var(--border);margin-top:6px;}
+.prog{height:5px;background:var(--s2);border-radius:3px;overflow:hidden;border:1px solid var(--border);margin-top:6px;}
 .prog-fill{height:100%;border-radius:3px;}
-@keyframes fi{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
-.fi{animation:fi .25s ease both;}
-.fi2{animation-delay:.07s}
-.fi3{animation-delay:.14s}
-.fi4{animation-delay:.21s}
+/* Welcome banner */
+.welcome-banner{background:linear-gradient(135deg,var(--accent),var(--am));border-radius:10px;padding:20px 24px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;color:#fff;}
+.wb-name{font-size:18px;font-weight:700;letter-spacing:-.2px;}
+.wb-sub{font-size:13px;opacity:.85;margin-top:3px;}
+.wb-right{text-align:right;}
+.wb-date{font-family:var(--mono);font-size:12px;opacity:.75;}
+/* User chip */
+#user-chip{display:flex;align-items:center;}
+/* Loading state */
+#loading-state{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:200;}
+.ls-inner{display:flex;flex-direction:column;align-items:center;gap:14px;}
+.ls-spin{width:32px;height:32px;border:3px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;}
+.ls-txt{font-family:var(--mono);font-size:13px;color:var(--muted);}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes fu{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+.fi{animation:fu .25s ease both;}
 </style>
 </head>
 <body>
-<div class="shell">
+
+<!-- Loading state while auth checks -->
+<div id="loading-state">
+  <div class="ls-inner">
+    <div class="ls-spin"></div>
+    <div class="ls-txt">Loading…</div>
+  </div>
+</div>
+
+<div class="shell" id="app" style="display:none;">
+
+<!-- SIDEBAR -->
 <aside class="sidebar" id="sidebar">
   <div class="sidebar-top">
     <button class="hbg" onclick="document.getElementById('sidebar').classList.toggle('open')"><span></span><span></span><span></span></button>
@@ -103,28 +124,41 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
     <a class="ni" href="settings.html"><span class="nic">⚙</span><span class="nl">Settings</span></a>
   </div>
 </aside>
+
 <main class="main">
   <div class="topbar">
-    <div><div class="pt">Dashboard</div><div class="bc">Overview · April 2026</div></div>
-    <div class="ta">
+    <div><div class="pt">Dashboard</div><div class="bc">Overview · <span id="today-date"></span></div></div>
+    <div style="display:flex;gap:10px;align-items:center;">
+      <div id="user-chip"></div>
       <a href="invoice.html" class="btn btn-p">+ New Invoice</a>
     </div>
   </div>
+
   <div class="content">
 
+    <!-- Welcome banner (populated by auth) -->
+    <div class="welcome-banner fi" id="welcome-banner">
+      <div>
+        <div class="wb-name" id="wb-name">Welcome back</div>
+        <div class="wb-sub">Here's your financial overview</div>
+      </div>
+      <div class="wb-right">
+        <div class="wb-date" id="wb-date"></div>
+      </div>
+    </div>
+
     <div class="kpi-row fi">
-      <a href="invoice.html" class="kpi"><div class="kpi-l">Total Income</div><div class="kpi-v">$48,320</div><div class="kpi-d up">▲ 12.4% vs last month</div></a>
-      <a href="invoice.html" class="kpi"><div class="kpi-l">Outstanding</div><div class="kpi-v">$9,750</div><div class="kpi-d">14 open invoices</div></a>
-      <a href="invoice.html" class="kpi"><div class="kpi-l">Overdue</div><div class="kpi-v">$2,550</div><div class="kpi-d down">3 students past due</div></a>
+      <a href="payments.html" class="kpi"><div class="kpi-l">Total Income</div><div class="kpi-v">$48,320</div><div class="kpi-d up">▲ 12.4% vs last month</div></a>
+      <a href="payments.html" class="kpi"><div class="kpi-l">Outstanding</div><div class="kpi-v">$9,750</div><div class="kpi-d">14 open invoices</div></a>
+      <a href="payments.html" class="kpi"><div class="kpi-l">Overdue</div><div class="kpi-v" style="color:var(--red);">$2,550</div><div class="kpi-d dn">3 students past due</div></a>
       <a href="donations.html" class="kpi"><div class="kpi-l">Donations</div><div class="kpi-v">$8,820</div><div class="kpi-d up">▲ 21% vs last month</div></a>
     </div>
 
-    <div class="grid2r fi fi2">
-      <!-- Recent Invoices -->
+    <div class="grid2r fi">
       <div class="card">
         <div class="card-hd">
           <div><div class="card-t">Recent Invoices</div></div>
-          <a href="invoice.html" class="lnk">All →</a>
+          <a href="payments.html" class="lnk">All →</a>
         </div>
         <table class="tbl">
           <thead><tr><th>Student</th><th>Amount</th><th>Due</th><th>Status</th></tr></thead>
@@ -136,15 +170,14 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
           </tbody>
         </table>
       </div>
-
-      <!-- Quick Actions + Alerts stacked -->
       <div style="display:flex;flex-direction:column;gap:14px;">
         <div class="card">
           <div class="card-hd"><div class="card-t">Quick Actions</div></div>
-          <a href="invoice.html" class="qa-item"><div class="qa-ic" style="background:var(--accent-light);">📄</div><div><div style="font-size:13px;font-weight:600;">New Invoice</div><div style="font-size:11.5px;color:var(--muted);">With installments & credits</div></div><div style="margin-left:auto;color:var(--muted2);">›</div></a>
-          <a href="payments.html" class="qa-item"><div class="qa-ic" style="background:var(--accent-light);">💳</div><div><div style="font-size:13px;font-weight:600;">Record Payment</div><div style="font-size:11.5px;color:var(--muted);">Allocate to line items</div></div><div style="margin-left:auto;color:var(--muted2);">›</div></a>
-          <a href="donations.html" class="qa-item"><div class="qa-ic" style="background:var(--blue-light);">🤝</div><div><div style="font-size:13px;font-weight:600;">Add Donation</div><div style="font-size:11.5px;color:var(--muted);">Gift, pledge, or campaign</div></div><div style="margin-left:auto;color:var(--muted2);">›</div></a>
-          <a href="reports.html" class="qa-item"><div class="qa-ic" style="background:var(--yellow-light);">📊</div><div><div style="font-size:13px;font-weight:600;">Run Report</div><div style="font-size:11.5px;color:var(--muted);">Export or preview</div></div><div style="margin-left:auto;color:var(--muted2);">›</div></a>
+          <a href="invoice.html" class="qa-item"><div class="qa-ic" style="background:var(--al);">📄</div><div><div style="font-size:13px;font-weight:600;">New Invoice</div><div style="font-size:11.5px;color:var(--muted);">With installments & credits</div></div><div style="margin-left:auto;color:var(--muted2);">›</div></a>
+          <a href="payments.html" class="qa-item"><div class="qa-ic" style="background:var(--al);">💳</div><div><div style="font-size:13px;font-weight:600;">Record Payment</div><div style="font-size:11.5px;color:var(--muted);">Allocate to line items</div></div><div style="margin-left:auto;color:var(--muted2);">›</div></a>
+          <a href="donations.html" class="qa-item"><div class="qa-ic" style="background:var(--bl);">🤝</div><div><div style="font-size:13px;font-weight:600;">Add Donation</div><div style="font-size:11.5px;color:var(--muted);">Gift, pledge, or campaign</div></div><div style="margin-left:auto;color:var(--muted2);">›</div></a>
+          <a href="import.html" class="qa-item"><div class="qa-ic" style="background:var(--yl);">📥</div><div><div style="font-size:13px;font-weight:600;">Import Contacts</div><div style="font-size:11.5px;color:var(--muted);">Upload CSV or Excel</div></div><div style="margin-left:auto;color:var(--muted2);">›</div></a>
+          <a href="reports.html" class="qa-item"><div class="qa-ic" style="background:var(--yl);">📊</div><div><div style="font-size:13px;font-weight:600;">Run Report</div><div style="font-size:11.5px;color:var(--muted);">Export or preview</div></div><div style="margin-left:auto;color:var(--muted2);">›</div></a>
         </div>
         <div class="card">
           <div class="card-hd"><div class="card-t">Alerts</div></div>
@@ -155,23 +188,13 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
       </div>
     </div>
 
-    <!-- Campaigns + Recent Payments -->
-    <div class="grid2 fi fi3">
+    <div class="grid2 fi">
       <div class="card">
         <div class="card-hd"><div><div class="card-t">Donation Campaigns</div></div><a href="donations.html" class="lnk">All →</a></div>
         <div style="padding:16px 18px;display:flex;flex-direction:column;gap:14px;">
-          <div>
-            <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;"><span style="font-weight:600;">General Fund</span><span class="mono" style="color:var(--accent);">$8,420 / $10,000</span></div>
-            <div class="prog"><div class="prog-fill" style="width:84%;background:var(--accent);"></div></div>
-          </div>
-          <div>
-            <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;"><span style="font-weight:600;">Scholarship Fund</span><span class="mono" style="color:var(--blue);">$9,200 / $15,000</span></div>
-            <div class="prog"><div class="prog-fill" style="width:61%;background:var(--blue);"></div></div>
-          </div>
-          <div>
-            <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;"><span style="font-weight:600;">Building Fund</span><span class="mono" style="color:var(--purple);">$7,200 / $17,000</span></div>
-            <div class="prog"><div class="prog-fill" style="width:42%;background:var(--purple);"></div></div>
-          </div>
+          <div><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;"><span style="font-weight:600;">General Fund</span><span class="mono" style="color:var(--accent);">$8,420 / $10,000</span></div><div class="prog"><div class="prog-fill" style="width:84%;background:var(--accent);"></div></div></div>
+          <div><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;"><span style="font-weight:600;">Scholarship Fund</span><span class="mono" style="color:var(--blue);">$9,200 / $15,000</span></div><div class="prog"><div class="prog-fill" style="width:61%;background:var(--blue);"></div></div></div>
+          <div><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;"><span style="font-weight:600;">Building Fund</span><span class="mono" style="color:var(--purple);">$7,200 / $17,000</span></div><div class="prog"><div class="prog-fill" style="width:42%;background:var(--purple);"></div></div></div>
         </div>
       </div>
       <div class="card">
@@ -191,5 +214,25 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
   </div>
 </main>
 </div>
+
+<script type="module">
+import { requireAuth } from './auth.js';
+
+// Show loading, wait for auth
+const user = await requireAuth();
+
+// Hide loading, show app
+document.getElementById('loading-state').style.display = 'none';
+document.getElementById('app').style.display = 'flex';
+
+// Personalize
+const name = user.displayName?.split(' ')[0] || 'there';
+document.getElementById('wb-name').textContent = `Welcome back, ${name}`;
+
+const now = new Date();
+const dateStr = now.toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric', year:'numeric' });
+document.getElementById('today-date').textContent = dateStr;
+document.getElementById('wb-date').textContent = dateStr;
+</script>
 </body>
 </html>
