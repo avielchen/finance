@@ -1,0 +1,1281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FinTrack — Invoice</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f5f5f0;--surface:#fff;--s2:#f0f0eb;--s3:#e8e8e2;
+  --border:#e2e2da;--border2:#d0d0c8;
+  --text:#1a1a18;--muted:#6b6b65;--muted2:#9b9b95;
+  --accent:#1a6b4a;--al:#e8f4ee;--am:#2d9068;
+  --red:#c0392b;--rl:#fdf0ef;--rb:#f0c0bb;
+  --yellow:#b07d00;--yl:#fdf8e8;--yb:#f0d890;
+  --blue:#1a4a8a;--bl:#eef3fb;--bb:#b8d0f0;
+  --purple:#5b2d8e;--pl:#f3eeff;
+  --sans:'IBM Plex Sans',sans-serif;--mono:'IBM Plex Mono',monospace;
+  --sc:56px;--se:210px;--tb:52px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;min-height:100vh;}
+.shell{display:flex;min-height:100vh;}
+
+/* SIDEBAR */
+.sidebar{width:var(--sc);background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100;transition:width .22s ease;overflow:hidden;}
+.sidebar.open{width:var(--se);}
+.sidebar-top{height:var(--tb);display:flex;align-items:center;padding:0 14px;border-bottom:1px solid var(--border);flex-shrink:0;gap:12px;}
+.hbg{width:28px;height:28px;border:none;background:none;cursor:pointer;display:flex;flex-direction:column;justify-content:center;gap:5px;flex-shrink:0;padding:0;}
+.hbg span{display:block;height:1.5px;background:var(--muted);border-radius:2px;}
+.hbg:hover span{background:var(--text);}
+.s-logo{font-size:13px;font-weight:700;color:var(--accent);white-space:nowrap;opacity:0;transition:opacity .15s;}
+.sidebar.open .s-logo{opacity:1;}
+.nav-sec{padding:16px 0 8px;border-bottom:1px solid var(--border);}
+.nav-sec:last-of-type{border-bottom:none;}
+.ni{display:flex;align-items:center;gap:12px;padding:9px 14px;cursor:pointer;color:var(--muted);font-size:13px;font-weight:500;white-space:nowrap;transition:all .15s;border-left:2px solid transparent;text-decoration:none;}
+.ni:hover{background:var(--s2);color:var(--text);}
+.ni.active{color:var(--accent);border-left-color:var(--accent);background:var(--al);}
+.nic{width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
+.nl{opacity:0;transition:opacity .15s;}
+.sidebar.open .nl{opacity:1;}
+
+/* MAIN */
+.main{margin-left:var(--sc);flex:1;display:flex;flex-direction:column;min-height:100vh;transition:margin-left .22s ease;}
+.sidebar.open~.main{margin-left:var(--se);}
+
+/* TOPBAR */
+.topbar{height:var(--tb);background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 24px;position:sticky;top:0;z-index:50;}
+.student-chip{display:flex;align-items:center;gap:9px;padding:4px 12px 4px 4px;background:var(--al);border:1px solid #b8dece;border-radius:20px;cursor:pointer;text-decoration:none;}
+.sc-av{width:26px;height:26px;border-radius:50%;background:var(--accent);color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;}
+.sc-name{font-size:12.5px;font-weight:700;color:var(--accent);}
+.sc-meta{font-size:10.5px;color:var(--am);}
+.topbar-r{display:flex;gap:7px;align-items:center;}
+.btn{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:6px;font-family:var(--sans);font-size:12.5px;font-weight:500;cursor:pointer;border:none;transition:all .15s;white-space:nowrap;}
+.btn-p{background:var(--accent);color:#fff;}.btn-p:hover{background:var(--am);}
+.btn-g{background:transparent;color:var(--muted);border:1px solid var(--border2);}.btn-g:hover{background:var(--s2);color:var(--text);}
+.btn-sm{padding:4px 9px;font-size:12px;}
+.btn-xs{padding:3px 7px;font-size:11px;}
+
+/* ACTION MENU */
+.amenu-wrap{position:relative;}
+.amenu{position:absolute;top:calc(100% + 5px);right:0;background:var(--surface);border:1px solid var(--border2);border-radius:8px;padding:5px;min-width:230px;z-index:200;box-shadow:0 4px 16px rgba(0,0,0,.1);}
+.amenu.hidden{display:none;}
+.am-item{display:flex;align-items:center;gap:9px;padding:7px 9px;border-radius:5px;font-size:12.5px;cursor:pointer;color:var(--text);}
+.am-item:hover{background:var(--s2);}
+.am-lbl{font-size:10px;font-weight:600;color:var(--muted2);text-transform:uppercase;letter-spacing:.06em;padding:5px 9px 2px;}
+.am-div{height:1px;background:var(--border);margin:3px 0;}
+
+/* CONTENT */
+.content{padding:20px 24px 90px;flex:1;max-width:1000px;}
+
+/* SECTION */
+.section{background:var(--surface);border:1px solid var(--border);border-radius:10px;margin-bottom:14px;overflow:visible;}
+.sec-hd{padding:11px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.sec-title{font-size:12.5px;font-weight:700;}
+.sec-body{padding:16px;}
+
+/* FORM */
+.field{display:flex;flex-direction:column;gap:4px;}
+.field label{font-size:10.5px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;}
+.input{height:33px;padding:0 9px;background:var(--bg);border:1px solid var(--border2);border-radius:6px;font-family:var(--sans);font-size:12.5px;color:var(--text);outline:none;transition:border-color .15s;width:100%;}
+.input:focus{border-color:var(--accent);background:#fff;}
+select.input{cursor:pointer;}
+.input.mono{font-family:var(--mono);}
+.ipfx{position:relative;}
+.ipfx .pfx{position:absolute;left:8px;top:50%;transform:translateY(-50%);font-family:var(--mono);font-size:11px;color:var(--muted2);pointer-events:none;}
+.ipfx .input{padding-left:20px;}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+
+/* SUMMARY (compact, under meta) */
+.summary-inline{background:var(--al);border:1px solid #b8dece;border-radius:8px;padding:12px 16px;margin-bottom:14px;}
+.si-row{display:flex;justify-content:space-between;font-size:12.5px;padding:2px 0;}
+.si-lbl{color:var(--muted);}
+.si-val{font-family:var(--mono);font-weight:600;}
+.si-divider{height:1px;background:#b8dece;margin:6px 0;}
+.si-total{display:flex;justify-content:space-between;font-size:15px;font-weight:700;}
+.si-total-val{font-family:var(--mono);color:var(--accent);}
+.si-balance{font-family:var(--mono);font-weight:700;color:var(--yellow);}
+.si-prog{height:5px;background:rgba(0,0,0,.08);border-radius:3px;overflow:hidden;margin-top:8px;}
+.si-prog-fill{height:100%;background:var(--accent);border-radius:3px;transition:width .4s;}
+
+/* ── FEES ── */
+/* Column layout: dh | type(120) | desc(1fr) | qty(44) | price(90) | due(96) | status(76) | total(72) | del(22) */
+.fee-cols{grid-template-columns:20px 120px 1fr 44px 90px 96px 76px 72px 22px;}
+.col-hd{display:grid;gap:5px;padding:0 0 7px;border-bottom:1px solid var(--border);margin-bottom:2px;}
+.col-hd span{font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;}
+
+/* FEE ROW */
+.fee-row{display:grid;grid-template-columns:20px 120px 1fr 44px 90px 96px 76px 72px 22px;gap:5px;align-items:center;padding:4px 0;border-bottom:1px solid var(--border);position:relative;transition:background .12s;}
+.fee-row:last-child{border-bottom:none;}
+.fee-row.drag-over-top{border-top:2px solid var(--accent);}
+.fee-row.drag-over-child{outline:2px dashed var(--accent);outline-offset:-2px;border-radius:4px;background:var(--al);}
+.fee-row.dragging{opacity:.3;}
+
+/* Status stripes */
+.fee-row.s-paid{border-left:3px solid var(--accent);}
+.fee-row.s-partial{border-left:3px solid var(--yellow);}
+.fee-row.s-overdue{border-left:3px solid var(--red);}
+.fee-row.s-credit{border-left:3px solid var(--blue);}
+.fee-row.s-unpaid{border-left:3px solid var(--border2);}
+
+/* GROUP HEADER */
+.fee-row.group-header{background:var(--s2);}
+.fee-row.group-header .row-total{font-weight:700;}
+
+/* CHILD ROW */
+.fee-row.child-row{padding-left:24px;background:rgba(26,74,138,.02);}
+.fee-row.child-row::before{content:'';position:absolute;left:8px;top:0;bottom:0;width:2px;background:var(--bl);border-radius:2px;}
+
+/* CREDIT child */
+.fee-row.credit-row{background:rgba(26,74,138,.03);}
+.fee-row.credit-row::before{content:'';position:absolute;left:8px;top:0;bottom:0;width:2px;background:var(--blue);opacity:.4;border-radius:2px;}
+
+/* SUBTOTAL ROW */
+.subtotal-row{display:flex;align-items:center;justify-content:space-between;padding:5px 8px 5px 28px;background:var(--s2);border-bottom:1px solid var(--border);border-top:1px solid var(--border);}
+.st-lbl{font-size:10.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;display:flex;align-items:center;gap:6px;}
+.st-val{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--text);}
+
+/* INSTALLMENT PLAN */
+.inst-plan{margin:0 0 0 28px;border-left:2px solid var(--border2);padding:0 0 4px 10px;background:rgba(0,0,0,.01);}
+.inst-plan-hd{display:flex;align-items:center;justify-content:space-between;padding:6px 0 4px;}
+.inst-plan-title{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;}
+.inst-config{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:8px 10px;background:var(--s2);border-radius:6px;margin-bottom:6px;align-items:end;}
+/* Inst sub-row cols: num(18) | label(1fr) | due(96) | amount(86) | status(76) | del(22) */
+.inst-sub-cols{grid-template-columns:18px 1fr 96px 86px 76px 22px;}
+.inst-col-hd{display:grid;gap:5px;padding:0 0 5px;border-bottom:1px solid var(--border);margin-bottom:2px;}
+.inst-col-hd span{font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;}
+.inst-sub-row{display:grid;grid-template-columns:18px 1fr 96px 86px 76px 22px;gap:5px;align-items:center;padding:3px 0;border-bottom:1px solid var(--border);cursor:grab;}
+.inst-sub-row:last-child{border-bottom:none;}
+.inst-sub-row.inst-dragging{opacity:.3;}
+.inst-sub-row.inst-drag-over{border-top:2px solid var(--accent);}
+.inst-num{font-family:var(--mono);font-size:10px;color:var(--muted2);text-align:center;}
+
+/* STATUS PILL */
+.sp{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:10px;font-size:10.5px;font-weight:600;font-family:var(--mono);cursor:pointer;border:none;white-space:nowrap;transition:all .12s;}
+.sp-u{background:var(--s3);color:var(--muted);border:1px solid var(--border2);}
+.sp-p{background:var(--yl);color:var(--yellow);border:1px solid var(--yb);}
+.sp-d{background:var(--al);color:var(--accent);border:1px solid #b8dece;}
+.sp-o{background:var(--rl);color:var(--red);border:1px solid var(--rb);}
+.sp-c{background:var(--bl);color:var(--blue);border:1px solid var(--bb);}
+
+/* DUE DATE */
+.input.due-overdue{border-color:var(--rb);background:var(--rl);color:var(--red);}
+.input.due-soon{border-color:var(--yb);background:var(--yl);color:var(--yellow);}
+
+/* GRAND TOTAL */
+.grand-total-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0 4px;border-top:2px solid var(--border);margin-top:4px;}
+.gt-lbl{font-size:13px;font-weight:700;}
+.gt-val{font-family:var(--mono);font-size:16px;font-weight:700;color:var(--accent);}
+
+/* ADD BUTTONS */
+.add-btn-row{display:flex;gap:8px;padding:8px 0 2px;}
+.add-btn{display:inline-flex;align-items:center;gap:4px;padding:5px 11px;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;background:none;transition:all .15s;border:1px dashed;}
+.ab-fee{color:var(--accent);border-color:rgba(26,107,74,.35);}.ab-fee:hover{background:var(--al);}
+.ab-cr{color:var(--blue);border-color:rgba(26,74,138,.35);}.ab-cr:hover{background:var(--bl);}
+.ab-pay{color:var(--purple);border-color:rgba(91,45,142,.35);}.ab-pay:hover{background:var(--pl);}
+
+/* DEL */
+.del-btn{width:22px;height:22px;border:none;background:transparent;color:var(--muted2);cursor:pointer;border-radius:4px;font-size:13px;display:flex;align-items:center;justify-content:center;transition:all .15s;padding:0;flex-shrink:0;}
+.del-btn:hover{background:var(--rl);color:var(--red);}
+
+/* DRAG HANDLE */
+.dh{cursor:grab;color:var(--muted2);font-size:13px;display:flex;align-items:center;justify-content:center;user-select:none;flex-shrink:0;}
+.dh:active{cursor:grabbing;}
+
+/* ── PAYMENTS ── */
+.payment-block{border:1px solid var(--border);border-radius:8px;margin-bottom:10px;overflow:hidden;background:var(--surface);}
+.payment-block.saved{background:var(--surface);}
+
+/* Payment header row */
+.pay-hd{display:grid;grid-template-columns:130px 60px 100px 95px 1fr 60px;gap:8px;align-items:center;padding:8px 12px;background:var(--s2);border-bottom:1px solid var(--border);}
+.pay-hd-saved{display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--s2);border-bottom:1px solid var(--border);cursor:pointer;}
+.pay-meta{font-family:var(--mono);font-size:11.5px;color:var(--muted);}
+.pay-amount{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--accent);}
+
+/* Allocation area */
+.alloc-area{padding:10px 12px;}
+.alloc-summary-bar{display:flex;align-items:center;gap:14px;padding:7px 10px;background:var(--al);border:1px solid #b8dece;border-radius:6px;margin-bottom:10px;flex-wrap:wrap;}
+.asb-item{display:flex;flex-direction:column;gap:1px;}
+.asb-lbl{font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;}
+.asb-val{font-family:var(--mono);font-size:13px;font-weight:700;}
+.asb-div{width:1px;height:30px;background:#b8dece;}
+
+/* Allocation rows */
+.alloc-item{display:grid;grid-template-columns:20px 1fr 90px 90px 76px;gap:8px;align-items:center;padding:5px 4px;border-radius:6px;transition:background .12s;}
+.alloc-item:hover{background:var(--s2);}
+.alloc-item.ai-checked{background:var(--al);}
+.alloc-check{width:16px;height:16px;border-radius:4px;border:1.5px solid var(--border2);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .12s;}
+.alloc-check.checked{background:var(--accent);border-color:var(--accent);}
+.alloc-check.checked::after{content:'✓';color:#fff;font-size:9px;font-weight:700;}
+.alloc-name{font-size:12.5px;font-weight:600;}
+.alloc-meta{font-size:11px;color:var(--muted);}
+.alloc-orig{font-family:var(--mono);font-size:11.5px;color:var(--muted);}
+.alloc-input-wrap{position:relative;}
+.alloc-input{height:28px;padding:0 7px 0 18px;background:var(--bg);border:1px solid var(--border2);border-radius:5px;font-family:var(--mono);font-size:12px;color:var(--text);outline:none;width:100%;transition:border-color .12s;}
+.alloc-input:focus{border-color:var(--accent);background:#fff;}
+.alloc-input.ai-overridden{border-color:var(--yellow);background:var(--yl);}
+.alloc-input-pfx{position:absolute;left:6px;top:50%;transform:translateY(-50%);font-family:var(--mono);font-size:11px;color:var(--muted2);pointer-events:none;}
+.alloc-new-bal{font-family:var(--mono);font-size:11.5px;font-weight:600;}
+
+/* Saved allocation list */
+.saved-alloc{padding:6px 12px 8px;}
+.saved-alloc-item{display:flex;align-items:baseline;gap:8px;padding:3px 0 3px 12px;border-left:2px solid #b8dece;margin-bottom:2px;}
+.sai-name{font-size:12px;font-weight:600;}
+.sai-inv{font-family:var(--mono);font-size:10.5px;color:var(--muted2);}
+.sai-orig{font-family:var(--mono);font-size:11px;color:var(--muted);text-decoration:line-through;}
+.sai-arrow{color:var(--muted2);font-size:11px;}
+.sai-new{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--accent);}
+
+/* Pay total row */
+.pay-total-row{display:flex;justify-content:flex-end;gap:18px;padding:8px 0 2px;border-top:1px solid var(--border);margin-top:4px;}
+
+/* BADGE */
+.badge{display:inline-flex;align-items:center;padding:2px 6px;border-radius:4px;font-family:var(--mono);font-size:10px;font-weight:500;}
+.b-g{background:var(--al);color:var(--accent);}
+.b-y{background:var(--yl);color:var(--yellow);}
+.b-r{background:var(--rl);color:var(--red);}
+.b-b{background:var(--bl);color:var(--blue);}
+.b-gr{background:var(--s3);color:var(--muted);}
+
+/* ACTION BAR */
+.action-bar{background:var(--surface);border-top:1px solid var(--border);padding:10px 24px;display:flex;align-items:center;gap:10px;position:fixed;bottom:0;left:var(--sc);right:0;transition:left .22s ease;z-index:40;}
+.sidebar.open~.main .action-bar{left:var(--se);}
+
+/* HINT / TIP */
+.hint{font-size:11px;color:var(--muted2);line-height:1.5;}
+.drag-tip{font-size:11px;color:var(--muted2);padding:4px 0;display:flex;align-items:center;gap:5px;}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+.fi{animation:fadeUp .2s ease both;}
+</style>
+</head>
+<body>
+<div class="shell">
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-top">
+    <button class="hbg" onclick="document.getElementById('sidebar').classList.toggle('open')"><span></span><span></span><span></span></button>
+    <div class="s-logo">FinTrack</div>
+  </div>
+  <div class="nav-sec"><a class="ni" href="index.html"><span class="nic">⊞</span><span class="nl">Dashboard</span></a></div>
+  <div class="nav-sec">
+    <a class="ni active" href="invoice.html"><span class="nic">📄</span><span class="nl">Tuition</span></a>
+    <a class="ni" href="donations.html"><span class="nic">🤝</span><span class="nl">Donations</span></a>
+    <a class="ni" href="payments.html"><span class="nic">💳</span><span class="nl">Payments</span></a>
+    <a class="ni" href="vendors.html"><span class="nic">🏢</span><span class="nl">Vendors</span></a>
+  </div>
+  <div class="nav-sec">
+    <a class="ni" href="students.html"><span class="nic">🎓</span><span class="nl">Students</span></a>
+    <a class="ni" href="parents.html"><span class="nic">👨‍👩‍👧</span><span class="nl">Parents</span></a>
+  </div>
+  <div class="nav-sec">
+    <a class="ni" href="reports.html"><span class="nic">↗</span><span class="nl">Reports</span></a>
+    <a class="ni" href="settings.html"><span class="nic">⚙</span><span class="nl">Settings</span></a>
+  </div>
+</aside>
+
+<main class="main" id="main">
+<div class="topbar">
+  <div style="display:flex;align-items:center;gap:12px;">
+    <a href="students.html" class="student-chip">
+      <div class="sc-av">DC</div>
+      <div><div class="sc-name">David Cohen</div><div class="sc-meta">Grade 8 · #INV-1048</div></div>
+    </a>
+    <span style="font-size:12px;color:var(--muted2);font-family:var(--mono);">New Invoice</span>
+  </div>
+  <div class="topbar-r">
+    <div class="amenu-wrap">
+      <button class="btn btn-g btn-sm" onclick="toggleMenu()">⚙ Options</button>
+      <div class="amenu hidden" id="amenu">
+        <div class="am-lbl">Date Default</div>
+        <div class="am-item"><input type="radio" name="dp" id="dp1" checked style="accent-color:var(--accent);"><label for="dp1" style="cursor:pointer;font-size:12.5px;">Always use today's date</label></div>
+        <div class="am-item"><input type="radio" name="dp" id="dp2" style="accent-color:var(--accent);"><label for="dp2" style="cursor:pointer;font-size:12.5px;">Use last entered date</label></div>
+        <div class="am-div"></div>
+        <div class="am-lbl">Invoice Number</div>
+        <div class="am-item"><input type="checkbox" id="auin" checked style="accent-color:var(--accent);"><label for="auin" style="cursor:pointer;font-size:12.5px;">Auto-increment</label></div>
+      </div>
+    </div>
+    <button class="btn btn-g btn-sm">👁 Preview</button>
+    <button class="btn btn-g btn-sm">💾 Draft</button>
+    <button class="btn btn-p btn-sm">✉ Send →</button>
+  </div>
+</div>
+
+<div class="content">
+
+  <!-- DATE / NUMBER -->
+  <div class="section fi">
+    <div class="sec-body" style="padding:14px 16px;">
+      <div class="g3">
+        <div class="field"><label>Invoice Date</label><input type="date" class="input mono" value="2026-04-28"></div>
+        <div class="field"><label>Invoice #</label><input type="text" class="input mono" value="#INV-1048"></div>
+        <div class="field"><label>School Year</label><select class="input"><option>2025 – 2026</option><option>2026 – 2027</option></select></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SUMMARY (compact inline) -->
+  <div class="summary-inline fi" id="summary-block">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+      <span style="font-size:12.5px;font-weight:700;">Invoice Summary</span>
+      <span class="badge b-y">Draft</span>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:0;">
+      <div class="si-row" style="flex-direction:column;gap:1px;padding:0 16px 0 0;border-right:1px solid #b8dece;">
+        <span class="si-lbl">Charges</span>
+        <span class="si-val" id="s-sub">$21,300.00</span>
+      </div>
+      <div class="si-row" style="flex-direction:column;gap:1px;padding:0 16px 0 16px;border-right:1px solid #b8dece;">
+        <span class="si-lbl">Credits</span>
+        <span class="si-val" style="color:var(--red);" id="s-credits">−$2,500.00</span>
+      </div>
+      <div class="si-row" style="flex-direction:column;gap:1px;padding:0 16px 0 16px;border-right:1px solid #b8dece;">
+        <span class="si-lbl">Total Due</span>
+        <span class="si-val" style="color:var(--accent);font-size:15px;font-weight:700;" id="s-total">$18,800.00</span>
+      </div>
+      <div class="si-row" style="flex-direction:column;gap:1px;padding:0 0 0 16px;">
+        <span class="si-lbl">Balance</span>
+        <span class="si-balance" id="s-balance">$9,325.62</span>
+      </div>
+    </div>
+    <div class="si-prog"><div class="si-prog-fill" id="s-prog" style="width:50%;"></div></div>
+    <div style="font-size:10.5px;color:var(--muted);margin-top:3px;" id="s-paid-lbl">$9,474.38 paid · 50% collected</div>
+  </div>
+
+  <!-- FEES -->
+  <div class="section fi">
+    <div class="sec-hd">
+      <div class="sec-title">Fees</div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div style="display:flex;align-items:center;gap:6px;font-size:10.5px;color:var(--muted2);">
+          <span style="width:7px;height:7px;border-radius:50%;background:var(--accent);display:inline-block;"></span>Paid
+          <span style="width:7px;height:7px;border-radius:50%;background:var(--yellow);display:inline-block;margin-left:4px;"></span>Partial
+          <span style="width:7px;height:7px;border-radius:50%;background:var(--red);display:inline-block;margin-left:4px;"></span>Overdue
+          <span style="width:7px;height:7px;border-radius:50%;background:var(--border2);display:inline-block;margin-left:4px;"></span>Unpaid
+        </div>
+      </div>
+    </div>
+    <div class="sec-body" style="padding-bottom:8px;">
+
+      <div class="col-hd fee-cols">
+        <span></span><span>Type</span><span>Description</span><span>Qty</span>
+        <span>Price</span><span>Due Date</span><span>Status</span>
+        <span style="text-align:right;">Total</span><span></span>
+      </div>
+      <div style="font-size:10.5px;color:var(--muted2);padding:3px 0 6px;display:flex;align-items:center;gap:5px;">
+        <span>⠿</span> Drag a row onto another to group them · Drag onto <strong>Installment Plan</strong> to add to payment plan
+      </div>
+
+      <!-- FEE ROWS CONTAINER -->
+      <div id="fee-rows">
+
+        <!-- GROUP: Tuition (header) -->
+        <div class="fee-row group-header s-partial" draggable="true" data-id="g1" data-type="group" data-amount="18500">
+          <div class="dh">⠿</div>
+          <select class="input" style="font-size:11.5px;" onchange="onTypeChange(this)">
+            <option selected>Tuition</option><option>Meal Plan</option><option>Dorm / Housing</option>
+            <option>Laundry</option><option>Technology Fee</option><option>Registration</option><option>Other</option>
+          </select>
+          <input class="input" value="Annual Tuition 2025–26" style="font-size:12px;">
+          <input class="input mono" type="number" value="1" min="1" style="font-size:12px;" oninput="calcRow(this)">
+          <div class="ipfx"><span class="pfx">$</span><input class="input mono" type="number" value="18500" step="0.01" oninput="calcRow(this)"></div>
+          <input type="date" class="input mono" value="2026-05-01" style="font-size:11px;" oninput="checkDue(this)">
+          <button class="sp sp-p" onclick="cycleStatus(this)">◑ Partial</button>
+          <div class="row-total" style="font-family:var(--mono);font-size:12px;font-weight:700;text-align:right;">$18,500.00</div>
+          <button class="del-btn" onclick="deleteGroup('g1')">×</button>
+        </div>
+
+        <!-- INSTALLMENT PLAN for group g1 -->
+        <div class="inst-plan" id="ip-g1">
+          <div class="inst-plan-hd">
+            <span class="inst-plan-title">Installment Plan</span>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span style="font-size:10.5px;color:var(--muted);">Base: <strong style="font-family:var(--mono);">$18,000.00</strong> after deposit</span>
+              <button class="del-btn" onclick="removeInstPlan('ip-g1')" title="Remove plan">×</button>
+            </div>
+          </div>
+          <div class="inst-config">
+            <div class="field"><label style="font-size:10px;">Deduct upfront</label>
+              <div class="ipfx"><span class="pfx">$</span><input class="input mono" type="number" value="500" style="font-size:11.5px;" oninput="recalcInstPlan('ip-g1',18500)"></div>
+            </div>
+            <div class="field"><label style="font-size:10px;">Type</label>
+              <select class="input" style="font-size:11.5px;"><option>Deposit</option><option>Registration</option><option>Application</option></select>
+            </div>
+            <div class="field"><label style="font-size:10px;"># Installments</label>
+              <input class="input mono" type="number" value="3" min="1" style="font-size:11.5px;" oninput="recalcInstPlan('ip-g1',18500)">
+            </div>
+            <div style="font-size:11px;color:var(--muted);padding-bottom:4px;align-self:end;" id="ip-g1-hint">3 × $6,000.00</div>
+          </div>
+          <div class="inst-col-hd inst-sub-cols">
+            <span>#</span><span>Label</span><span>Due Date</span><span>Amount</span><span>Status</span><span></span>
+          </div>
+          <div id="ip-g1-rows">
+            <div class="inst-sub-row" draggable="true" data-iid="i1">
+              <span class="inst-num">①</span>
+              <input class="input" value="Deposit" style="font-size:11.5px;">
+              <input type="date" class="input mono" value="2026-05-01" style="font-size:11px;" oninput="checkDue(this)">
+              <div class="ipfx"><span class="pfx">$</span><input class="input mono" type="number" value="500" style="font-size:11.5px;"></div>
+              <button class="sp sp-d" onclick="cycleStatus(this)">✓ Paid</button>
+              <button class="del-btn" onclick="this.closest('.inst-sub-row').remove();renumberInst('ip-g1-rows')">×</button>
+            </div>
+            <div class="inst-sub-row" draggable="true" data-iid="i2">
+              <span class="inst-num">②</span>
+              <input class="input" value="Installment 1" style="font-size:11.5px;">
+              <input type="date" class="input mono" value="2026-08-01" style="font-size:11px;" oninput="checkDue(this)">
+              <div class="ipfx"><span class="pfx">$</span><input class="input mono" type="number" value="6000" style="font-size:11.5px;"></div>
+              <button class="sp sp-p" onclick="cycleStatus(this)">◑ Partial</button>
+              <button class="del-btn" onclick="this.closest('.inst-sub-row').remove();renumberInst('ip-g1-rows')">×</button>
+            </div>
+            <div class="inst-sub-row" draggable="true" data-iid="i3">
+              <span class="inst-num">③</span>
+              <input class="input" value="Installment 2" style="font-size:11.5px;">
+              <input type="date" class="input mono" value="2026-11-01" style="font-size:11px;" oninput="checkDue(this)">
+              <div class="ipfx"><span class="pfx">$</span><input class="input mono" type="number" value="6000" style="font-size:11.5px;"></div>
+              <button class="sp sp-u" onclick="cycleStatus(this)">○ Unpaid</button>
+              <button class="del-btn" onclick="this.closest('.inst-sub-row').remove();renumberInst('ip-g1-rows')">×</button>
+            </div>
+            <div class="inst-sub-row" draggable="true" data-iid="i4">
+              <span class="inst-num">④</span>
+              <input class="input" value="Installment 3" style="font-size:11.5px;">
+              <input type="date" class="input mono" value="2027-01-01" style="font-size:11px;" oninput="checkDue(this)">
+              <div class="ipfx"><span class="pfx">$</span><input class="input mono" type="number" value="6000" style="font-size:11.5px;"></div>
+              <button class="sp sp-u" onclick="cycleStatus(this)">○ Unpaid</button>
+              <button class="del-btn" onclick="this.closest('.inst-sub-row').remove();renumberInst('ip-g1-rows')">×</button>
+            </div>
+          </div>
+          <button class="add-btn ab-fee" style="font-size:11px;padding:3px 8px;margin-top:4px;" onclick="addInstRow('ip-g1-rows')">+ Add installment</button>
+        </div>
+
+        <!-- CHILD: Merit Scholarship (credit under tuition) -->
+        <div class="fee-row child-row credit-row s-credit" draggable="true" data-id="c1" data-type="credit" data-parent="g1" data-amount="2500">
+          <div class="dh">⠿</div>
+          <select class="input" style="font-size:11.5px;background:var(--bl);">
+            <option selected>Merit Scholarship</option><option>Financial Aid</option><option>Sibling Discount</option><option>Other Discount</option>
+          </select>
+          <input class="input" value="Merit Scholarship" style="font-size:12px;background:var(--bl);">
+          <input class="input mono" type="number" value="1" style="font-size:12px;background:var(--bl);" oninput="calcRow(this)">
+          <div class="ipfx"><span class="pfx">$</span><input class="input mono" type="number" value="2500" step="0.01" style="background:var(--bl);" oninput="calcRow(this)"></div>
+          <input type="date" class="input mono" style="font-size:11px;background:var(--bl);">
+          <button class="sp sp-c">Credit</button>
+          <div class="row-total" style="font-family:var(--mono);font-size:12px;font-weight:700;text-align:right;color:var(--red);">−$2,500.00</div>
+          <button class="del-btn" onclick="removeRow(this)">×</button>
+        </div>
+
+        <!-- SUBTOTAL for g1 group -->
+        <div class="subtotal-row" id="st-g1">
+          <span class="st-lbl">
+            <span style="width:2px;height:14px;background:var(--border2);display:inline-block;border-radius:1px;"></span>
+            Subtotal — Annual Tuition after credit
+          </span>
+          <span class="st-val">$16,000.00</span>
+        </div>
+
+        <!-- STANDALONE: Meal Plan -->
+        <div class="fee-row s-overdue" draggable="true" data-id="r2" data-type="fee" data-amount="2000">
+          <div class="dh">⠿</div>
+          <select class="input" style="font-size:11.5px;" onchange="onTypeChange(this)">
+            <option>Tuition</option><option selected>Meal Plan</option><option>Dorm / Housing</option><option>Laundry</option>
+          </select>
+          <input class="input" value="Annual Meal Plan" style="font-size:12px;">
+          <input class="input mono" type="number" value="1" style="font-size:12px;" oninput="calcRow(this)">
+          <div class="ipfx"><span class="pfx">$</span><input class="input mono" type="number" value="2000" step="0.01" oninput="calcRow(this)"></div>
+          <input type="date" class="input mono due-overdue" value="2026-04-01" style="font-size:11px;" oninput="checkDue(this)">
+          <button class="sp sp-o" onclick="cycleStatus(this)">⚠ Overdue</button>
+          <div class="row-total" style="font-family:var(--mono);font-size:12px;font-weight:700;text-align:right;">$2,000.00</div>
+          <button class="del-btn" onclick="removeRow(this)">×</button>
+        </div>
+
+        <!-- STANDALONE: Laundry -->
+        <div class="fee-row s-unpaid" draggable="true" data-id="r3" data-type="fee" data-amount="500">
+          <div class="dh">⠿</div>
+          <select class="input" style="font-size:11.5px;">
+            <option>Tuition</option><option>Meal Plan</option><option>Dorm / Housing</option><option selected>Laundry</option>
+          </select>
+          <input class="input" value="Laundry Service" style="font-size:12px;">
+          <input class="input mono" type="number" value="1" style="font-size:12px;" oninput="calcRow(this)">
+          <div class="ipfx"><span class="pfx">$</span><input class="input mono" type="number" value="500" step="0.01" oninput="calcRow(this)"></div>
+          <input type="date" class="input mono" value="2026-06-01" style="font-size:11px;" oninput="checkDue(this)">
+          <button class="sp sp-u" onclick="cycleStatus(this)">○ Unpaid</button>
+          <div class="row-total" style="font-family:var(--mono);font-size:12px;font-weight:700;text-align:right;">$500.00</div>
+          <button class="del-btn" onclick="removeRow(this)">×</button>
+        </div>
+
+        <!-- STANDALONE: Technology Fee -->
+        <div class="fee-row s-unpaid" draggable="true" data-id="r4" data-type="fee" data-amount="300">
+          <div class="dh">⠿</div>
+          <select class="input" style="font-size:11.5px;">
+            <option>Tuition</option><option>Meal Plan</option><option>Dorm / Housing</option>
+            <option>Laundry</option><option selected>Technology Fee</option><option>Registration</option>
+          </select>
+          <input class="input" value="Technology Fee" style="font-size:12px;">
+          <input class="input mono" type="number" value="1" style="font-size:12px;" oninput="calcRow(this)">
+          <div class="ipfx"><span class="pfx">$</span><input class="input mono" type="number" value="300" step="0.01" oninput="calcRow(this)"></div>
+          <input type="date" class="input mono" value="2026-08-01" style="font-size:11px;" oninput="checkDue(this)">
+          <button class="sp sp-u" onclick="cycleStatus(this)">○ Unpaid</button>
+          <div class="row-total" style="font-family:var(--mono);font-size:12px;font-weight:700;text-align:right;">$300.00</div>
+          <button class="del-btn" onclick="removeRow(this)">×</button>
+        </div>
+
+      </div><!-- /fee-rows -->
+
+      <div class="grand-total-row">
+        <span class="gt-lbl">Grand Total</span>
+        <span class="gt-val" id="grand-total">$18,800.00</span>
+      </div>
+      <div class="add-btn-row">
+        <button class="add-btn ab-fee" onclick="addFeeRow()">＋ Add Fee</button>
+        <button class="add-btn ab-cr" onclick="addCreditRow()">＋ Add Credit</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAYMENTS RECEIVED -->
+  <div class="section fi">
+    <div class="sec-hd">
+      <div class="sec-title">Payments Received</div>
+      <div style="font-size:11.5px;color:var(--muted);">Total paid: <strong style="font-family:var(--mono);color:var(--accent);" id="total-paid-lbl">$9,474.38</strong></div>
+    </div>
+    <div class="sec-body" style="padding-bottom:8px;">
+      <div id="payment-blocks">
+
+        <!-- SAVED PAYMENT 1 -->
+        <div class="payment-block saved" id="pb-1">
+          <div class="pay-hd-saved" onclick="togglePayEdit('pb-1')">
+            <span style="font-family:var(--mono);font-size:12px;color:var(--muted2);">Apr 12</span>
+            <span style="font-size:12.5px;font-weight:600;">Credit Card</span>
+            <span class="badge b-g" style="margin-left:4px;">2.5%</span>
+            <span class="pay-amount" style="margin-left:auto;">$5,482.92</span>
+            <button class="btn btn-g btn-xs" style="margin-left:10px;" onclick="event.stopPropagation();togglePayEdit('pb-1')">Edit</button>
+          </div>
+          <div class="saved-alloc" id="pb-1-alloc">
+            <div class="sai-name" style="font-size:10.5px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px;">Applied to:</div>
+            <div class="saved-alloc-item">
+              <span class="sai-name">Annual Tuition — Deposit ①</span>
+              <span class="sai-inv">#INV-1048</span>
+              <span class="sai-orig">$500</span>
+              <span class="sai-arrow">→</span>
+              <span class="sai-new">$0 remaining</span>
+            </div>
+            <div class="saved-alloc-item">
+              <span class="sai-name">Tuition — Installment 1 ②</span>
+              <span class="sai-inv">#INV-1048</span>
+              <span class="sai-orig">$6,000</span>
+              <span class="sai-arrow">→</span>
+              <span class="sai-new">$1,017.08 remaining</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- SAVED PAYMENT 2 -->
+        <div class="payment-block saved" id="pb-2">
+          <div class="pay-hd-saved" onclick="togglePayEdit('pb-2')">
+            <span style="font-family:var(--mono);font-size:12px;color:var(--muted2);">Mar 1</span>
+            <span style="font-size:12.5px;font-weight:600;">Bank Transfer</span>
+            <span class="badge b-gr" style="margin-left:4px;">0%</span>
+            <span class="pay-amount" style="margin-left:auto;">$3,991.46</span>
+            <button class="btn btn-g btn-xs" style="margin-left:10px;" onclick="event.stopPropagation();togglePayEdit('pb-2')">Edit</button>
+          </div>
+          <div class="saved-alloc" id="pb-2-alloc">
+            <div class="sai-name" style="font-size:10.5px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px;">Applied to:</div>
+            <div class="saved-alloc-item">
+              <span class="sai-name">Tuition — Installment 1 ②</span>
+              <span class="sai-inv">#INV-1048</span>
+              <span class="sai-orig">$6,000</span>
+              <span class="sai-arrow">→</span>
+              <span class="sai-new">$1,017.08 remaining</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="pay-total-row">
+        <span style="font-size:12px;color:var(--muted);">Total paid</span>
+        <span style="font-family:var(--mono);font-size:13px;font-weight:700;color:var(--accent);">$9,474.38</span>
+      </div>
+
+      <div class="add-btn-row">
+        <button class="add-btn ab-pay" onclick="addPaymentBlock()">＋ Add Payment</button>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /content -->
+
+<!-- ACTION BAR -->
+<div class="action-bar">
+  <a href="students.html" style="display:flex;align-items:center;gap:7px;text-decoration:none;color:var(--text);">
+    <div style="width:22px;height:22px;border-radius:50%;background:var(--accent);color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">DC</div>
+    <span style="font-size:12px;font-weight:600;">David Cohen</span>
+    <span style="font-size:11px;color:var(--muted2);font-family:var(--mono);">#INV-1048</span>
+  </a>
+  <span style="color:var(--border2);">|</span>
+  <span style="font-family:var(--mono);font-size:12px;color:var(--yellow);" id="ab-balance">Balance: $9,325.62</span>
+  <div style="margin-left:auto;display:flex;gap:7px;">
+    <button class="btn btn-g btn-sm">Cancel</button>
+    <button class="btn btn-g btn-sm">💾 Draft</button>
+    <button class="btn btn-p btn-sm">✉ Save & Send</button>
+  </div>
+</div>
+
+</main>
+</div>
+
+<script>
+// ── MENUS ──
+function toggleMenu() { document.getElementById('amenu').classList.toggle('hidden'); }
+document.addEventListener('click', e => {
+  if (!e.target.closest('#amenu') && !e.target.closest('[onclick="toggleMenu()"]'))
+    document.getElementById('amenu').classList.add('hidden');
+});
+
+// ── STATUS CYCLE ──
+const SC = ['sp-u','sp-p','sp-d','sp-o'];
+const SL = { 'sp-u':'○ Unpaid','sp-p':'◑ Partial','sp-d':'✓ Paid','sp-o':'⚠ Overdue','sp-c':'Credit' };
+const SS = { 'sp-u':'s-unpaid','sp-p':'s-partial','sp-d':'s-paid','sp-o':'s-overdue' };
+function cycleStatus(btn) {
+  if (btn.classList.contains('sp-c')) return;
+  const cur = SC.find(s => btn.classList.contains(s)) || 'sp-u';
+  const next = SC[(SC.indexOf(cur) + 1) % SC.length];
+  SC.forEach(s => btn.classList.remove(s));
+  btn.classList.add(next);
+  btn.textContent = SL[next];
+  const row = btn.closest('.fee-row,.inst-sub-row');
+  if (row?.classList.contains('fee-row')) {
+    Object.values(SS).forEach(c => row.classList.remove(c));
+    row.classList.add(SS[next]);
+  }
+}
+
+// ── DUE DATE COLOR ──
+function checkDue(inp) {
+  if (!inp.value) return;
+  const today = new Date(); const due = new Date(inp.value);
+  inp.classList.remove('due-overdue','due-soon');
+  if (due < today) inp.classList.add('due-overdue');
+  else if ((due - today) < 14 * 86400000) inp.classList.add('due-soon');
+}
+
+// ── CALC ROW ──
+function calcRow(inp) {
+  const row = inp.closest('.fee-row');
+  if (!row) return;
+  const nums = row.querySelectorAll('input[type=number]');
+  const tot = (parseFloat(nums[0]?.value)||0) * (parseFloat(nums[1]?.value)||0);
+  const isCredit = row.dataset.type === 'credit';
+  const el = row.querySelector('.row-total');
+  if (el) { el.textContent = isCredit ? '−$'+fmt(tot) : '$'+fmt(tot); }
+  row.dataset.amount = tot;
+  recalcAll();
+}
+
+function recalcAll() {
+  let sub=0, cr=0;
+  document.querySelectorAll('#fee-rows .fee-row').forEach(r => {
+    const a = parseFloat(r.dataset.amount)||0;
+    if (r.dataset.type==='credit') cr+=a; else sub+=a;
+  });
+  const total = sub - cr;
+  const paid = getPaid();
+  const bal = Math.max(total - paid, 0);
+  const pct = total > 0 ? Math.min(paid/total*100,100) : 0;
+  document.getElementById('s-sub').textContent = '$'+fmt(sub);
+  document.getElementById('s-credits').textContent = '−$'+fmt(cr);
+  document.getElementById('s-total').textContent = '$'+fmt(total);
+  document.getElementById('s-balance').textContent = '$'+fmt(bal);
+  document.getElementById('s-prog').style.width = pct+'%';
+  document.getElementById('s-paid-lbl').textContent = '$'+fmt(paid)+' paid · '+Math.round(pct)+'% collected';
+  document.getElementById('grand-total').textContent = '$'+fmt(total);
+  document.getElementById('ab-balance').textContent = 'Balance: $'+fmt(bal);
+}
+
+function getPaid() {
+  let p = 0;
+  document.querySelectorAll('.pay-amount-input').forEach(i => p += parseFloat(i.value)||0);
+  return p;
+}
+
+// ── TYPE DEFAULTS ──
+const TD = {'Tuition':18500,'Meal Plan':2000,'Dorm / Housing':5000,'Laundry':500,'Technology Fee':300,'Registration':250,'Activity Fee':180,'Other':0};
+function onTypeChange(sel) {
+  const row = sel.closest('.fee-row');
+  const n = row.querySelectorAll('input[type=number]')[1];
+  const d = TD[sel.value];
+  if (n && d !== undefined && (parseFloat(n.value)||0) === 0) { n.value = d; calcRow(n); }
+}
+
+// ── INST PLAN ──
+function recalcInstPlan(planId, feeAmt) {
+  const plan = document.getElementById(planId);
+  if (!plan) return;
+  const inputs = plan.querySelectorAll('.inst-config input[type=number]');
+  const deduct = parseFloat(inputs[0]?.value)||0;
+  const count = parseInt(inputs[1]?.value)||1;
+  const rem = Math.max(feeAmt - deduct, 0);
+  const hint = document.getElementById(planId+'-hint');
+  if (hint) hint.textContent = count+' × $'+fmt(rem/count);
+}
+
+function removeInstPlan(id) { document.getElementById(id)?.remove(); }
+
+function addInstRow(rowsId) {
+  const wrap = document.getElementById(rowsId);
+  if (!wrap) return;
+  const n = wrap.children.length + 1;
+  const div = document.createElement('div');
+  div.className = 'inst-sub-row';
+  div.draggable = true;
+  div.innerHTML = `
+    <span class="inst-num">${n}</span>
+    <input class="input" value="Installment ${n}" style="font-size:11.5px;">
+    <input type="date" class="input mono" style="font-size:11px;" oninput="checkDue(this)">
+    <div class="ipfx"><span class="pfx">$</span><input class="input mono" type="number" value="0" style="font-size:11.5px;"></div>
+    <button class="sp sp-u" onclick="cycleStatus(this)">○ Unpaid</button>
+    <button class="del-btn" onclick="this.closest('.inst-sub-row').remove();renumberInst('${rowsId}')">×</button>`;
+  wrap.appendChild(div);
+  setupInstDrag(wrap);
+}
+
+function renumberInst(rowsId) {
+  const wrap = document.getElementById(rowsId);
+  if (!wrap) return;
+  const nums = ['①','②','③','④','⑤','⑥','⑦','⑧','⑨','⑩'];
+  wrap.querySelectorAll('.inst-sub-row').forEach((r, i) => {
+    const n = r.querySelector('.inst-num');
+    if (n) n.textContent = nums[i] || (i+1);
+  });
+}
+
+// ── ADD FEE ──
+let rc = 30;
+function addFeeRow() {
+  rc++;
+  const id = 'r'+rc;
+  const wrap = document.getElementById('fee-rows');
+  const div = document.createElement('div');
+  div.className = 'fee-row s-unpaid';
+  div.draggable = true;
+  div.dataset.id = id; div.dataset.type = 'fee'; div.dataset.amount = '0';
+  div.innerHTML = `
+    <div class="dh">⠿</div>
+    <select class="input" style="font-size:11.5px;" onchange="onTypeChange(this)">
+      <option>Tuition</option><option>Meal Plan</option><option>Dorm / Housing</option>
+      <option>Laundry</option><option>Technology Fee</option><option>Registration</option><option>Other</option>
+    </select>
+    <input class="input" placeholder="Description" style="font-size:12px;">
+    <input class="input mono" type="number" value="1" min="1" style="font-size:12px;" oninput="calcRow(this)">
+    <div class="ipfx"><span class="pfx">$</span><input class="input mono" type="number" value="0" step="0.01" oninput="calcRow(this)"></div>
+    <input type="date" class="input mono" style="font-size:11px;" oninput="checkDue(this)">
+    <button class="sp sp-u" onclick="cycleStatus(this)">○ Unpaid</button>
+    <div class="row-total" style="font-family:var(--mono);font-size:12px;font-weight:700;text-align:right;">$0.00</div>
+    <button class="del-btn" onclick="removeRow(this)">×</button>`;
+  wrap.appendChild(div);
+  setupFeeRowDrag(div);
+  div.querySelector('input[placeholder]')?.focus();
+}
+
+function addCreditRow() {
+  rc++;
+  const id = 'r'+rc;
+  const wrap = document.getElementById('fee-rows');
+  const div = document.createElement('div');
+  div.className = 'fee-row s-credit';
+  div.draggable = true;
+  div.dataset.id = id; div.dataset.type = 'credit'; div.dataset.amount = '0';
+  div.innerHTML = `
+    <div class="dh">⠿</div>
+    <select class="input" style="font-size:11.5px;background:var(--bl);">
+      <option>Merit Scholarship</option><option>Financial Aid</option><option>Sibling Discount</option><option>Other Discount</option>
+    </select>
+    <input class="input" placeholder="Credit description" style="font-size:12px;background:var(--bl);">
+    <input class="input mono" type="number" value="1" style="font-size:12px;background:var(--bl);" oninput="calcRow(this)">
+    <div class="ipfx"><span class="pfx">$</span><input class="input mono" type="number" value="0" step="0.01" style="background:var(--bl);" oninput="calcRow(this)"></div>
+    <input type="date" class="input mono" style="font-size:11px;background:var(--bl);">
+    <button class="sp sp-c">Credit</button>
+    <div class="row-total" style="font-family:var(--mono);font-size:12px;font-weight:700;text-align:right;color:var(--red);">−$0.00</div>
+    <button class="del-btn" onclick="removeRow(this)">×</button>`;
+  wrap.appendChild(div);
+  const st = document.createElement('div');
+  st.className = 'subtotal-row';
+  st.innerHTML = `<span class="st-lbl"><span style="width:2px;height:14px;background:var(--border2);display:inline-block;border-radius:1px;"></span> Subtotal after credit</span><span class="st-val">$0.00</span>`;
+  wrap.appendChild(st);
+  setupFeeRowDrag(div);
+  div.querySelector('input[placeholder]')?.focus();
+  recalcAll();
+}
+
+function removeRow(btn) {
+  const row = btn.closest('.fee-row,.pay-row-item');
+  const next = row?.nextElementSibling;
+  if (next?.classList.contains('subtotal-row')) next.remove();
+  const id = row?.dataset?.id;
+  if (id) { document.getElementById('ip-'+id)?.remove(); document.getElementById('st-'+id)?.remove(); }
+  row?.remove();
+  recalcAll();
+}
+
+function deleteGroup(id) {
+  const rows = document.querySelectorAll(`[data-parent="${id}"]`);
+  rows.forEach(r => r.remove());
+  document.getElementById('ip-'+id)?.remove();
+  document.getElementById('st-'+id)?.remove();
+  document.querySelector(`.fee-row[data-id="${id}"]`)?.remove();
+  recalcAll();
+}
+
+// ── FEE ROW DRAG & DROP ──
+let dragFeeRow = null;
+
+function setupFeeRowDrag(row) {
+  row.addEventListener('dragstart', e => {
+    dragFeeRow = row;
+    e.dataTransfer.effectAllowed = 'move';
+    setTimeout(() => row.classList.add('dragging'), 0);
+  });
+  row.addEventListener('dragend', () => {
+    row.classList.remove('dragging');
+    document.querySelectorAll('.fee-row').forEach(r => {
+      r.classList.remove('drag-over-top','drag-over-child');
+    });
+    dragFeeRow = null;
+  });
+  row.addEventListener('dragover', e => {
+    e.preventDefault();
+    if (!dragFeeRow || dragFeeRow === row) return;
+    document.querySelectorAll('.fee-row').forEach(r => r.classList.remove('drag-over-top','drag-over-child'));
+    // Top half = reorder, bottom half = make child
+    const rect = row.getBoundingClientRect();
+    const mid = rect.top + rect.height * 0.5;
+    if (e.clientY < mid) row.classList.add('drag-over-top');
+    else row.classList.add('drag-over-child');
+  });
+  row.addEventListener('dragleave', () => {
+    row.classList.remove('drag-over-top','drag-over-child');
+  });
+  row.addEventListener('drop', e => {
+    e.preventDefault();
+    if (!dragFeeRow || dragFeeRow === row) return;
+    const rect = row.getBoundingClientRect();
+    const mid = rect.top + rect.height * 0.5;
+    const wrap = document.getElementById('fee-rows');
+    if (e.clientY < mid) {
+      // REORDER: insert before target, also move any installment plan and subitems
+      const dragId = dragFeeRow.dataset.id;
+      const ip = document.getElementById('ip-'+dragId);
+      const children = document.querySelectorAll(`[data-parent="${dragId}"]`);
+      const st = document.getElementById('st-'+dragId);
+      // Gather elements to move
+      const toMove = [dragFeeRow];
+      if (ip) toMove.push(ip);
+      children.forEach(c => toMove.push(c));
+      if (st) toMove.push(st);
+      toMove.forEach(el => wrap.insertBefore(el, row));
+    } else {
+      // MAKE CHILD: drag row becomes child of target row
+      const targetId = row.dataset.id;
+      const dragId = dragFeeRow.dataset.id;
+      if (!targetId) return;
+      // Promote target to group-header if not already
+      row.classList.add('group-header');
+      row.dataset.type = 'group';
+      // Mark dragged row as child
+      dragFeeRow.classList.add('child-row');
+      dragFeeRow.classList.remove('group-header');
+      dragFeeRow.dataset.parent = targetId;
+      // Move dragged row right after target (and its inst plan)
+      const ip = document.getElementById('ip-'+targetId);
+      const insertAfter = ip || row;
+      if (insertAfter.nextSibling) wrap.insertBefore(dragFeeRow, insertAfter.nextSibling);
+      else wrap.appendChild(dragFeeRow);
+      // Add subtotal if group has none
+      if (!document.getElementById('st-'+targetId)) {
+        const st = document.createElement('div');
+        st.className = 'subtotal-row';
+        st.id = 'st-'+targetId;
+        st.innerHTML = `<span class="st-lbl"><span style="width:2px;height:14px;background:var(--border2);display:inline-block;border-radius:1px;"></span> Subtotal</span><span class="st-val">–</span>`;
+        // Insert after all children of this group
+        const allChildren = document.querySelectorAll(`[data-parent="${targetId}"]`);
+        const last = allChildren[allChildren.length-1] || dragFeeRow;
+        if (last.nextSibling) wrap.insertBefore(st, last.nextSibling);
+        else wrap.appendChild(st);
+      }
+      // Add installment plan button if group has none
+      if (!document.getElementById('ip-'+targetId)) {
+        // Add an "Add Installment Plan" button hint near the group header
+        const hint = document.createElement('div');
+        hint.className = 'add-btn-row';
+        hint.style.cssText = 'padding-left:28px;';
+        hint.innerHTML = `<button class="add-btn ab-fee" style="font-size:11px;" onclick="addInstPlanToGroup('${targetId}',this)">⇌ Add Installment Plan to this group</button>`;
+        const st = document.getElementById('st-'+targetId);
+        if (st) wrap.insertBefore(hint, st);
+      }
+    }
+    row.classList.remove('drag-over-top','drag-over-child');
+    recalcAll();
+  });
+}
+
+function addInstPlanToGroup(groupId, btn) {
+  const wrap = document.getElementById('fee-rows');
+  const groupRow = wrap.querySelector(`[data-id="${groupId}"]`);
+  if (!groupRow || document.getElementById('ip-'+groupId)) {
+    btn.closest('.add-btn-row')?.remove();
+    return;
+  }
+  const plan = document.createElement('div');
+  plan.className = 'inst-plan';
+  plan.id = 'ip-'+groupId;
+  plan.innerHTML = `
+    <div class="inst-plan-hd">
+      <span class="inst-plan-title">Installment Plan</span>
+      <button class="del-btn" onclick="removeInstPlan('ip-${groupId}')">×</button>
+    </div>
+    <div class="inst-config">
+      <div class="field"><label style="font-size:10px;">Deduct upfront</label>
+        <div class="ipfx"><span class="pfx">$</span><input class="input mono" type="number" value="0" style="font-size:11.5px;" oninput="recalcInstPlan('ip-${groupId}',0)"></div>
+      </div>
+      <div class="field"><label style="font-size:10px;">Type</label>
+        <select class="input" style="font-size:11.5px;"><option>Deposit</option><option>Registration</option><option>Application</option></select>
+      </div>
+      <div class="field"><label style="font-size:10px;"># Installments</label>
+        <input class="input mono" type="number" value="3" min="1" style="font-size:11.5px;" oninput="recalcInstPlan('ip-${groupId}',0)">
+      </div>
+      <div style="font-size:11px;color:var(--muted);padding-bottom:4px;align-self:end;" id="ip-${groupId}-hint">3 installments</div>
+    </div>
+    <div class="inst-col-hd inst-sub-cols">
+      <span>#</span><span>Label</span><span>Due Date</span><span>Amount</span><span>Status</span><span></span>
+    </div>
+    <div id="ip-${groupId}-rows"></div>
+    <button class="add-btn ab-fee" style="font-size:11px;padding:3px 8px;margin-top:4px;" onclick="addInstRow('ip-${groupId}-rows')">+ Add installment</button>`;
+  groupRow.after(plan);
+  btn.closest('.add-btn-row')?.remove();
+  addInstRow('ip-'+groupId+'-rows');
+  addInstRow('ip-'+groupId+'-rows');
+  addInstRow('ip-'+groupId+'-rows');
+}
+
+// INST DRAG WITHIN PLAN
+function setupInstDrag(wrap) {
+  let dragInst = null;
+  wrap.querySelectorAll('.inst-sub-row').forEach(row => {
+    row.addEventListener('dragstart', e => {
+      dragInst = row; e.stopPropagation();
+      e.dataTransfer.effectAllowed = 'move';
+      setTimeout(() => row.classList.add('inst-dragging'), 0);
+    });
+    row.addEventListener('dragend', () => {
+      row.classList.remove('inst-dragging');
+      wrap.querySelectorAll('.inst-sub-row').forEach(r => r.classList.remove('inst-drag-over'));
+      dragInst = null;
+    });
+    row.addEventListener('dragover', e => {
+      e.preventDefault(); e.stopPropagation();
+      if (row !== dragInst) {
+        wrap.querySelectorAll('.inst-sub-row').forEach(r => r.classList.remove('inst-drag-over'));
+        row.classList.add('inst-drag-over');
+      }
+    });
+    row.addEventListener('drop', e => {
+      e.preventDefault(); e.stopPropagation();
+      if (dragInst && dragInst !== row) {
+        wrap.insertBefore(dragInst, row);
+        row.classList.remove('inst-drag-over');
+        renumberInst(wrap.id);
+      }
+    });
+  });
+}
+
+// Init drag on all existing rows
+document.querySelectorAll('#fee-rows .fee-row[draggable]').forEach(setupFeeRowDrag);
+document.querySelectorAll('.inst-plan [id$="-rows"]').forEach(setupInstDrag);
+
+// ── PAYMENTS ──
+let payCounter = 10;
+
+// Sub-invoice data for allocation
+const subInvoices = [
+  { id:'si1', name:'Annual Tuition — Deposit ①', inv:'#INV-1048', orig:500, balance:0 },
+  { id:'si2', name:'Tuition — Installment 1 ②', inv:'#INV-1048', orig:6000, balance:1017.08 },
+  { id:'si3', name:'Tuition — Installment 2 ③', inv:'#INV-1048', orig:6000, balance:6000 },
+  { id:'si4', name:'Tuition — Installment 3 ④', inv:'#INV-1048', orig:6000, balance:6000 },
+  { id:'si5', name:'Meal Plan', inv:'#INV-1048', orig:2000, balance:2000 },
+  { id:'si6', name:'Laundry Service', inv:'#INV-1048', orig:500, balance:500 },
+  { id:'si7', name:'Technology Fee', inv:'#INV-1048', orig:300, balance:300 },
+];
+
+function addPaymentBlock() {
+  payCounter++;
+  const pid = 'pb-'+payCounter;
+  const wrap = document.getElementById('payment-blocks');
+  const div = document.createElement('div');
+  div.className = 'payment-block';
+  div.id = pid;
+
+  // Build sub-invoice checklist
+  const listHTML = subInvoices.filter(si => si.balance > 0).map(si => `
+    <div class="alloc-item" id="${pid}-ai-${si.id}" data-id="${si.id}" data-orig="${si.orig}" data-balance="${si.balance}">
+      <div class="alloc-check" onclick="toggleAlloc('${pid}','${si.id}')" id="${pid}-chk-${si.id}"></div>
+      <div>
+        <div class="alloc-name">${si.name}</div>
+        <div class="alloc-meta">${si.inv} · Original: <span class="alloc-orig">$${fmt(si.orig)}</span></div>
+      </div>
+      <div style="font-family:var(--mono);font-size:11.5px;color:var(--muted);text-align:right;">$${fmt(si.balance)}<br><span style="font-size:10px;">balance</span></div>
+      <div class="alloc-input-wrap">
+        <span class="alloc-input-pfx">$</span>
+        <input type="number" class="alloc-input" id="${pid}-amt-${si.id}" value="0" step="0.01"
+          oninput="onAllocOverride('${pid}','${si.id}')" disabled>
+      </div>
+      <div class="alloc-new-bal" id="${pid}-new-${si.id}" style="color:var(--muted2);font-size:11px;">→ $${fmt(si.balance)}</div>
+    </div>`).join('');
+
+  div.innerHTML = `
+    <div class="pay-hd" id="${pid}-hd">
+      <select class="input" style="font-size:11.5px;" onchange="onPayMethodNew(this,'${pid}')">
+        <option>Bank Transfer</option><option selected>Credit Card</option>
+        <option>Check</option><option>Cash</option><option>Zelle / Venmo</option>
+      </select>
+      <div style="display:flex;align-items:center;gap:2px;">
+        <input class="input mono" type="number" value="2.5" step="0.1" style="font-size:11.5px;" id="${pid}-rate">
+        <span style="font-size:10px;color:var(--muted);flex-shrink:0;">%</span>
+      </div>
+      <input type="date" class="input mono" value="2026-04-28" style="font-size:11px;">
+      <div class="ipfx"><span class="pfx">$</span>
+        <input class="input mono pay-amount-input" type="number" value="0" step="0.01"
+          style="font-size:12px;font-weight:600;" id="${pid}-total"
+          oninput="onPayAmountChange('${pid}')">
+      </div>
+      <div style="font-size:11px;color:var(--muted);">Enter amount, then select items below</div>
+      <button class="btn btn-g btn-xs" onclick="savePayment('${pid}')">Save</button>
+    </div>
+    <div class="alloc-area" id="${pid}-alloc">
+      <div class="alloc-summary-bar" id="${pid}-asb">
+        <div class="asb-item"><div class="asb-lbl">Payment In</div><div class="asb-val" style="color:var(--accent);" id="${pid}-in">$0.00</div></div>
+        <div class="asb-div"></div>
+        <div class="asb-item"><div class="asb-lbl">Allocated</div><div class="asb-val" style="color:var(--blue);" id="${pid}-alloc-tot">$0.00</div></div>
+        <div class="asb-div"></div>
+        <div class="asb-item"><div class="asb-lbl">Remaining</div><div class="asb-val" style="color:var(--yellow);" id="${pid}-rem">$0.00</div></div>
+      </div>
+      <div id="${pid}-list">${listHTML}</div>
+    </div>`;
+  wrap.appendChild(div);
+}
+
+const SR = {'Bank Transfer':0,'Credit Card':2.5,'Check':0,'Cash':0,'Zelle / Venmo':0};
+function onPayMethodNew(sel, pid) {
+  const ri = document.getElementById(pid+'-rate');
+  if (ri) ri.value = SR[sel.value] ?? 0;
+}
+
+function onPayAmountChange(pid) {
+  const total = parseFloat(document.getElementById(pid+'-total')?.value)||0;
+  document.getElementById(pid+'-in').textContent = '$'+fmt(total);
+  // Auto-suggest: fill checked items
+  autoSuggestAlloc(pid);
+}
+
+function toggleAlloc(pid, siId) {
+  const chk = document.getElementById(pid+'-chk-'+siId);
+  const inp = document.getElementById(pid+'-amt-'+siId);
+  const item = document.getElementById(pid+'-ai-'+siId);
+  const isChecked = chk.classList.contains('checked');
+  if (isChecked) {
+    chk.classList.remove('checked');
+    item.classList.remove('ai-checked');
+    inp.disabled = true;
+    inp.value = 0;
+    inp.classList.remove('ai-overridden');
+  } else {
+    chk.classList.add('checked');
+    item.classList.add('ai-checked');
+    inp.disabled = false;
+  }
+  autoSuggestAlloc(pid);
+}
+
+function autoSuggestAlloc(pid) {
+  const total = parseFloat(document.getElementById(pid+'-total')?.value)||0;
+  let remaining = total;
+  // For each checked item, fill up to its balance
+  document.querySelectorAll(`#${pid}-list .alloc-item`).forEach(item => {
+    const siId = item.dataset.id;
+    const chk = document.getElementById(pid+'-chk-'+siId);
+    const inp = document.getElementById(pid+'-amt-'+siId);
+    const newBal = document.getElementById(pid+'-new-'+siId);
+    const balance = parseFloat(item.dataset.balance)||0;
+    if (chk?.classList.contains('checked') && !inp.classList.contains('ai-overridden')) {
+      const apply = Math.min(remaining, balance);
+      inp.value = fmt(apply);
+      remaining = Math.max(remaining - apply, 0);
+      if (newBal) {
+        const after = Math.max(balance - apply, 0);
+        newBal.textContent = '→ $'+fmt(after);
+        newBal.style.color = after === 0 ? 'var(--accent)' : 'var(--yellow)';
+      }
+    } else if (!chk?.classList.contains('checked')) {
+      if (newBal) { newBal.textContent = '→ $'+fmt(balance); newBal.style.color = 'var(--muted2)'; }
+      if (inp) inp.value = 0;
+    }
+  });
+  updateAllocBar(pid, total);
+}
+
+function onAllocOverride(pid, siId) {
+  const inp = document.getElementById(pid+'-amt-'+siId);
+  inp.classList.add('ai-overridden');
+  const item = document.getElementById(pid+'-ai-'+siId);
+  const balance = parseFloat(item?.dataset.balance)||0;
+  const applied = parseFloat(inp.value)||0;
+  const newBal = document.getElementById(pid+'-new-'+siId);
+  if (newBal) {
+    const after = Math.max(balance - applied, 0);
+    newBal.textContent = '→ $'+fmt(after);
+    newBal.style.color = after === 0 ? 'var(--accent)' : 'var(--yellow)';
+  }
+  const total = parseFloat(document.getElementById(pid+'-total')?.value)||0;
+  updateAllocBar(pid, total);
+}
+
+function updateAllocBar(pid, total) {
+  let allocated = 0;
+  document.querySelectorAll(`#${pid}-list .alloc-item`).forEach(item => {
+    const siId = item.dataset.id;
+    const chk = document.getElementById(pid+'-chk-'+siId);
+    if (chk?.classList.contains('checked')) {
+      allocated += parseFloat(document.getElementById(pid+'-amt-'+siId)?.value)||0;
+    }
+  });
+  const rem = Math.max(total - allocated, 0);
+  document.getElementById(pid+'-alloc-tot').textContent = '$'+fmt(allocated);
+  document.getElementById(pid+'-rem').textContent = '$'+fmt(rem);
+  if (rem > 0) {
+    document.getElementById(pid+'-rem').style.color = 'var(--yellow)';
+  } else {
+    document.getElementById(pid+'-rem').style.color = 'var(--accent)';
+  }
+}
+
+function savePayment(pid) {
+  const total = parseFloat(document.getElementById(pid+'-total')?.value)||0;
+  const dateInput = document.querySelector(`#${pid}-hd input[type=date]`);
+  const methodSel = document.querySelector(`#${pid}-hd select`);
+  const rateInput = document.getElementById(pid+'-rate');
+  const date = dateInput?.value || '';
+  const method = methodSel?.value || 'Payment';
+  const rate = rateInput?.value || '0';
+
+  // Collect applied items
+  const applied = [];
+  document.querySelectorAll(`#${pid}-list .alloc-item`).forEach(item => {
+    const siId = item.dataset.id;
+    const chk = document.getElementById(pid+'-chk-'+siId);
+    if (chk?.classList.contains('checked')) {
+      const amt = parseFloat(document.getElementById(pid+'-amt-'+siId)?.value)||0;
+      const name = item.querySelector('.alloc-name')?.textContent||'';
+      const inv = item.querySelector('.alloc-meta')?.textContent?.split('·')[0]?.trim()||'';
+      const orig = parseFloat(item.dataset.orig)||0;
+      const newBal = document.getElementById(pid+'-new-'+siId)?.textContent?.replace('→ ','') || '';
+      if (amt > 0) applied.push({name, inv, orig, amt, newBal});
+    }
+  });
+
+  // Replace with saved view
+  const block = document.getElementById(pid);
+  // Format date
+  const d = date ? new Date(date+' 12:00').toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '';
+  const allocHTML = applied.map(a =>
+    `<div class="saved-alloc-item">
+      <span class="sai-name">${a.name}</span>
+      <span class="sai-inv">${a.inv}</span>
+      <span class="sai-orig">$${fmt(a.orig)}</span>
+      <span class="sai-arrow">→</span>
+      <span class="sai-new">${a.newBal} remaining</span>
+    </div>`
+  ).join('');
+
+  block.classList.add('saved');
+  block.innerHTML = `
+    <div class="pay-hd-saved" onclick="togglePayEdit('${pid}')">
+      <span style="font-family:var(--mono);font-size:12px;color:var(--muted2);">${d}</span>
+      <span style="font-size:12.5px;font-weight:600;">${method}</span>
+      <span class="badge b-gr" style="margin-left:4px;">${rate}%</span>
+      <span class="pay-amount" style="margin-left:auto;">$${fmt(total)}</span>
+      <button class="btn btn-g btn-xs" style="margin-left:10px;" onclick="event.stopPropagation();editPayment('${pid}','${method}','${rate}','${date}',${total})">Edit</button>
+    </div>
+    <div class="saved-alloc" id="${pid}-alloc">
+      ${applied.length > 0 ? `<div class="sai-name" style="font-size:10.5px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px;">Applied to:</div>${allocHTML}` : '<div style="font-size:11.5px;color:var(--muted2);padding:4px 0;">No items allocated</div>'}
+    </div>`;
+  recalcAll();
+}
+
+function togglePayEdit(pid) {
+  const alloc = document.getElementById(pid+'-alloc');
+  if (alloc) alloc.style.display = alloc.style.display === 'none' ? '' : 'none';
+}
+
+function editPayment(pid, method, rate, date, total) {
+  // Re-open the payment for editing
+  const block = document.getElementById(pid);
+  const listHTML = subInvoices.filter(si => si.balance > 0).map(si => `
+    <div class="alloc-item" id="${pid}-ai-${si.id}" data-id="${si.id}" data-orig="${si.orig}" data-balance="${si.balance}">
+      <div class="alloc-check" onclick="toggleAlloc('${pid}','${si.id}')" id="${pid}-chk-${si.id}"></div>
+      <div><div class="alloc-name">${si.name}</div><div class="alloc-meta">${si.inv} · Original: $${fmt(si.orig)}</div></div>
+      <div style="font-family:var(--mono);font-size:11.5px;color:var(--muted);text-align:right;">$${fmt(si.balance)}<br><span style="font-size:10px;">balance</span></div>
+      <div class="alloc-input-wrap"><span class="alloc-input-pfx">$</span>
+        <input type="number" class="alloc-input" id="${pid}-amt-${si.id}" value="0" step="0.01"
+          oninput="onAllocOverride('${pid}','${si.id}')" disabled>
+      </div>
+      <div class="alloc-new-bal" id="${pid}-new-${si.id}" style="color:var(--muted2);font-size:11px;">→ $${fmt(si.balance)}</div>
+    </div>`).join('');
+
+  block.classList.remove('saved');
+  block.innerHTML = `
+    <div class="pay-hd" id="${pid}-hd">
+      <select class="input" style="font-size:11.5px;" onchange="onPayMethodNew(this,'${pid}')">
+        <option${method==='Bank Transfer'?' selected':''}>Bank Transfer</option>
+        <option${method==='Credit Card'?' selected':''}>Credit Card</option>
+        <option${method==='Check'?' selected':''}>Check</option>
+        <option${method==='Cash'?' selected':''}>Cash</option>
+        <option${method==='Zelle / Venmo'?' selected':''}>Zelle / Venmo</option>
+      </select>
+      <div style="display:flex;align-items:center;gap:2px;">
+        <input class="input mono" type="number" value="${rate}" step="0.1" style="font-size:11.5px;" id="${pid}-rate">
+        <span style="font-size:10px;color:var(--muted);flex-shrink:0;">%</span>
+      </div>
+      <input type="date" class="input mono" value="${date}" style="font-size:11px;">
+      <div class="ipfx"><span class="pfx">$</span>
+        <input class="input mono pay-amount-input" type="number" value="${total}" step="0.01"
+          style="font-size:12px;font-weight:600;" id="${pid}-total"
+          oninput="onPayAmountChange('${pid}')">
+      </div>
+      <div style="font-size:11px;color:var(--muted);">Edit and re-save</div>
+      <button class="btn btn-g btn-xs" onclick="savePayment('${pid}')">Save</button>
+    </div>
+    <div class="alloc-area" id="${pid}-alloc">
+      <div class="alloc-summary-bar" id="${pid}-asb">
+        <div class="asb-item"><div class="asb-lbl">Payment In</div><div class="asb-val" style="color:var(--accent);" id="${pid}-in">$${fmt(total)}</div></div>
+        <div class="asb-div"></div>
+        <div class="asb-item"><div class="asb-lbl">Allocated</div><div class="asb-val" style="color:var(--blue);" id="${pid}-alloc-tot">$0.00</div></div>
+        <div class="asb-div"></div>
+        <div class="asb-item"><div class="asb-lbl">Remaining</div><div class="asb-val" style="color:var(--yellow);" id="${pid}-rem">$${fmt(total)}</div></div>
+      </div>
+      <div id="${pid}-list">${listHTML}</div>
+    </div>`;
+}
+
+// ── FORMAT ──
+function fmt(n) {
+  return (parseFloat(n)||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+
+// ── INIT ──
+recalcAll();
+document.querySelectorAll('input[type=date]').forEach(checkDue);
+// Setup inst drag for existing plans
+document.querySelectorAll('.inst-plan [id$="-rows"]').forEach(setupInstDrag);
+</script>
+</body>
+</html>
