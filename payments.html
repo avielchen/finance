@@ -3,26 +3,24 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FinTrack — Record Payment</title>
+<title>FinTrack — Payments</title>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-:root {
-  --bg:#f5f5f0; --surface:#fff; --surface2:#f0f0eb;
-  --border:#e2e2da; --border2:#d0d0c8;
-  --text:#1a1a18; --muted:#6b6b65; --muted2:#9b9b95;
-  --accent:#1a6b4a; --accent-light:#e8f4ee; --accent-mid:#2d9068;
-  --red:#c0392b; --red-light:#fdf0ef;
-  --yellow:#b07d00; --yellow-light:#fdf8e8;
-  --blue:#1a4a8a; --blue-light:#eef3fb;
-  --purple:#5b2d8e; --purple-light:#f3eeff;
-  --sans:'IBM Plex Sans',sans-serif; --mono:'IBM Plex Mono',monospace;
-  --sc:56px; --se:210px; --tb:52px;
+:root{
+  --bg:#f7f7f3;--surface:#fff;--s2:#f0f0eb;--s3:#e6e6e0;
+  --border:#e0e0d8;--border2:#ccccc4;
+  --text:#1c1c1a;--muted:#686860;--muted2:#a0a098;
+  --accent:#1a6b4a;--al:#e6f4ee;--am:#2d9068;
+  --red:#b83232;--rl:#fdf0f0;--rb:#e8b8b8;
+  --yellow:#a07000;--yl:#fdf8e6;--yb:#e8d890;
+  --blue:#1a4a8a;--bl:#eef3fc;--bb:#b0c8f0;
+  --purple:#5b2d8e;--pl:#f3eeff;
+  --sans:'IBM Plex Sans',sans-serif;--mono:'IBM Plex Mono',monospace;
+  --sc:56px;--se:210px;--tb:52px;
 }
 *{margin:0;padding:0;box-sizing:border-box;}
-body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;font-size:14px;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;min-height:100vh;}
 .shell{display:flex;min-height:100vh;}
-
-/* SIDEBAR */
 .sidebar{width:var(--sc);background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100;transition:width .22s ease;overflow:hidden;}
 .sidebar.open{width:var(--se);}
 .sidebar-top{height:var(--tb);display:flex;align-items:center;padding:0 14px;border-bottom:1px solid var(--border);flex-shrink:0;gap:12px;}
@@ -34,130 +32,137 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
 .nav-sec{padding:16px 0 8px;border-bottom:1px solid var(--border);}
 .nav-sec:last-of-type{border-bottom:none;}
 .ni{display:flex;align-items:center;gap:12px;padding:9px 14px;cursor:pointer;color:var(--muted);font-size:13px;font-weight:500;white-space:nowrap;transition:all .15s;border-left:2px solid transparent;text-decoration:none;}
-.ni:hover{background:var(--surface2);color:var(--text);}
-.ni.active{color:var(--accent);border-left-color:var(--accent);background:var(--accent-light);}
+.ni:hover{background:var(--s2);color:var(--text);}
+.ni.active{color:var(--accent);border-left-color:var(--accent);background:var(--al);}
 .nic{width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
 .nl{opacity:0;transition:opacity .15s;}
 .sidebar.open .nl{opacity:1;}
-
-/* MAIN */
-.main{margin-left:var(--sc);flex:1;display:flex;flex-direction:column;transition:margin-left .22s ease;}
+.main{margin-left:var(--sc);flex:1;display:flex;flex-direction:column;min-height:100vh;transition:margin-left .22s ease;}
 .sidebar.open~.main{margin-left:var(--se);}
-
-/* TOPBAR */
-.topbar{height:var(--tb);background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 28px;position:sticky;top:0;z-index:50;}
+.topbar{height:var(--tb);background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 24px;position:sticky;top:0;z-index:50;}
 .pt{font-size:15px;font-weight:600;}
 .bc{font-family:var(--mono);font-size:11px;color:var(--muted2);margin-top:1px;}
-.ta{display:flex;gap:8px;align-items:center;}
-.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:6px;font-family:var(--sans);font-size:13px;font-weight:500;cursor:pointer;border:none;transition:all .15s;white-space:nowrap;}
-.btn-p{background:var(--accent);color:#fff;}.btn-p:hover{background:var(--accent-mid);}
-.btn-g{background:transparent;color:var(--muted);border:1px solid var(--border2);}.btn-g:hover{background:var(--surface2);color:var(--text);}
-.btn-sm{padding:5px 10px;font-size:12px;}
-
-/* CONTENT */
-.content{padding:24px 28px;flex:1;}
-.two-col{display:grid;grid-template-columns:1fr 340px;gap:20px;align-items:start;}
-
-/* SECTIONS */
-.section{background:var(--surface);border:1px solid var(--border);border-radius:10px;margin-bottom:16px;overflow:hidden;}
-.sec-hd{padding:14px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
-.sec-title{font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px;}
-.sec-title .step{color:var(--muted2);}
-.sec-body{padding:20px;}
-
-/* FORM */
-.field{display:flex;flex-direction:column;gap:5px;margin-bottom:0;}
-.field label{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;}
-.input{height:36px;padding:0 10px;background:var(--bg);border:1px solid var(--border2);border-radius:6px;font-family:var(--sans);font-size:13px;color:var(--text);outline:none;transition:border-color .15s;width:100%;}
+.btn{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:6px;font-family:var(--sans);font-size:12.5px;font-weight:500;cursor:pointer;border:none;transition:all .15s;white-space:nowrap;}
+.btn-p{background:var(--accent);color:#fff;}.btn-p:hover{background:var(--am);}
+.btn-g{background:var(--surface);color:var(--muted);border:1px solid var(--border2);}.btn-g:hover{background:var(--s2);color:var(--text);}
+.btn-sm{padding:4px 9px;font-size:12px;}
+.btn-xs{padding:3px 7px;font-size:11px;}
+.content{padding:20px 24px;flex:1;}
+.input{height:33px;padding:0 9px;background:var(--bg);border:1px solid var(--border2);border-radius:6px;font-family:var(--sans);font-size:12.5px;color:var(--text);outline:none;transition:border-color .15s;width:100%;}
 .input:focus{border-color:var(--accent);background:#fff;}
 select.input{cursor:pointer;}
-.input.mono{font-family:var(--mono);}
-.form-grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;}
-.form-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
-.input-pfx{position:relative;}
-.input-pfx .pfx{position:absolute;left:10px;top:50%;transform:translateY(-50%);font-family:var(--mono);font-size:12px;color:var(--muted2);pointer-events:none;}
-.input-pfx .input{padding-left:24px;}
-
-/* SIBLING SWITCHER */
-.sibling-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;}
-.sib-chip{padding:6px 13px;border-radius:6px;font-size:12.5px;font-weight:500;cursor:pointer;border:1px solid var(--border2);background:var(--surface2);color:var(--muted);transition:all .15s;}
-.sib-chip:hover{border-color:var(--accent);color:var(--accent);}
-.sib-chip.active{background:var(--accent);color:#fff;border-color:var(--accent);}
-
-/* ALLOCATION ITEMS */
-.alloc-item{display:flex;align-items:center;gap:12px;padding:12px 14px;border:1px solid var(--border);border-radius:8px;margin-bottom:8px;cursor:pointer;transition:all .15s;background:var(--bg);}
-.alloc-item:hover{border-color:var(--border2);}
-.alloc-item.selected{border-color:var(--accent);background:var(--accent-light);}
-.alloc-item.selected .alloc-check{background:var(--accent);border-color:var(--accent);}
-.alloc-item.selected .alloc-check::after{content:'✓';color:#fff;font-size:10px;}
-.alloc-check{width:18px;height:18px;border-radius:4px;border:1.5px solid var(--border2);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;}
-.alloc-name{font-size:13px;font-weight:600;flex:1;}
-.alloc-meta{font-size:11.5px;color:var(--muted);margin-top:1px;}
-.alloc-bal{font-family:var(--mono);font-size:13px;font-weight:600;color:var(--red);white-space:nowrap;}
-.alloc-bal.paid{color:var(--accent);}
-
-/* SUMMARY CARD */
-.summary-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;position:sticky;top:72px;}
-.sum-hd{padding:14px 18px;border-bottom:1px solid var(--border);font-size:13px;font-weight:600;}
-.sum-row{display:flex;justify-content:space-between;align-items:center;padding:11px 18px;border-bottom:1px solid var(--border);font-size:13px;}
-.sum-row:last-child{border-bottom:none;}
-.sum-row .lbl{color:var(--muted);}
-.sum-row .val{font-family:var(--mono);font-weight:600;}
-.sum-row.total{background:var(--accent-light);}
-.sum-row.total .lbl{color:var(--text);font-weight:700;}
-.sum-row.total .val{color:var(--accent);font-size:16px;}
-
-/* PROGRESS BAR */
-.prog-wrap{margin:0 18px 14px;padding-top:14px;}
-.prog-lbl{display:flex;justify-content:space-between;font-size:11.5px;color:var(--muted);margin-bottom:6px;}
-.prog{height:6px;background:var(--surface2);border-radius:3px;overflow:hidden;border:1px solid var(--border);}
-.prog-fill{height:100%;background:var(--accent);border-radius:3px;transition:width .3s ease;}
-.prog-fill.over{background:var(--red);}
-
-/* CREDIT OPTIONS */
-.credit-options{display:flex;flex-direction:column;gap:8px;}
-.credit-opt{display:flex;align-items:flex-start;gap:10px;padding:12px 14px;border:1px solid var(--border);border-radius:8px;cursor:pointer;background:var(--bg);transition:all .15s;}
-.credit-opt:hover{border-color:var(--border2);}
-.credit-opt.selected{border-color:var(--accent);background:var(--accent-light);}
-.credit-opt input[type=radio]{margin-top:2px;accent-color:var(--accent);flex-shrink:0;}
-.credit-opt-title{font-size:13px;font-weight:600;margin-bottom:2px;}
-.credit-opt-desc{font-size:11.5px;color:var(--muted);line-height:1.5;}
-
-/* BADGE */
+.num{font-family:var(--mono);}
+.ipfx{position:relative;}
+.ipfx .pfx{position:absolute;left:8px;top:50%;transform:translateY(-50%);font-family:var(--mono);font-size:11px;color:var(--muted2);pointer-events:none;}
+.ipfx .input{padding-left:20px;}
 .badge{display:inline-flex;align-items:center;padding:2px 7px;border-radius:4px;font-family:var(--mono);font-size:10.5px;font-weight:500;}
-.b-g{background:var(--accent-light);color:var(--accent);}
-.b-y{background:var(--yellow-light);color:var(--yellow);}
-.b-r{background:var(--red-light);color:var(--red);}
-.b-b{background:var(--blue-light);color:var(--blue);}
-.b-p{background:var(--purple-light);color:var(--purple);}
+.b-g{background:var(--al);color:var(--accent);}
+.b-y{background:var(--yl);color:var(--yellow);}
+.b-r{background:var(--rl);color:var(--red);}
+.b-b{background:var(--bl);color:var(--blue);}
+.b-gr{background:var(--s3);color:var(--muted);}
+.field{display:flex;flex-direction:column;gap:4px;}
+.field label{font-size:10.5px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;}
+input[type=date].input{min-width:130px;padding-right:4px;}
 
-/* DIVIDER */
-.divider{height:1px;background:var(--border);margin:16px 0;}
-.sec-lbl{font-size:12px;font-weight:700;color:var(--text);margin-bottom:10px;}
-.hint{font-size:11.5px;color:var(--muted2);margin-top:4px;line-height:1.5;}
+/* KPI */
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px;}
+.kpi{background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:14px 16px;}
+.kpi-l{font-size:10.5px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;}
+.kpi-v{font-family:var(--mono);font-size:20px;font-weight:700;letter-spacing:-.3px;}
+.kpi-d{font-size:11.5px;color:var(--muted);margin-top:3px;}
+.kpi-d.up{color:var(--accent);} .kpi-d.dn{color:var(--red);}
 
-/* ACTION BAR */
-.action-bar{background:var(--surface);border-top:1px solid var(--border);padding:14px 28px;display:flex;align-items:center;gap:10px;position:sticky;bottom:0;}
-.action-bar-r{display:flex;gap:8px;margin-left:auto;}
+/* Filter */
+.filter-bar{display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;}
+.search-wrap{display:flex;align-items:center;gap:8px;flex:1;min-width:180px;background:var(--surface);border:1px solid var(--border2);border-radius:7px;padding:0 12px;height:33px;}
+.search-wrap input{flex:1;border:none;background:none;font-family:var(--sans);font-size:12.5px;color:var(--text);outline:none;}
+.search-wrap input::placeholder{color:var(--muted2);}
+.tog-btn{display:flex;align-items:center;gap:6px;padding:5px 11px;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;border:1px solid var(--border2);background:var(--surface);color:var(--muted);transition:all .15s;height:33px;}
+.tog-btn.on{background:var(--al);color:var(--accent);border-color:#b0d8c0;}
+.tog-btn:hover{border-color:var(--accent);}
 
-@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
-.fi{animation:fadeIn .2s ease both;}
+/* Invoice card */
+.inv-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;margin-bottom:12px;overflow:hidden;transition:border-color .15s;}
+.inv-card-hd{display:flex;align-items:center;gap:12px;padding:13px 16px;cursor:pointer;background:var(--s2);transition:background .1s;}
+.inv-card-hd:hover{background:var(--s3);}
+.inv-av{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0;}
+.inv-name{font-size:13px;font-weight:700;}
+.inv-meta{font-size:11px;color:var(--muted);margin-top:1px;}
+.inv-prog-wrap{flex:1;max-width:200px;}
+.inv-prog-lbl{display:flex;justify-content:space-between;font-size:10.5px;color:var(--muted);margin-bottom:4px;}
+.inv-prog{height:5px;background:var(--s3);border-radius:3px;overflow:hidden;}
+.inv-prog-fill{height:100%;border-radius:3px;transition:width .4s;}
+.inv-right{text-align:right;flex-shrink:0;}
+.inv-total-val{font-family:var(--mono);font-size:13px;font-weight:700;letter-spacing:-.2px;}
+.inv-bal-val{font-family:var(--mono);font-size:11px;color:var(--yellow);margin-top:2px;}
+.caret{color:var(--muted2);font-size:12px;flex-shrink:0;transition:transform .18s;}
+.caret.open{transform:rotate(180deg);}
+.inv-stripe{height:3px;}
+.inv-stripe-fill{height:100%;transition:width .4s;}
+
+/* Body */
+.inv-body{padding:14px 16px;}
+.inv-body.hidden{display:none;}
+.hist-lbl{font-size:10.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;}
+
+/* Saved payment block */
+.pay-block{border:1px solid var(--border);border-radius:7px;margin-bottom:8px;overflow:hidden;}
+.pay-block-hd{display:flex;align-items:center;gap:8px;padding:9px 12px;background:var(--s2);cursor:pointer;}
+.pay-block-hd:hover{background:var(--s3);}
+.pbh-date{font-family:var(--mono);font-size:11px;color:var(--muted2);}
+.pbh-method{font-size:12.5px;font-weight:600;}
+.pbh-amt{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--accent);margin-left:auto;letter-spacing:-.2px;}
+/* Allocation list */
+.alloc-list{padding:8px 12px 10px;}
+.al-row{display:flex;align-items:baseline;flex-wrap:wrap;gap:6px;padding:3px 0 3px 10px;border-left:3px solid #b0d8c0;margin-bottom:3px;}
+.al-row:last-child{margin-bottom:0;}
+.al-name{font-size:12px;font-weight:600;}
+.al-inv{font-family:var(--mono);font-size:10px;color:var(--muted2);}
+.al-orig{font-family:var(--mono);font-size:11px;color:var(--muted);}
+.al-arr{color:var(--muted2);font-size:10px;}
+.al-new{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--accent);}
+.al-noalloc{font-size:11.5px;color:var(--muted2);padding:4px 0;}
+
+/* New payment form */
+.npf{border:1px solid #b0d8c0;border-radius:8px;background:var(--al);padding:14px;margin-top:10px;}
+.npf-title{font-size:12.5px;font-weight:700;color:var(--accent);margin-bottom:10px;display:flex;align-items:center;gap:6px;}
+.npf-hd{display:grid;grid-template-columns:140px 65px 130px 105px 1fr;gap:8px;align-items:end;margin-bottom:12px;}
+/* Summary bar */
+.asb{display:flex;align-items:center;gap:12px;padding:9px 13px;background:#fff;border:1px solid #b0d8c0;border-radius:7px;margin-bottom:10px;flex-wrap:wrap;}
+.asb-i{display:flex;flex-direction:column;gap:1px;}
+.asb-lbl{font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;}
+.asb-val{font-family:var(--mono);font-size:14px;font-weight:700;letter-spacing:-.2px;}
+.asb-d{width:1px;height:30px;background:#b0d8c0;}
+/* Sub-invoice rows */
+.si-col-hd{display:grid;grid-template-columns:20px 1fr 95px 100px 84px;gap:8px;padding:0 8px 6px;border-bottom:1px solid #b0d8c0;margin-bottom:3px;}
+.si-col-hd span{font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;}
+.si-row{display:grid;grid-template-columns:20px 1fr 95px 100px 84px;gap:8px;align-items:center;padding:5px 8px;border-radius:6px;transition:background .1s;}
+.si-row:hover{background:rgba(255,255,255,.7);}
+.si-row.checked{background:#fff;border:1px solid #b0d8c0;}
+.si-chk{width:16px;height:16px;border-radius:4px;border:1.5px solid var(--border2);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .12s;}
+.si-chk.on{background:var(--accent);border-color:var(--accent);}
+.si-chk.on::after{content:'✓';color:#fff;font-size:9px;font-weight:700;}
+.si-name{font-size:12.5px;font-weight:600;}
+.si-sub{font-size:11px;color:var(--muted);}
+.si-bal{font-family:var(--mono);font-size:12px;color:var(--muted);text-align:right;}
+.si-inp-wrap{position:relative;}
+.si-inp{height:28px;padding:0 6px 0 18px;background:var(--bg);border:1px solid var(--border2);border-radius:5px;font-family:var(--mono);font-size:12px;color:var(--text);outline:none;width:100%;transition:border-color .12s;}
+.si-inp:focus{border-color:var(--accent);background:#fff;}
+.si-inp.ov{border-color:var(--yellow);background:var(--yl);}
+.si-inp-pfx{position:absolute;left:6px;top:50%;transform:translateY(-50%);font-family:var(--mono);font-size:10px;color:var(--muted2);pointer-events:none;}
+.si-new{font-family:var(--mono);font-size:12px;font-weight:700;text-align:right;}
+.npf-footer{display:flex;align-items:center;justify-content:flex-end;gap:8px;margin-top:10px;padding-top:10px;border-top:1px solid #b0d8c0;}
+
+@keyframes fu{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+.fi{animation:fu .2s ease both;}
 </style>
 </head>
 <body>
 <div class="shell">
-
-<!-- SIDEBAR -->
 <aside class="sidebar" id="sidebar">
-  <div class="sidebar-top">
-    <button class="hbg" onclick="document.getElementById('sidebar').classList.toggle('open')">
-      <span></span><span></span><span></span>
-    </button>
-    <div class="s-logo">FinTrack</div>
-  </div>
-  <div class="nav-sec">
-    <a class="ni" href="dashboard.html"><span class="nic">⊞</span><span class="nl">Dashboard</span></a>
-  </div>
+  <div class="sidebar-top"><button class="hbg" onclick="document.getElementById('sidebar').classList.toggle('open')"><span></span><span></span><span></span></button><div class="s-logo">FinTrack</div></div>
+  <div class="nav-sec"><a class="ni" href="index.html"><span class="nic">⊞</span><span class="nl">Dashboard</span></a></div>
   <div class="nav-sec">
     <a class="ni" href="invoice.html"><span class="nic">📄</span><span class="nl">Tuition</span></a>
     <a class="ni" href="donations.html"><span class="nic">🤝</span><span class="nl">Donations</span></a>
@@ -174,352 +179,575 @@ select.input{cursor:pointer;}
   </div>
 </aside>
 
-<!-- MAIN -->
 <main class="main">
-  <div class="topbar">
-    <div>
-      <div class="pt">Record Payment</div>
-      <div class="bc">Payments / New</div>
-    </div>
-    <div class="ta">
-      <button class="btn btn-g">Cancel</button>
-      <button class="btn btn-p" onclick="recordPayment()">✅ Record Payment</button>
-    </div>
+<div class="topbar">
+  <div><div class="pt">Payments</div><div class="bc">All outstanding invoices · record & allocate</div></div>
+  <div style="display:flex;gap:8px;"><button class="btn btn-g btn-sm">⬇ Export</button></div>
+</div>
+<div class="content">
+
+  <div class="kpi-row fi">
+    <div class="kpi"><div class="kpi-l">Total Outstanding</div><div class="kpi-v">$52,700</div><div class="kpi-d dn">22 open invoices</div></div>
+    <div class="kpi"><div class="kpi-l">Overdue</div><div class="kpi-v" style="color:var(--red);">$9,200</div><div class="kpi-d dn">4 past due</div></div>
+    <div class="kpi"><div class="kpi-l">Collected This Month</div><div class="kpi-v" style="color:var(--accent);">$28,480</div><div class="kpi-d up">▲ 12% vs last</div></div>
+    <div class="kpi"><div class="kpi-l">Unallocated Credits</div><div class="kpi-v" style="color:var(--purple);">$1,840</div><div class="kpi-d">5 accounts</div></div>
   </div>
 
-  <div class="content">
-    <div class="two-col">
+  <div class="filter-bar fi">
+    <div class="search-wrap">
+      <span style="color:var(--muted2);font-size:14px;">⌕</span>
+      <input type="text" placeholder="Search student or invoice..." id="srch" oninput="filterCards()">
+    </div>
+    <select class="input" style="width:155px;height:33px;font-size:12.5px;" id="yr-sel" onchange="filterCards()">
+      <option value="all">All Years</option>
+      <option value="2025-2026" selected>2025 – 2026</option>
+      <option value="2024-2025">2024 – 2025</option>
+    </select>
+    <select class="input" style="width:130px;height:33px;font-size:12.5px;" id="st-sel" onchange="filterCards()">
+      <option value="all">All Status</option>
+      <option value="overdue">Overdue</option>
+      <option value="partial">Partial</option>
+      <option value="unpaid">Unpaid</option>
+    </select>
+    <button class="tog-btn" id="show-paid-btn" onclick="toggleShowPaid()">👁 Show Paid</button>
+  </div>
 
-      <!-- LEFT COLUMN -->
-      <div>
+  <div id="cards">
 
-        <!-- STEP 1: PAYER -->
-        <div class="section fi">
-          <div class="sec-hd">
-            <div class="sec-title"><span class="step">①</span> Who is Paying?</div>
+    <!-- ═══ CARD: David Cohen ═══ -->
+    <div class="inv-card fi" id="card-c1" data-status="partial" data-yr="2025-2026" data-sname="david cohen">
+      <!-- HEADER (updated dynamically) -->
+      <div class="inv-card-hd" onclick="toggleCard('c1')" id="hd-c1">
+        <div class="inv-av" style="background:var(--accent);">DC</div>
+        <div style="flex:1;min-width:0;">
+          <div class="inv-name">David Cohen</div>
+          <div class="inv-meta">Grade 8 · #INV-1042 · 2025–26</div>
+        </div>
+        <div class="inv-prog-wrap">
+          <div class="inv-prog-lbl">
+            <span id="pct-c1">50% paid</span>
+            <span style="font-family:var(--mono);" id="prog-nums-c1">$9,474 / $18,948</span>
           </div>
-          <div class="sec-body">
-            <div class="form-grid-2" style="margin-bottom:12px;">
-              <div class="field">
-                <label>Family</label>
-                <select class="input" id="family-select" onchange="updateFamily()">
-                  <option value="">— Select family —</option>
-                  <option value="cohen" selected>Cohen Family</option>
-                  <option value="katz">Katz Family</option>
-                  <option value="shapiro">Shapiro Family</option>
-                  <option value="goldstein">Goldstein Family</option>
-                </select>
-              </div>
-              <div class="field">
-                <label>Payer Name</label>
-                <select class="input" id="payer-select">
-                  <option>Jonathan Cohen (Father)</option>
-                  <option>Miriam Cohen (Mother)</option>
-                </select>
-              </div>
-            </div>
-            <div class="field" style="margin-bottom:12px;">
-              <label>Select Student (switch between siblings)</label>
-            </div>
-            <div class="sibling-row" id="sibling-row">
-              <div class="sib-chip active" onclick="selectSibling(this,'david')">David Cohen</div>
-              <div class="sib-chip" onclick="selectSibling(this,'rachel')">Rachel Cohen</div>
-            </div>
+          <div class="inv-prog"><div class="inv-prog-fill" id="prog-fill-c1" style="width:50%;background:var(--accent);"></div></div>
+        </div>
+        <div class="inv-right">
+          <div class="inv-total-val" id="total-c1">$18,948</div>
+          <div class="inv-bal-val" id="bal-c1">$9,474 balance</div>
+        </div>
+        <span class="badge b-y" id="badge-c1">Partial</span>
+        <span class="caret open" id="caret-c1">▾</span>
+      </div>
+      <div class="inv-stripe"><div class="inv-stripe-fill" id="stripe-c1" style="width:50%;background:var(--accent);"></div></div>
+
+      <div class="inv-body" id="body-c1">
+        <div class="hist-lbl">Payment History</div>
+
+        <!-- Saved payment 1 -->
+        <div class="pay-block">
+          <div class="pay-block-hd" onclick="toggleAllocList(this)">
+            <span class="pbh-date">Apr 12, 2026</span>
+            <span class="pbh-method">Credit Card</span>
+            <span class="badge b-gr">2.5%</span>
+            <span class="pbh-amt">$5,482.92</span>
+            <button class="btn btn-g btn-xs" style="margin-left:8px;" onclick="event.stopPropagation();">Edit</button>
+            <span style="color:var(--muted2);font-size:11px;margin-left:4px;">▾</span>
+          </div>
+          <div class="alloc-list">
+            <div class="al-row"><span class="al-name">Tuition — Deposit</span><span class="al-inv">#INV-1042</span><span class="al-orig">$500.00</span><span class="al-arr">→</span><span class="al-new">$0.00 remaining</span></div>
+            <div class="al-row"><span class="al-name">Tuition — Installment 1</span><span class="al-inv">#INV-1042</span><span class="al-orig">$6,000.00</span><span class="al-arr">→</span><span class="al-new">$1,017.08 remaining</span></div>
           </div>
         </div>
 
-        <!-- STEP 2: PAYMENT DETAILS -->
-        <div class="section fi">
-          <div class="sec-hd">
-            <div class="sec-title"><span class="step">②</span> Payment Details</div>
+        <!-- Saved payment 2 -->
+        <div class="pay-block">
+          <div class="pay-block-hd" onclick="toggleAllocList(this)">
+            <span class="pbh-date">Mar 1, 2026</span>
+            <span class="pbh-method">Bank Transfer</span>
+            <span class="badge b-gr">0%</span>
+            <span class="pbh-amt">$3,991.46</span>
+            <button class="btn btn-g btn-xs" style="margin-left:8px;" onclick="event.stopPropagation();">Edit</button>
+            <span style="color:var(--muted2);font-size:11px;margin-left:4px;">▾</span>
           </div>
-          <div class="sec-body">
-            <div class="form-grid-3" style="margin-bottom:14px;">
-              <div class="field">
-                <label>Amount</label>
-                <div class="input-pfx">
-                  <span class="pfx">$</span>
-                  <input class="input mono" id="pay-amount" type="number" value="6000" step="0.01" oninput="updateAlloc()">
-                </div>
-              </div>
-              <div class="field">
-                <label>Payment Method</label>
-                <select class="input" id="pay-method">
-                  <option>Bank Transfer</option>
-                  <option>Credit Card</option>
-                  <option>Check</option>
-                  <option>Cash</option>
-                  <option>Zelle / Venmo</option>
-                </select>
-              </div>
-              <div class="field">
-                <label>Payment Date</label>
-                <input type="date" class="input" value="2026-04-28">
-              </div>
-            </div>
-            <div class="form-grid-2">
-              <div class="field">
-                <label>Reference / Check #</label>
-                <input class="input" placeholder="Optional reference...">
-              </div>
-              <div class="field">
-                <label>Exchange Rate (if non-USD)</label>
-                <div class="input-pfx">
-                  <span class="pfx">×</span>
-                  <input class="input mono" value="1.00" type="number" step="0.01" style="padding-left:22px;">
-                </div>
-                <div class="hint">Leave as 1.00 for USD</div>
-              </div>
-            </div>
+          <div class="alloc-list">
+            <div class="al-row"><span class="al-name">Tuition — Installment 1</span><span class="al-inv">#INV-1042</span><span class="al-orig">$6,000.00</span><span class="al-arr">→</span><span class="al-new">$1,017.08 remaining</span></div>
           </div>
         </div>
 
-        <!-- STEP 3: ALLOCATE -->
-        <div class="section fi">
-          <div class="sec-hd">
-            <div class="sec-title"><span class="step">③</span> Allocate Payment</div>
-            <div style="font-size:12px;color:var(--muted);">Select items to pay. Remaining shown below.</div>
+        <button class="btn btn-g btn-sm" id="addbtn-c1" onclick="showNPF('c1')">＋ Record Payment</button>
+
+        <!-- NEW PAYMENT FORM -->
+        <div class="npf" id="npf-c1" style="display:none;">
+          <div class="npf-title">💳 New Payment — David Cohen</div>
+          <div class="npf-hd">
+            <div class="field"><label>Method</label>
+              <select class="input" style="height:32px;font-size:12px;" onchange="onMeth(this,'c1')" id="meth-c1">
+                <option>Bank Transfer</option><option selected>Credit Card</option><option>Check</option><option>Cash</option><option>Zelle / Venmo</option>
+              </select>
+            </div>
+            <div class="field"><label>Surcharge</label>
+              <div style="display:flex;align-items:center;gap:2px;">
+                <input class="input num" type="number" value="2.5" step="0.1" style="height:32px;font-size:12px;" id="rate-c1">
+                <span style="font-size:10px;color:var(--muted);flex-shrink:0;">%</span>
+              </div>
+            </div>
+            <div class="field"><label>Date</label>
+              <input type="date" class="input num" value="2026-04-28" style="height:32px;font-size:11.5px;" id="date-c1">
+            </div>
+            <div class="field"><label>Amount</label>
+              <div class="ipfx"><span class="pfx">$</span>
+                <input class="input num" type="number" value="0" step="0.01" style="height:32px;font-size:13px;" id="amt-c1" oninput="onAmt('c1')">
+              </div>
+            </div>
+            <div class="field"><label>Reference</label>
+              <input class="input" placeholder="Optional ref #" style="height:32px;font-size:12px;">
+            </div>
           </div>
-          <div class="sec-body">
-            <div class="sec-lbl">Outstanding — David Cohen (#INV-1042)</div>
 
-            <div class="alloc-item selected" id="a1" onclick="toggleAlloc('a1',2000)" data-amt="2000">
-              <div class="alloc-check"></div>
-              <div style="flex:1;">
-                <div class="alloc-name">Meal Plan</div>
-                <div class="alloc-meta">Invoice #INV-1042 · Line item</div>
-              </div>
-              <div class="alloc-bal">$2,000.00</div>
-            </div>
+          <!-- Allocation bar -->
+          <div class="asb" id="asb-c1">
+            <div class="asb-i"><div class="asb-lbl">Payment In</div><div class="asb-val" style="color:var(--accent);" id="asb-in-c1">$0.00</div></div>
+            <div class="asb-d"></div>
+            <div class="asb-i"><div class="asb-lbl">Allocated</div><div class="asb-val" style="color:var(--blue);" id="asb-al-c1">$0.00</div></div>
+            <div class="asb-d"></div>
+            <div class="asb-i"><div class="asb-lbl">Unallocated</div><div class="asb-val" style="color:var(--yellow);" id="asb-rem-c1">$0.00</div></div>
+          </div>
 
-            <div class="alloc-item selected" id="a2" onclick="toggleAlloc('a2',500)" data-amt="500">
-              <div class="alloc-check"></div>
-              <div style="flex:1;">
-                <div class="alloc-name">Laundry Service</div>
-                <div class="alloc-meta">Invoice #INV-1042 · Line item</div>
-              </div>
-              <div class="alloc-bal">$500.00</div>
-            </div>
+          <div class="si-col-hd">
+            <span></span>
+            <span>Fee / Installment</span>
+            <span style="text-align:right;">Balance</span>
+            <span style="text-align:right;">Apply ($)</span>
+            <span style="text-align:right;">After</span>
+          </div>
 
-            <div class="alloc-item" id="a3" onclick="toggleAlloc('a3',1491.46)" data-amt="1491.46">
-              <div class="alloc-check"></div>
-              <div style="flex:1;">
-                <div class="alloc-name">Installment 2 — Remaining Balance</div>
-                <div class="alloc-meta">Invoice #INV-1042 · Due Aug 1 · Partial</div>
-              </div>
-              <div class="alloc-bal">$1,491.46</div>
-            </div>
+          <!-- Sub-invoices (ordered oldest/overdue first) -->
+          <div id="silist-c1">
+            <div class="si-row" data-bal="2000" data-order="1" id="sir-c1-d"><div class="si-chk" onclick="togSI('c1','d')" id="chk-c1-d"></div><div><div class="si-name">Meal Plan</div><div class="si-sub" style="color:var(--red);">#INV-1042 · Overdue · Due Apr 1</div></div><div class="si-bal" style="color:var(--red);">$2,000.00</div><div class="si-inp-wrap"><span class="si-inp-pfx">$</span><input type="number" class="si-inp" id="sia-c1-d" value="0" step="0.01" disabled oninput="onSIOv('c1','d')"></div><div class="si-new" id="sin-c1-d" style="color:var(--muted2);">$2,000.00</div></div>
+            <div class="si-row" data-bal="1017.08" data-order="2" id="sir-c1-a"><div class="si-chk" onclick="togSI('c1','a')" id="chk-c1-a"></div><div><div class="si-name">Tuition — Installment 1</div><div class="si-sub">#INV-1042 · Due Aug 1</div></div><div class="si-bal">$1,017.08</div><div class="si-inp-wrap"><span class="si-inp-pfx">$</span><input type="number" class="si-inp" id="sia-c1-a" value="0" step="0.01" disabled oninput="onSIOv('c1','a')"></div><div class="si-new" id="sin-c1-a" style="color:var(--muted2);">$1,017.08</div></div>
+            <div class="si-row" data-bal="500" data-order="3" id="sir-c1-e"><div class="si-chk" onclick="togSI('c1','e')" id="chk-c1-e"></div><div><div class="si-name">Laundry Service</div><div class="si-sub">#INV-1042 · Due Jun 1</div></div><div class="si-bal">$500.00</div><div class="si-inp-wrap"><span class="si-inp-pfx">$</span><input type="number" class="si-inp" id="sia-c1-e" value="0" step="0.01" disabled oninput="onSIOv('c1','e')"></div><div class="si-new" id="sin-c1-e" style="color:var(--muted2);">$500.00</div></div>
+            <div class="si-row" data-bal="6000" data-order="4" id="sir-c1-b"><div class="si-chk" onclick="togSI('c1','b')" id="chk-c1-b"></div><div><div class="si-name">Tuition — Installment 2</div><div class="si-sub">#INV-1042 · Due Nov 1</div></div><div class="si-bal">$6,000.00</div><div class="si-inp-wrap"><span class="si-inp-pfx">$</span><input type="number" class="si-inp" id="sia-c1-b" value="0" step="0.01" disabled oninput="onSIOv('c1','b')"></div><div class="si-new" id="sin-c1-b" style="color:var(--muted2);">$6,000.00</div></div>
+            <div class="si-row" data-bal="6000" data-order="5" id="sir-c1-c"><div class="si-chk" onclick="togSI('c1','c')" id="chk-c1-c"></div><div><div class="si-name">Tuition — Installment 3</div><div class="si-sub">#INV-1042 · Due Jan 1</div></div><div class="si-bal">$6,000.00</div><div class="si-inp-wrap"><span class="si-inp-pfx">$</span><input type="number" class="si-inp" id="sia-c1-c" value="0" step="0.01" disabled oninput="onSIOv('c1','c')"></div><div class="si-new" id="sin-c1-c" style="color:var(--muted2);">$6,000.00</div></div>
+          </div>
 
-            <div class="alloc-item" id="a4" onclick="toggleAlloc('a4',5482.91)" data-amt="5482.91">
-              <div class="alloc-check"></div>
-              <div style="flex:1;">
-                <div class="alloc-name">Installment 3</div>
-                <div class="alloc-meta">Invoice #INV-1042 · Due Nov 1</div>
-              </div>
-              <div class="alloc-bal">$5,482.91</div>
-            </div>
-
-            <div class="divider"></div>
-
-            <!-- CREDIT OPTIONS -->
-            <div class="sec-lbl" id="credit-lbl">Remaining: <span id="remaining-amt" style="font-family:var(--mono);color:var(--yellow);">$3,500.00</span> — What should we do with it?</div>
-            <div class="credit-options" id="credit-opts">
-              <label class="credit-opt selected" onclick="selectCreditOpt(this)">
-                <input type="radio" name="credit" value="hold" checked>
-                <div>
-                  <div class="credit-opt-title">Leave as account credit</div>
-                  <div class="credit-opt-desc">Carries forward. Can be applied to future invoices or converted later.</div>
-                </div>
-              </label>
-              <label class="credit-opt" onclick="selectCreditOpt(this)">
-                <input type="radio" name="credit" value="donate">
-                <div>
-                  <div class="credit-opt-title">Convert to donation</div>
-                  <div class="credit-opt-desc">Move this amount to a fund or campaign.</div>
-                  <select class="input" style="width:220px;margin-top:8px;height:32px;font-size:12px;" onclick="event.stopPropagation()">
-                    <option>General Fund</option>
-                    <option>Scholarship Fund</option>
-                    <option>Building Fund</option>
-                  </select>
-                </div>
-              </label>
-              <label class="credit-opt" onclick="selectCreditOpt(this)">
-                <input type="radio" name="credit" value="refund">
-                <div>
-                  <div class="credit-opt-title">Issue refund</div>
-                  <div class="credit-opt-desc">Return the overpayment to the payer.</div>
-                </div>
-              </label>
-            </div>
+          <div class="npf-footer">
+            <button class="btn btn-g btn-sm" onclick="cancelNPF('c1')">Cancel</button>
+            <button class="btn btn-p btn-sm" onclick="saveNPF('c1')">Save Payment</button>
           </div>
         </div>
 
       </div>
+    </div>
 
-      <!-- RIGHT: SUMMARY -->
-      <div>
-        <div class="summary-card fi">
-          <div class="sum-hd">Payment Summary</div>
-
-          <div class="prog-wrap">
-            <div class="prog-lbl">
-              <span>Allocated</span>
-              <span id="prog-lbl-val">$2,500 of $6,000</span>
-            </div>
-            <div class="prog">
-              <div class="prog-fill" id="prog-fill" style="width:41.7%;"></div>
-            </div>
-          </div>
-
-          <div class="sum-row">
-            <span class="lbl">Payment In</span>
-            <span class="val" id="s-total" style="color:var(--accent);">$6,000.00</span>
-          </div>
-          <div class="sum-row">
-            <span class="lbl">Allocated</span>
-            <span class="val" id="s-alloc" style="color:var(--blue);">$2,500.00</span>
-          </div>
-          <div class="sum-row">
-            <span class="lbl">Unallocated</span>
-            <span class="val" id="s-remain" style="color:var(--yellow);">$3,500.00</span>
-          </div>
-          <div class="sum-row total">
-            <span class="lbl">After this payment</span>
-            <span class="val" id="s-after">$6,974.37</span>
-          </div>
-
-          <div style="padding:14px 18px;border-top:1px solid var(--border);">
-            <div style="font-size:11.5px;color:var(--muted);margin-bottom:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;">Selected Items</div>
-            <div id="selected-list" style="display:flex;flex-direction:column;gap:6px;font-size:12px;">
-              <div style="display:flex;justify-content:space-between;">
-                <span>Meal Plan</span>
-                <span style="font-family:var(--mono);color:var(--accent);">$2,000.00</span>
-              </div>
-              <div style="display:flex;justify-content:space-between;">
-                <span>Laundry Service</span>
-                <span style="font-family:var(--mono);color:var(--accent);">$500.00</span>
-              </div>
-            </div>
-          </div>
-
-          <div style="padding:14px 18px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:8px;">
-            <button class="btn btn-p" style="width:100%;justify-content:center;" onclick="recordPayment()">✅ Record Payment</button>
-            <button class="btn btn-g" style="width:100%;justify-content:center;">🖨 Print Receipt</button>
-            <button class="btn btn-g" style="width:100%;justify-content:center;">✉ Email Receipt</button>
-          </div>
+    <!-- ═══ CARD: Yossi Katz ═══ -->
+    <div class="inv-card fi" id="card-c2" data-status="overdue" data-yr="2025-2026" data-sname="yossi katz" style="border-color:var(--rb);">
+      <div class="inv-card-hd" onclick="toggleCard('c2')" id="hd-c2" style="background:var(--rl);">
+        <div class="inv-av" style="background:#c0622b;">YK</div>
+        <div style="flex:1;min-width:0;"><div class="inv-name">Yossi Katz</div><div class="inv-meta">Grade 11 · #INV-1044 · 2025–26</div></div>
+        <div class="inv-prog-wrap">
+          <div class="inv-prog-lbl"><span id="pct-c2" style="color:var(--red);">0% paid — Overdue</span><span class="num" id="prog-nums-c2">$0 / $18,500</span></div>
+          <div class="inv-prog"><div class="inv-prog-fill" id="prog-fill-c2" style="width:0%;background:var(--red);"></div></div>
         </div>
-
-        <!-- ACCOUNT CREDITS BOX -->
-        <div style="margin-top:14px;padding:14px 16px;background:var(--purple-light);border:1px solid #d0b8f0;border-radius:10px;" class="fi">
-          <div style="font-size:12px;font-weight:700;color:var(--purple);margin-bottom:6px;">💜 Existing Account Credit</div>
-          <div style="font-family:var(--mono);font-size:20px;font-weight:700;color:var(--purple);">$340.00</div>
-          <div style="font-size:11.5px;color:var(--muted);margin-top:4px;line-height:1.5;">Unallocated from Apr 12 overpayment. Apply to this invoice?</div>
-          <button class="btn btn-g btn-sm" style="margin-top:10px;border-color:#d0b8f0;color:var(--purple);">Apply Credit →</button>
+        <div class="inv-right"><div class="inv-total-val" id="total-c2">$18,500</div><div class="inv-bal-val" id="bal-c2" style="color:var(--red);">$18,500 overdue</div></div>
+        <span class="badge b-r" id="badge-c2">Overdue</span>
+        <span class="caret" id="caret-c2">▾</span>
+      </div>
+      <div class="inv-stripe"><div class="inv-stripe-fill" id="stripe-c2" style="width:0%;background:var(--red);"></div></div>
+      <div class="inv-body hidden" id="body-c2">
+        <div style="font-size:12px;color:var(--muted);padding:4px 0 10px;">No payments yet.</div>
+        <button class="btn btn-g btn-sm" id="addbtn-c2" onclick="showNPF('c2')">＋ Record Payment</button>
+        <div class="npf" id="npf-c2" style="display:none;">
+          <div class="npf-title">💳 New Payment — Yossi Katz</div>
+          <div class="npf-hd">
+            <div class="field"><label>Method</label><select class="input" style="height:32px;font-size:12px;" onchange="onMeth(this,'c2')" id="meth-c2"><option>Bank Transfer</option><option selected>Credit Card</option><option>Check</option><option>Cash</option></select></div>
+            <div class="field"><label>Surcharge</label><div style="display:flex;align-items:center;gap:2px;"><input class="input num" type="number" value="2.5" step="0.1" style="height:32px;font-size:12px;" id="rate-c2"><span style="font-size:10px;color:var(--muted);flex-shrink:0;">%</span></div></div>
+            <div class="field"><label>Date</label><input type="date" class="input num" value="2026-04-28" style="height:32px;font-size:11.5px;" id="date-c2"></div>
+            <div class="field"><label>Amount</label><div class="ipfx"><span class="pfx">$</span><input class="input num" type="number" value="0" step="0.01" style="height:32px;font-size:13px;" id="amt-c2" oninput="onAmt('c2')"></div></div>
+            <div class="field"><label>Reference</label><input class="input" placeholder="Optional" style="height:32px;font-size:12px;"></div>
+          </div>
+          <div class="asb"><div class="asb-i"><div class="asb-lbl">Payment In</div><div class="asb-val" style="color:var(--accent);" id="asb-in-c2">$0.00</div></div><div class="asb-d"></div><div class="asb-i"><div class="asb-lbl">Allocated</div><div class="asb-val" style="color:var(--blue);" id="asb-al-c2">$0.00</div></div><div class="asb-d"></div><div class="asb-i"><div class="asb-lbl">Unallocated</div><div class="asb-val" style="color:var(--yellow);" id="asb-rem-c2">$0.00</div></div></div>
+          <div class="si-col-hd"><span></span><span>Fee / Installment</span><span style="text-align:right;">Balance</span><span style="text-align:right;">Apply ($)</span><span style="text-align:right;">After</span></div>
+          <div id="silist-c2">
+            <div class="si-row" data-bal="18500" data-order="1" id="sir-c2-a"><div class="si-chk" onclick="togSI('c2','a')" id="chk-c2-a"></div><div><div class="si-name">Annual Tuition</div><div class="si-sub" style="color:var(--red);">#INV-1044 · Overdue</div></div><div class="si-bal" style="color:var(--red);">$18,500.00</div><div class="si-inp-wrap"><span class="si-inp-pfx">$</span><input type="number" class="si-inp" id="sia-c2-a" value="0" step="0.01" disabled oninput="onSIOv('c2','a')"></div><div class="si-new" id="sin-c2-a" style="color:var(--muted2);">$18,500.00</div></div>
+          </div>
+          <div class="npf-footer"><button class="btn btn-g btn-sm" onclick="cancelNPF('c2')">Cancel</button><button class="btn btn-p btn-sm" onclick="saveNPF('c2')">Save Payment</button></div>
         </div>
       </div>
+    </div>
 
+    <!-- ═══ CARD: Rivka Shapiro ═══ -->
+    <div class="inv-card fi" id="card-c3" data-status="partial" data-yr="2025-2026" data-sname="rivka shapiro">
+      <div class="inv-card-hd" onclick="toggleCard('c3')" id="hd-c3">
+        <div class="inv-av" style="background:#7b52ab;">RS</div>
+        <div style="flex:1;min-width:0;"><div class="inv-name">Rivka Shapiro</div><div class="inv-meta">Grade 3 · #INV-1045 · 2025–26</div></div>
+        <div class="inv-prog-wrap">
+          <div class="inv-prog-lbl"><span id="pct-c3">30% paid</span><span class="num" id="prog-nums-c3">$4,350 / $14,500</span></div>
+          <div class="inv-prog"><div class="inv-prog-fill" id="prog-fill-c3" style="width:30%;background:var(--accent);"></div></div>
+        </div>
+        <div class="inv-right"><div class="inv-total-val" id="total-c3">$14,500</div><div class="inv-bal-val" id="bal-c3">$10,150 balance</div></div>
+        <span class="badge b-y" id="badge-c3">Partial</span>
+        <span class="caret" id="caret-c3">▾</span>
+      </div>
+      <div class="inv-stripe"><div class="inv-stripe-fill" id="stripe-c3" style="width:30%;background:var(--accent);"></div></div>
+      <div class="inv-body hidden" id="body-c3">
+        <div style="font-size:12px;color:var(--muted);padding:4px 0 10px;">1 payment recorded.</div>
+        <button class="btn btn-g btn-sm" id="addbtn-c3" onclick="showNPF('c3')">＋ Record Payment</button>
+        <div class="npf" id="npf-c3" style="display:none;"></div>
+      </div>
     </div>
-  </div>
 
-  <!-- ACTION BAR -->
-  <div class="action-bar">
-    <div style="font-size:12.5px;color:var(--muted);">
-      Recording payment for <strong style="color:var(--text);">David Cohen</strong> — Cohen Family
+    <!-- ═══ CARD: Sara Goldstein — PAID (hidden) ═══ -->
+    <div class="inv-card fi" id="card-c4" data-status="paid" data-yr="2025-2026" data-sname="sara goldstein" style="display:none;opacity:.65;">
+      <div class="inv-card-hd" onclick="toggleCard('c4')" id="hd-c4">
+        <div class="inv-av" style="background:var(--blue);">SG</div>
+        <div style="flex:1;min-width:0;"><div class="inv-name">Sara Goldstein</div><div class="inv-meta">Grade 5 · #INV-1043 · 2025–26</div></div>
+        <div class="inv-prog-wrap">
+          <div class="inv-prog-lbl"><span id="pct-c4">100% paid</span><span class="num" id="prog-nums-c4">$16,000 / $16,000</span></div>
+          <div class="inv-prog"><div class="inv-prog-fill" id="prog-fill-c4" style="width:100%;background:var(--accent);"></div></div>
+        </div>
+        <div class="inv-right"><div class="inv-total-val" id="total-c4">$16,000</div><div class="inv-bal-val" id="bal-c4" style="color:var(--accent);">Paid in full</div></div>
+        <span class="badge b-g" id="badge-c4">Paid</span>
+        <span class="caret" id="caret-c4">▾</span>
+      </div>
+      <div class="inv-stripe"><div class="inv-stripe-fill" id="stripe-c4" style="width:100%;background:var(--accent);"></div></div>
+      <div class="inv-body hidden" id="body-c4">
+        <div class="pay-block">
+          <div class="pay-block-hd" onclick="toggleAllocList(this)">
+            <span class="pbh-date">Jan 10</span><span class="pbh-method">Check</span><span class="badge b-gr">0%</span>
+            <span class="pbh-amt">$16,000.00</span>
+            <span style="color:var(--muted2);font-size:11px;margin-left:4px;">▾</span>
+          </div>
+          <div class="alloc-list"><div class="al-row"><span class="al-name">Annual Tuition — Full</span><span class="al-inv">#INV-1043</span><span class="al-orig">$16,000.00</span><span class="al-arr">→</span><span class="al-new">$0.00 remaining</span></div></div>
+        </div>
+      </div>
     </div>
-    <div class="action-bar-r">
-      <button class="btn btn-g">Cancel</button>
-      <button class="btn btn-g">💾 Save Draft</button>
-      <button class="btn btn-p" onclick="recordPayment()">✅ Record Payment</button>
-    </div>
-  </div>
+
+  </div><!-- /cards -->
+</div>
 </main>
 </div>
 
 <script>
-// Selected alloc items: id -> amount
-const allocData = {
-  a1: { name:'Meal Plan', amt:2000 },
-  a2: { name:'Laundry Service', amt:500 },
-  a3: { name:'Installment 2 Remaining', amt:1491.46 },
-  a4: { name:'Installment 3', amt:5482.91 },
+// ── card state per invoice ──
+// Tracks: totalInvoice, totalPaid, balances per sub-invoice
+const cardState = {
+  c1: {
+    total: 18948,
+    paid: 9474.38,
+    subs: [
+      {id:'d', name:'Meal Plan', inv:'#INV-1042', due:'Apr 1', bal:2000, order:1, overdue:true},
+      {id:'a', name:'Tuition — Installment 1', inv:'#INV-1042', due:'Aug 1', bal:1017.08, order:2},
+      {id:'e', name:'Laundry Service', inv:'#INV-1042', due:'Jun 1', bal:500, order:3},
+      {id:'b', name:'Tuition — Installment 2', inv:'#INV-1042', due:'Nov 1', bal:6000, order:4},
+      {id:'c', name:'Tuition — Installment 3', inv:'#INV-1042', due:'Jan 1', bal:6000, order:5},
+    ]
+  },
+  c2: {
+    total: 18500,
+    paid: 0,
+    subs: [
+      {id:'a', name:'Annual Tuition', inv:'#INV-1044', due:'Overdue', bal:18500, order:1, overdue:true},
+    ]
+  }
 };
-const selected = new Set(['a1','a2']);
 
-function toggleAlloc(id) {
-  const el = document.getElementById(id);
-  if (selected.has(id)) { selected.delete(id); el.classList.remove('selected'); }
-  else { selected.add(id); el.classList.add('selected'); }
-  updateAlloc();
+// ── Toggle card ──
+function toggleCard(id){
+  const b=document.getElementById('body-'+id);
+  const c=document.getElementById('caret-'+id);
+  if(!b)return;
+  const h=b.classList.contains('hidden');
+  b.classList.toggle('hidden',!h);
+  if(c)c.classList.toggle('open',h);
 }
 
-function updateAlloc() {
-  const total = parseFloat(document.getElementById('pay-amount').value) || 0;
-  let alloc = 0;
-  selected.forEach(id => { alloc += allocData[id].amt; });
-  alloc = Math.min(alloc, total);
-  const remain = Math.max(total - alloc, 0);
+// ── Toggle alloc list ──
+function toggleAllocList(hdEl){
+  const block=hdEl.closest('.pay-block');
+  const list=block?.querySelector('.alloc-list');
+  if(list)list.style.display=list.style.display==='none'?'':'none';
+}
 
-  document.getElementById('s-total').textContent = fmt(total);
-  document.getElementById('s-alloc').textContent = fmt(alloc);
-  document.getElementById('s-remain').textContent = fmt(remain);
-  document.getElementById('s-after').textContent = fmt(Math.max(9474.37 - alloc, 0));
-  document.getElementById('remaining-amt').textContent = fmt(remain);
-  document.getElementById('prog-lbl-val').textContent = fmt(alloc) + ' of ' + fmt(total);
+// ── Show/cancel NPF ──
+function showNPF(id){
+  const f=document.getElementById('npf-'+id);
+  const b=document.getElementById('addbtn-'+id);
+  if(f){f.style.display='';f.scrollIntoView({behavior:'smooth',block:'nearest'});}
+  if(b)b.style.display='none';
+}
+function cancelNPF(id){
+  document.getElementById('npf-'+id).style.display='none';
+  document.getElementById('addbtn-'+id).style.display='';
+  // Reset form
+  const amtEl=document.getElementById('amt-'+id);
+  if(amtEl)amtEl.value=0;
+  resetSubs(id);
+}
 
-  const pct = total > 0 ? Math.min((alloc / total) * 100, 100) : 0;
-  const fill = document.getElementById('prog-fill');
-  fill.style.width = pct + '%';
-  fill.className = 'prog-fill' + (alloc > total ? ' over' : '');
+function resetSubs(invId){
+  const state=cardState[invId];
+  if(!state)return;
+  state.subs.forEach(sub=>{
+    const chk=document.getElementById('chk-'+invId+'-'+sub.id);
+    const inp=document.getElementById('sia-'+invId+'-'+sub.id);
+    const newEl=document.getElementById('sin-'+invId+'-'+sub.id);
+    const row=document.getElementById('sir-'+invId+'-'+sub.id);
+    chk?.classList.remove('on');
+    row?.classList.remove('checked');
+    if(inp){inp.disabled=true;inp.value=0;inp.classList.remove('ov');}
+    if(newEl){newEl.textContent='$'+fmt(sub.bal);newEl.style.color='var(--muted2)';}
+  });
+  updateASB(invId,0);
+}
 
-  // show/hide credit options
-  const creditSection = document.getElementById('credit-lbl');
-  const creditOpts = document.getElementById('credit-opts');
-  const show = remain > 0;
-  creditSection.style.display = show ? '' : 'none';
-  creditOpts.style.display = show ? '' : 'none';
+// ── Pay method surcharge ──
+const SR={'Bank Transfer':0,'Credit Card':2.5,'Check':0,'Cash':0,'Zelle / Venmo':0};
+function onMeth(sel,id){const r=document.getElementById('rate-'+id);if(r)r.value=SR[sel.value]??0;}
 
-  // update selected list
-  const list = document.getElementById('selected-list');
-  list.innerHTML = '';
-  if (selected.size === 0) {
-    list.innerHTML = '<div style="color:var(--muted2);font-size:12px;">No items selected</div>';
-    return;
+// ── Amount entered — auto-allocate oldest first ──
+function onAmt(id){
+  const total=parseFloat(document.getElementById('amt-'+id)?.value)||0;
+  document.getElementById('asb-in-'+id).textContent='$'+fmt(total);
+  autoAllocate(id,total);
+}
+
+function autoAllocate(invId,total){
+  const state=cardState[invId];
+  if(!state)return;
+  // Sort subs by order (oldest/overdue first)
+  const sorted=[...state.subs].sort((a,b)=>a.order-b.order);
+  let rem=total;
+  sorted.forEach(sub=>{
+    const chk=document.getElementById('chk-'+invId+'-'+sub.id);
+    const inp=document.getElementById('sia-'+invId+'-'+sub.id);
+    const newEl=document.getElementById('sin-'+invId+'-'+sub.id);
+    const row=document.getElementById('sir-'+invId+'-'+sub.id);
+    if(rem>0&&sub.bal>0){
+      // Auto-check
+      chk?.classList.add('on');
+      row?.classList.add('checked');
+      if(inp)inp.disabled=false;
+      const apply=Math.min(rem,sub.bal);
+      if(inp&&!inp.classList.contains('ov'))inp.value=fmt(apply);
+      rem=Math.max(rem-apply,0);
+      if(newEl){
+        const after=Math.max(sub.bal-apply,0);
+        newEl.textContent='$'+fmt(after);
+        newEl.style.color=after===0?'var(--accent)':'var(--yellow)';
+      }
+    } else if(sub.bal<=0||rem<=0){
+      // uncheck if nothing to pay or no more money
+      if(sub.bal<=0){
+        chk?.classList.remove('on');
+        row?.classList.remove('checked');
+        if(inp){inp.disabled=true;inp.value=0;}
+        if(newEl){newEl.textContent='$0.00';newEl.style.color='var(--accent)';}
+      }
+    }
+  });
+  updateASB(invId,total);
+}
+
+function togSI(invId,siId){
+  const chk=document.getElementById('chk-'+invId+'-'+siId);
+  const inp=document.getElementById('sia-'+invId+'-'+siId);
+  const row=document.getElementById('sir-'+invId+'-'+siId);
+  const on=chk?.classList.contains('on');
+  const state=cardState[invId];
+  const sub=state?.subs.find(s=>s.id===siId);
+  if(on){
+    chk?.classList.remove('on');row?.classList.remove('checked');
+    if(inp){inp.disabled=true;inp.value=0;inp.classList.remove('ov');}
+    const newEl=document.getElementById('sin-'+invId+'-'+siId);
+    if(newEl&&sub){newEl.textContent='$'+fmt(sub.bal);newEl.style.color='var(--muted2)';}
+  } else {
+    chk?.classList.add('on');row?.classList.add('checked');
+    if(inp)inp.disabled=false;
   }
-  selected.forEach(id => {
-    const d = allocData[id];
-    const row = document.createElement('div');
-    row.style.cssText = 'display:flex;justify-content:space-between;';
-    row.innerHTML = `<span>${d.name}</span><span style="font-family:var(--mono);color:var(--accent);">${fmt(Math.min(d.amt, total))}</span>`;
-    list.appendChild(row);
+  const total=parseFloat(document.getElementById('amt-'+invId)?.value)||0;
+  // Re-run autoallocate for unchecked, but respect overrides
+  recomputeASB(invId,total);
+}
+
+function onSIOv(invId,siId){
+  const inp=document.getElementById('sia-'+invId+'-'+siId);
+  inp?.classList.add('ov');
+  const state=cardState[invId];
+  const sub=state?.subs.find(s=>s.id===siId);
+  if(!sub)return;
+  const applied=parseFloat(inp?.value)||0;
+  const newEl=document.getElementById('sin-'+invId+'-'+siId);
+  if(newEl){const after=Math.max(sub.bal-applied,0);newEl.textContent='$'+fmt(after);newEl.style.color=after===0?'var(--accent)':'var(--yellow)';}
+  const total=parseFloat(document.getElementById('amt-'+invId)?.value)||0;
+  recomputeASB(invId,total);
+}
+
+function recomputeASB(invId,total){
+  let alloc=0;
+  const state=cardState[invId];
+  if(!state)return;
+  state.subs.forEach(sub=>{
+    const chk=document.getElementById('chk-'+invId+'-'+sub.id);
+    if(chk?.classList.contains('on')){
+      alloc+=parseFloat(document.getElementById('sia-'+invId+'-'+sub.id)?.value)||0;
+    }
+  });
+  updateASB(invId,total,alloc);
+}
+
+function updateASB(invId,total,allocOverride){
+  let alloc=allocOverride;
+  if(alloc===undefined){
+    alloc=0;
+    const state=cardState[invId];
+    state?.subs.forEach(sub=>{
+      const chk=document.getElementById('chk-'+invId+'-'+sub.id);
+      if(chk?.classList.contains('on')) alloc+=parseFloat(document.getElementById('sia-'+invId+'-'+sub.id)?.value)||0;
+    });
+  }
+  const rem=Math.max(total-alloc,0);
+  const alEl=document.getElementById('asb-al-'+invId);
+  const remEl=document.getElementById('asb-rem-'+invId);
+  if(alEl)alEl.textContent='$'+fmt(alloc);
+  if(remEl){remEl.textContent='$'+fmt(rem);remEl.style.color=rem<0.01?'var(--accent)':'var(--yellow)';}
+}
+
+// ── SAVE PAYMENT ──
+function saveNPF(invId){
+  const total=parseFloat(document.getElementById('amt-'+invId)?.value)||0;
+  const method=document.getElementById('meth-'+invId)?.value||'Payment';
+  const rate=document.getElementById('rate-'+invId)?.value||'0';
+  const date=document.getElementById('date-'+invId)?.value||'Today';
+  if(total<=0){alert('Please enter a payment amount.');return;}
+
+  const state=cardState[invId];
+  if(!state)return;
+
+  // Collect applied subs
+  const applied=[];
+  let totalApplied=0;
+  state.subs.forEach(sub=>{
+    const chk=document.getElementById('chk-'+invId+'-'+sub.id);
+    if(chk?.classList.contains('on')){
+      const amt=parseFloat(document.getElementById('sia-'+invId+'-'+sub.id)?.value)||0;
+      const newBal=Math.max(sub.bal-amt,0);
+      if(amt>0){
+        applied.push({name:sub.name,inv:sub.inv,origBal:sub.bal,amt,newBal});
+        totalApplied+=amt;
+        // Update state
+        sub.bal=newBal;
+      }
+    }
+  });
+
+  // Update state totals
+  state.paid+=totalApplied;
+
+  // Format date
+  const dFmt=date?new Date(date+'T12:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):date;
+
+  // Build alloc HTML
+  const allocHTML=applied.length>0
+    ?applied.map(a=>`<div class="al-row"><span class="al-name">${a.name}</span><span class="al-inv">${a.inv}</span><span class="al-orig">$${fmt(a.origBal)}</span><span class="al-arr">→</span><span class="al-new">$${fmt(a.newBal)} remaining</span></div>`).join('')
+    :'<div class="al-noalloc">No items allocated</div>';
+
+  // Insert new payment block before the form
+  const block=document.createElement('div');
+  block.className='pay-block';
+  block.innerHTML=`
+    <div class="pay-block-hd" onclick="toggleAllocList(this)">
+      <span class="pbh-date">${dFmt}</span>
+      <span class="pbh-method">${method}</span>
+      <span class="badge b-gr">${rate}%</span>
+      <span class="pbh-amt">$${fmt(total)}</span>
+      <button class="btn btn-g btn-xs" style="margin-left:8px;" onclick="event.stopPropagation();">Edit</button>
+      <span style="color:var(--muted2);font-size:11px;margin-left:4px;">▾</span>
+    </div>
+    <div class="alloc-list">${allocHTML}</div>`;
+
+  const npfEl=document.getElementById('npf-'+invId);
+  npfEl.parentNode.insertBefore(block,npfEl);
+
+  // Update sub-invoice rows to show new balances
+  state.subs.forEach(sub=>{
+    const inp=document.getElementById('sia-'+invId+'-'+sub.id);
+    const newEl=document.getElementById('sin-'+invId+'-'+sub.id);
+    const row=document.getElementById('sir-'+invId+'-'+sub.id);
+    const balEl=row?.querySelector('.si-bal');
+    if(balEl)balEl.textContent='$'+fmt(sub.bal);
+    if(newEl){newEl.textContent='$'+fmt(sub.bal);newEl.style.color='var(--muted2)';}
+    // Hide fully paid subs from future payments
+    if(sub.bal<=0&&row)row.style.display='none';
+  });
+
+  // ── UPDATE CARD HEADER SUMMARY ──
+  updateCardHeader(invId);
+
+  // Reset and close form
+  cancelNPF(invId);
+}
+
+function updateCardHeader(invId){
+  const state=cardState[invId];
+  if(!state)return;
+  const pct=state.total>0?Math.min(state.paid/state.total*100,100):0;
+  const bal=Math.max(state.total-state.paid,0);
+  const fill=document.getElementById('prog-fill-'+invId);
+  const pctEl=document.getElementById('pct-'+invId);
+  const numsEl=document.getElementById('prog-nums-'+invId);
+  const balEl=document.getElementById('bal-'+invId);
+  const badgeEl=document.getElementById('badge-'+invId);
+  const stripeEl=document.getElementById('stripe-'+invId);
+  if(fill){fill.style.width=pct+'%';fill.style.background=pct>=100?'var(--accent)':pct>0?'var(--accent)':'var(--red)';}
+  if(stripeEl){const sf=stripeEl.querySelector('.inv-stripe-fill')||stripeEl;sf.style.width=pct+'%';sf.style.background=pct>=100?'var(--accent)':'var(--accent)';}
+  if(pctEl)pctEl.textContent=Math.round(pct)+'% paid';
+  if(numsEl)numsEl.textContent='$'+fmtK(state.paid)+' / $'+fmtK(state.total);
+  if(balEl){
+    balEl.textContent=bal<=0?'Paid in full':'$'+fmtK(bal)+' balance';
+    balEl.style.color=bal<=0?'var(--accent)':bal===state.total?'var(--red)':'var(--yellow)';
+  }
+  if(badgeEl){
+    if(pct>=100){badgeEl.textContent='Paid';badgeEl.className='badge b-g';}
+    else if(pct>0){badgeEl.textContent='Partial';badgeEl.className='badge b-y';}
+    else{badgeEl.textContent='Overdue';badgeEl.className='badge b-r';}
+  }
+  // Update card data-status
+  const card=document.getElementById('card-'+invId);
+  if(card){
+    if(pct>=100)card.dataset.status='paid';
+    else if(pct>0)card.dataset.status='partial';
+    else card.dataset.status='overdue';
+  }
+}
+
+// ── FILTER ──
+let showPaid=false;
+function toggleShowPaid(){
+  showPaid=!showPaid;
+  const btn=document.getElementById('show-paid-btn');
+  btn.classList.toggle('on',showPaid);
+  btn.textContent=showPaid?'👁 Hide Paid':'👁 Show Paid';
+  filterCards();
+}
+function filterCards(){
+  const q=(document.getElementById('srch')?.value||'').toLowerCase();
+  const yr=document.getElementById('yr-sel')?.value||'all';
+  const st=document.getElementById('st-sel')?.value||'all';
+  document.querySelectorAll('#cards .inv-card').forEach(c=>{
+    const cs=c.dataset.status||'';
+    const cy=c.dataset.yr||'';
+    const cn=c.dataset.sname||'';
+    let show=true;
+    if(cs==='paid'&&!showPaid)show=false;
+    if(yr!=='all'&&cy!==yr)show=false;
+    if(st!=='all'&&cs!==st)show=false;
+    if(q&&!cn.includes(q))show=false;
+    c.style.display=show?'':'none';
   });
 }
 
-function fmt(n) {
-  return '$' + n.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
-}
-
-function selectCreditOpt(el) {
-  document.querySelectorAll('.credit-opt').forEach(o => o.classList.remove('selected'));
-  el.classList.add('selected');
-  el.querySelector('input[type=radio]').checked = true;
-}
-
-function selectSibling(el, student) {
-  document.querySelectorAll('.sib-chip').forEach(c => c.classList.remove('active'));
-  el.classList.add('active');
-  // In a real app, would reload outstanding items for selected student
-}
-
-function updateFamily() {
-  // In real app, update payers and students based on family
-}
-
-function recordPayment() {
-  alert('Payment recorded! (Demo)\n\nIn production this would save to the database, send receipt, and update balances.');
-}
-
-// Init
-updateAlloc();
+// ── UTILS ──
+function fmt(n){return(parseFloat(n)||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});}
+function fmtK(n){const v=parseFloat(n)||0;return v%1===0?v.toLocaleString('en-US'):v.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});}
 </script>
 </body>
 </html>
