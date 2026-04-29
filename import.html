@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FinTrack — Import Contacts</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<!-- SheetJS for Excel support -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root{
+  --bg:#f7f7f3;--surface:#fff;--s2:#f0f0eb;--s3:#e6e6e0;
+  --border:#e0e0d8;--border2:#ccccc4;
+  --text:#1c1c1a;--muted:#686860;--muted2:#a0a098;
+  --accent:#1a6b4a;--al:#e6f4ee;--am:#2d9068;
+  --red:#b83232;--rl:#fdf0f0;--rb:#e8b8b8;
+  --yellow:#a07000;--yl:#fdf8e6;--yb:#e8d890;
+  --blue:#1a4a8a;--bl:#eef3fc;
+  --purple:#5b2d8e;--pl:#f3eeff;
+  --sans:'IBM Plex Sans',sans-serif;--mono:'IBM Plex Mono',monospace;
+  --sc:56px;--se:210px;--tb:52px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;min-height:100vh;}
+.shell{display:flex;min-height:100vh;}
+.sidebar{width:var(--sc);background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100;transition:width .22s ease;overflow:hidden;}
+.sidebar.open{width:var(--se);}
+.sidebar-top{height:var(--tb);display:flex;align-items:center;padding:0 14px;border-bottom:1px solid var(--border);flex-shrink:0;gap:12px;}
+.hbg{width:28px;height:28px;border:none;background:none;cursor:pointer;display:flex;flex-direction:column;justify-content:center;gap:5px;flex-shrink:0;padding:0;}
+.hbg span{display:block;height:1.5px;background:var(--muted);border-radius:2px;}
+.hbg:hover span{background:var(--text);}
+.s-logo{font-size:13px;font-weight:700;color:var(--accent);white-space:nowrap;opacity:0;transition:opacity .15s;}
+.sidebar.open .s-logo{opacity:1;}
+.nav-sec{padding:16px 0 8px;border-bottom:1px solid var(--border);}
+.nav-sec:last-of-type{border-bottom:none;}
+.ni{display:flex;align-items:center;gap:12px;padding:9px 14px;cursor:pointer;color:var(--muted);font-size:13px;font-weight:500;white-space:nowrap;transition:all .15s;border-left:2px solid transparent;text-decoration:none;}
+.ni:hover{background:var(--s2);color:var(--text);}
+.ni.active{color:var(--accent);border-left-color:var(--accent);background:var(--al);}
+.nic{width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
+.nl{opacity:0;transition:opacity .15s;}
+.sidebar.open .nl{opacity:1;}
+.main{margin-left:var(--sc);flex:1;display:flex;flex-direction:column;transition:margin-left .22s ease;}
+.sidebar.open~.main{margin-left:var(--se);}
+.topbar{height:var(--tb);background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 24px;position:sticky;top:0;z-index:50;}
+.pt{font-size:15px;font-weight:600;}
+.bc{font-family:var(--mono);font-size:11px;color:var(--muted2);margin-top:1px;}
+.btn{display:inline-flex;align-items:center;gap:5px;padding:7px 14px;border-radius:6px;font-family:var(--sans);font-size:13px;font-weight:500;cursor:pointer;border:none;transition:all .15s;white-space:nowrap;}
+.btn-p{background:var(--accent);color:#fff;}.btn-p:hover{background:var(--am);}
+.btn-p:disabled{opacity:.45;cursor:not-allowed;}
+.btn-g{background:var(--surface);color:var(--muted);border:1px solid var(--border2);}.btn-g:hover{background:var(--s2);color:var(--text);}
+.btn-sm{padding:4px 10px;font-size:12px;}
+.content{padding:24px;flex:1;max-width:1000px;}
+
+/* STEPS */
+.steps{display:flex;align-items:center;gap:0;margin-bottom:28px;}
+.step{display:flex;align-items:center;gap:10px;padding:10px 16px;border-radius:8px;font-size:13px;font-weight:500;color:var(--muted2);flex:1;}
+.step.active{background:var(--al);color:var(--accent);}
+.step.done{color:var(--accent);}
+.step-num{width:24px;height:24px;border-radius:50%;border:2px solid currentColor;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;}
+.step.done .step-num{background:var(--accent);border-color:var(--accent);color:#fff;}
+.step-arrow{color:var(--border2);font-size:18px;flex-shrink:0;}
+
+/* SECTION */
+.section{background:var(--surface);border:1px solid var(--border);border-radius:10px;margin-bottom:16px;}
+.sec-hd{padding:13px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.sec-title{font-size:13px;font-weight:700;}
+.sec-sub{font-size:11.5px;color:var(--muted);margin-top:2px;}
+.sec-body{padding:20px;}
+
+/* DROPZONE */
+.dropzone{border:2px dashed var(--border2);border-radius:10px;padding:40px 20px;text-align:center;cursor:pointer;transition:all .2s;background:var(--bg);}
+.dropzone:hover,.dropzone.drag-over{border-color:var(--accent);background:var(--al);}
+.dz-icon{font-size:36px;margin-bottom:12px;}
+.dz-title{font-size:15px;font-weight:600;margin-bottom:6px;}
+.dz-sub{font-size:13px;color:var(--muted);margin-bottom:16px;}
+.dz-formats{font-family:var(--mono);font-size:11px;color:var(--muted2);}
+.dz-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 18px;border-radius:7px;background:var(--accent);color:#fff;font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all .15s;}
+.dz-btn:hover{background:var(--am);}
+
+/* FILE INFO */
+.file-info{display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--al);border:1px solid #b0d8c0;border-radius:8px;margin-bottom:16px;}
+.fi-icon{font-size:22px;}
+.fi-name{font-size:13.5px;font-weight:600;}
+.fi-meta{font-size:11.5px;color:var(--muted);margin-top:2px;}
+.fi-clear{margin-left:auto;color:var(--muted);cursor:pointer;font-size:18px;background:none;border:none;transition:color .15s;}
+.fi-clear:hover{color:var(--red);}
+
+/* MAPPING TABLE */
+.map-table{width:100%;border-collapse:collapse;}
+.map-table th{font-size:10.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;padding:8px 12px;text-align:left;border-bottom:2px solid var(--border);}
+.map-table td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle;}
+.map-table tr:last-child td{border-bottom:none;}
+.map-table tr:hover td{background:var(--s2);}
+.col-name{font-family:var(--mono);font-size:12.5px;font-weight:500;}
+.col-sample{font-size:11.5px;color:var(--muted);font-style:italic;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.map-select{height:32px;padding:0 8px;background:var(--bg);border:1.5px solid var(--border2);border-radius:6px;font-family:var(--sans);font-size:12.5px;color:var(--text);outline:none;cursor:pointer;width:100%;transition:border-color .15s;}
+.map-select:focus{border-color:var(--accent);background:#fff;}
+.map-select.mapped{border-color:var(--accent);background:var(--al);}
+.map-select.conflict{border-color:var(--red);background:var(--rl);}
+.map-badge{display:inline-flex;align-items:center;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:600;font-family:var(--mono);}
+.mb-auto{background:var(--al);color:var(--accent);}
+.mb-manual{background:var(--yl);color:var(--yellow);}
+.mb-skip{background:var(--s3);color:var(--muted);}
+
+/* PREVIEW TABLE */
+.preview-wrap{overflow-x:auto;max-height:340px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;}
+.preview-table{width:100%;border-collapse:collapse;font-size:12.5px;}
+.preview-table th{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;padding:7px 10px;text-align:left;border-bottom:1px solid var(--border);background:var(--s2);position:sticky;top:0;}
+.preview-table td{padding:8px 10px;border-bottom:1px solid var(--border);vertical-align:middle;}
+.preview-table tr:hover td{background:var(--s2);}
+.type-badge{display:inline-flex;align-items:center;padding:2px 7px;border-radius:4px;font-size:10.5px;font-weight:600;font-family:var(--mono);}
+.tb-student{background:var(--al);color:var(--accent);}
+.tb-parent{background:var(--bl);color:var(--blue);}
+.tb-vendor{background:var(--yl);color:var(--yellow);}
+.tb-donor{background:var(--pl);color:var(--purple);}
+.tb-other{background:var(--s3);color:var(--muted);}
+.row-issue{background:var(--rl)!important;}
+.issue-txt{font-size:10.5px;color:var(--red);margin-top:2px;}
+
+/* PROGRESS */
+.import-progress{padding:20px;}
+.ip-bar-wrap{height:8px;background:var(--s3);border-radius:4px;overflow:hidden;margin:12px 0;}
+.ip-bar{height:100%;background:var(--accent);border-radius:4px;transition:width .3s ease;}
+.ip-status{font-size:13px;color:var(--muted);}
+.ip-counts{display:flex;gap:20px;margin-top:12px;flex-wrap:wrap;}
+.ip-count{display:flex;flex-direction:column;gap:2px;}
+.ip-count-val{font-family:var(--mono);font-size:18px;font-weight:700;}
+.ip-count-lbl{font-size:11.5px;color:var(--muted);}
+
+/* RESULT */
+.result-block{padding:20px;text-align:center;}
+.result-icon{font-size:48px;margin-bottom:12px;}
+.result-title{font-size:18px;font-weight:700;margin-bottom:6px;}
+.result-sub{font-size:13px;color:var(--muted);line-height:1.6;}
+.result-stats{display:flex;justify-content:center;gap:24px;margin:20px 0;flex-wrap:wrap;}
+.rs-item{display:flex;flex-direction:column;align-items:center;gap:4px;}
+.rs-val{font-family:var(--mono);font-size:22px;font-weight:700;}
+.rs-lbl{font-size:12px;color:var(--muted);}
+
+/* TEMPLATE DOWNLOAD */
+.template-box{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--bl);border:1px solid var(--bb);border-radius:8px;margin-bottom:16px;}
+.tb-txt{font-size:13px;color:var(--blue);}
+.tb-sub{font-size:11.5px;color:var(--muted);margin-top:2px;}
+
+/* BADGE */
+.badge{display:inline-flex;align-items:center;padding:2px 7px;border-radius:4px;font-family:var(--mono);font-size:10.5px;font-weight:500;}
+.b-g{background:var(--al);color:var(--accent);}
+.b-r{background:var(--rl);color:var(--red);}
+.b-y{background:var(--yl);color:var(--yellow);}
+
+/* User chip */
+#user-chip{display:flex;align-items:center;}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+.fi-anim{animation:fadeUp .2s ease both;}
+</style>
+</head>
+<body>
+<div class="shell">
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-top">
+    <button class="hbg" onclick="document.getElementById('sidebar').classList.toggle('open')"><span></span><span></span><span></span></button>
+    <div class="s-logo">FinTrack</div>
+  </div>
+  <div class="nav-sec"><a class="ni" href="index.html"><span class="nic">⊞</span><span class="nl">Dashboard</span></a></div>
+  <div class="nav-sec">
+    <a class="ni" href="invoice.html"><span class="nic">📄</span><span class="nl">Tuition</span></a>
+    <a class="ni" href="donations.html"><span class="nic">🤝</span><span class="nl">Donations</span></a>
+    <a class="ni" href="payments.html"><span class="nic">💳</span><span class="nl">Payments</span></a>
+    <a class="ni" href="vendors.html"><span class="nic">🏢</span><span class="nl">Vendors</span></a>
+  </div>
+  <div class="nav-sec">
+    <a class="ni" href="students.html"><span class="nic">🎓</span><span class="nl">Students</span></a>
+    <a class="ni" href="parents.html"><span class="nic">👨‍👩‍👧</span><span class="nl">Parents</span></a>
+  </div>
+  <div class="nav-sec">
+    <a class="ni" href="reports.html"><span class="nic">↗</span><span class="nl">Reports</span></a>
+    <a class="ni active" href="import.html"><span class="nic">⚙</span><span class="nl">Settings</span></a>
+  </div>
+</aside>
+
+<main class="main">
+<div class="topbar">
+  <div>
+    <div class="pt">Import Contacts</div>
+    <div class="bc">Settings / Import</div>
+  </div>
+  <div style="display:flex;gap:10px;align-items:center;">
+    <div id="user-chip"></div>
+    <a href="settings.html" class="btn btn-g btn-sm">← Back to Settings</a>
+  </div>
+</div>
+
+<div class="content">
+
+  <!-- STEPS -->
+  <div class="steps fi-anim">
+    <div class="step active" id="step-1"><div class="step-num">1</div>Upload File</div>
+    <div class="step-arrow">›</div>
+    <div class="step" id="step-2"><div class="step-num">2</div>Map Fields</div>
+    <div class="step-arrow">›</div>
+    <div class="step" id="step-3"><div class="step-num">3</div>Preview & Confirm</div>
+    <div class="step-arrow">›</div>
+    <div class="step" id="step-4"><div class="step-num">4</div>Done</div>
+  </div>
+
+  <!-- ═══ STEP 1: UPLOAD ═══ -->
+  <div id="view-1">
+
+    <!-- Template download -->
+    <div class="template-box fi-anim">
+      <div>
+        <div class="tb-txt">📋 Download our template</div>
+        <div class="tb-sub">Use our CSV template to make sure your data maps correctly on the first try.</div>
+      </div>
+      <button class="btn btn-g btn-sm" onclick="downloadTemplate()">⬇ Download Template</button>
+    </div>
+
+    <div class="section fi-anim">
+      <div class="sec-hd">
+        <div>
+          <div class="sec-title">Upload your file</div>
+          <div class="sec-sub">Supports Excel (.xlsx, .xls) and CSV (.csv) files</div>
+        </div>
+      </div>
+      <div class="sec-body">
+        <!-- File info (shown after upload) -->
+        <div id="file-info" style="display:none;" class="file-info">
+          <div class="fi-icon">📄</div>
+          <div>
+            <div class="fi-name" id="file-name">-</div>
+            <div class="fi-meta" id="file-meta">-</div>
+          </div>
+          <button class="fi-clear" onclick="clearFile()" title="Remove file">×</button>
+        </div>
+
+        <!-- Drop zone -->
+        <div class="dropzone" id="dropzone"
+          ondragover="event.preventDefault();this.classList.add('drag-over')"
+          ondragleave="this.classList.remove('drag-over')"
+          ondrop="onDrop(event)"
+          onclick="document.getElementById('file-input').click()">
+          <div class="dz-icon">📂</div>
+          <div class="dz-title">Drop your file here</div>
+          <div class="dz-sub">or click to browse your computer</div>
+          <button class="dz-btn" onclick="event.stopPropagation();document.getElementById('file-input').click()">Choose File</button>
+          <div class="dz-formats" style="margin-top:12px;">.xlsx · .xls · .csv · up to 10MB</div>
+        </div>
+        <input type="file" id="file-input" accept=".xlsx,.xls,.csv" style="display:none;" onchange="onFileSelect(event)">
+      </div>
+    </div>
+
+    <div style="display:flex;justify-content:flex-end;">
+      <button class="btn btn-p" id="step1-next" onclick="goToStep(2)" disabled>Next: Map Fields →</button>
+    </div>
+  </div>
+
+  <!-- ═══ STEP 2: MAP FIELDS ═══ -->
+  <div id="view-2" style="display:none;">
+    <div class="section fi-anim">
+      <div class="sec-hd">
+        <div>
+          <div class="sec-title">Map columns to fields</div>
+          <div class="sec-sub">We auto-detected the mappings below. Adjust any that look wrong.</div>
+        </div>
+        <span class="badge b-g" id="map-auto-count">0 auto-mapped</span>
+      </div>
+      <div class="sec-body" style="padding:0;">
+        <table class="map-table">
+          <thead>
+            <tr>
+              <th>Your Column</th>
+              <th>Sample Data</th>
+              <th>Maps To</th>
+              <th>Detection</th>
+            </tr>
+          </thead>
+          <tbody id="map-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+    <div style="display:flex;justify-content:space-between;">
+      <button class="btn btn-g" onclick="goToStep(1)">← Back</button>
+      <button class="btn btn-p" id="step2-next" onclick="goToStep(3)">Next: Preview →</button>
+    </div>
+  </div>
+
+  <!-- ═══ STEP 3: PREVIEW ═══ -->
+  <div id="view-3" style="display:none;">
+    <div class="section fi-anim">
+      <div class="sec-hd">
+        <div>
+          <div class="sec-title">Preview import</div>
+          <div class="sec-sub" id="preview-sub">Showing first 50 rows</div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <span class="badge b-g" id="prev-ok-count">0 ready</span>
+          <span class="badge b-r" id="prev-err-count" style="display:none;">0 issues</span>
+        </div>
+      </div>
+      <div class="sec-body" style="padding:0;">
+        <div class="preview-wrap">
+          <table class="preview-table" id="preview-table">
+            <thead id="prev-thead"></thead>
+            <tbody id="prev-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Duplicate handling -->
+    <div class="section fi-anim">
+      <div class="sec-hd"><div class="sec-title">Duplicate handling</div></div>
+      <div class="sec-body">
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;padding:10px 12px;border:1px solid var(--border);border-radius:7px;background:var(--bg);">
+            <input type="radio" name="dup" value="skip" checked style="accent-color:var(--accent);margin-top:2px;flex-shrink:0;">
+            <div><div style="font-size:13px;font-weight:600;">Skip duplicates</div><div style="font-size:12px;color:var(--muted);margin-top:2px;">If a contact with the same email already exists, leave them unchanged.</div></div>
+          </label>
+          <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;padding:10px 12px;border:1px solid var(--border);border-radius:7px;background:var(--bg);">
+            <input type="radio" name="dup" value="update" style="accent-color:var(--accent);margin-top:2px;flex-shrink:0;">
+            <div><div style="font-size:13px;font-weight:600;">Update existing</div><div style="font-size:12px;color:var(--muted);margin-top:2px;">Overwrite existing contacts with data from the file.</div></div>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;justify-content:space-between;">
+      <button class="btn btn-g" onclick="goToStep(2)">← Back</button>
+      <button class="btn btn-p" id="step3-import" onclick="runImport()">Import <span id="import-count">0</span> Contacts →</button>
+    </div>
+  </div>
+
+  <!-- ═══ STEP 4: IMPORTING / DONE ═══ -->
+  <div id="view-4" style="display:none;">
+    <div class="section fi-anim">
+      <div class="sec-hd"><div class="sec-title" id="step4-title">Importing…</div></div>
+
+      <!-- Progress -->
+      <div class="import-progress" id="import-progress">
+        <div class="ip-status" id="ip-status">Preparing…</div>
+        <div class="ip-bar-wrap"><div class="ip-bar" id="ip-bar" style="width:0%;"></div></div>
+        <div class="ip-counts">
+          <div class="ip-count"><div class="ip-count-val" id="ip-done">0</div><div class="ip-count-lbl">Imported</div></div>
+          <div class="ip-count"><div class="ip-count-val" id="ip-skip">0</div><div class="ip-count-lbl">Skipped</div></div>
+          <div class="ip-count"><div class="ip-count-val" id="ip-err">0</div><div class="ip-count-lbl">Errors</div></div>
+          <div class="ip-count"><div class="ip-count-val" id="ip-total">0</div><div class="ip-count-lbl">Total</div></div>
+        </div>
+      </div>
+
+      <!-- Result -->
+      <div class="result-block" id="import-result" style="display:none;">
+        <div class="result-icon" id="res-icon">✅</div>
+        <div class="result-title" id="res-title">Import Complete</div>
+        <div class="result-sub" id="res-sub"></div>
+        <div class="result-stats" id="res-stats"></div>
+        <div style="display:flex;gap:10px;justify-content:center;margin-top:8px;">
+          <a href="students.html" class="btn btn-p">View Students →</a>
+          <a href="parents.html" class="btn btn-g">View Parents →</a>
+          <button class="btn btn-g" onclick="resetImport()">Import Another File</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /content -->
+</main>
+</div>
+
+<script type="module">
+import { requireAuth } from './auth.js';
+import { getFirebaseDB } from './auth.js';
+import { collection, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+// Require login
+const currentUser = await requireAuth();
+const db = getFirebaseDB();
+
+// ── STATE ──
+let rawData = [];        // array of row objects from file
+let columns = [];        // column names from file
+let mappings = {};       // { colName: targetField }
+let parsedRows = [];     // final mapped rows ready for import
+
+// ── FIELD DEFINITIONS ──
+const FIELDS = [
+  { value:'skip',       label:'— Skip this column —' },
+  { value:'type',       label:'Contact Type (student/parent/vendor/donor)' },
+  { value:'firstName',  label:'First Name' },
+  { value:'lastName',   label:'Last Name' },
+  { value:'email',      label:'Email' },
+  { value:'phone',      label:'Phone' },
+  { value:'grade',      label:'Grade' },
+  { value:'role',       label:'Role / Title' },
+  { value:'address',    label:'Address' },
+  { value:'city',       label:'City' },
+  { value:'country',    label:'Country' },
+  { value:'notes',      label:'Notes' },
+  { value:'familyName', label:'Family / Group Name' },
+  { value:'studentId',  label:'Student ID' },
+  { value:'dob',        label:'Date of Birth' },
+  { value:'enrollYear', label:'Enrollment Year' },
+];
+
+// Auto-detection keywords
+const AUTO_MAP = {
+  firstName:  ['first','fname','firstname','given','givenname'],
+  lastName:   ['last','lname','lastname','surname','family'],
+  email:      ['email','e-mail','mail'],
+  phone:      ['phone','mobile','cell','tel','telephone'],
+  grade:      ['grade','class','year','level'],
+  type:       ['type','role','contact','kind','category'],
+  address:    ['address','street','addr'],
+  city:       ['city','town'],
+  country:    ['country','nation'],
+  notes:      ['note','notes','comment','comments','remarks'],
+  familyName: ['family','household','group'],
+  studentId:  ['id','studentid','student_id','enrollment'],
+  dob:        ['dob','birthdate','birthday','birth'],
+  enrollYear: ['year','enrollyear','enroll'],
+};
+
+function autoDetect(col) {
+  const c = col.toLowerCase().replace(/[^a-z]/g,'');
+  for (const [field, keywords] of Object.entries(AUTO_MAP)) {
+    if (keywords.some(k => c.includes(k))) return field;
+  }
+  return 'skip';
+}
+
+// ── FILE HANDLING ──
+window.onDrop = function(e) {
+  e.preventDefault();
+  document.getElementById('dropzone').classList.remove('drag-over');
+  const file = e.dataTransfer.files[0];
+  if (file) processFile(file);
+};
+
+window.onFileSelect = function(e) {
+  const file = e.target.files[0];
+  if (file) processFile(file);
+};
+
+function processFile(file) {
+  const ext = file.name.split('.').pop().toLowerCase();
+  if (!['xlsx','xls','csv'].includes(ext)) {
+    alert('Please upload an Excel (.xlsx, .xls) or CSV (.csv) file.');
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      let data;
+      if (ext === 'csv') {
+        // Parse CSV
+        const text = e.target.result;
+        const lines = text.split(/\r?\n/).filter(l => l.trim());
+        const headers = parseCSVRow(lines[0]);
+        data = lines.slice(1).map(line => {
+          const vals = parseCSVRow(line);
+          const obj = {};
+          headers.forEach((h,i) => obj[h] = vals[i]||'');
+          return obj;
+        }).filter(r => Object.values(r).some(v => v));
+        columns = headers;
+      } else {
+        // Parse Excel
+        const wb = XLSX.read(e.target.result, {type:'binary'});
+        const ws = wb.Sheets[wb.SheetNames[0]];
+        const rows = XLSX.utils.sheet_to_json(ws, {defval:''});
+        columns = rows.length > 0 ? Object.keys(rows[0]) : [];
+        data = rows;
+      }
+      rawData = data;
+      // Show file info
+      document.getElementById('file-name').textContent = file.name;
+      document.getElementById('file-meta').textContent = `${data.length.toLocaleString()} rows · ${columns.length} columns`;
+      document.getElementById('file-info').style.display = 'flex';
+      document.getElementById('step1-next').disabled = false;
+    } catch(err) {
+      alert('Error reading file: ' + err.message);
+    }
+  };
+  if (ext === 'csv') reader.readAsText(file);
+  else reader.readAsBinaryString(file);
+}
+
+function parseCSVRow(line) {
+  const result = [];
+  let cur = '', inQ = false;
+  for (let i = 0; i < line.length; i++) {
+    const c = line[i];
+    if (c === '"') { inQ = !inQ; }
+    else if (c === ',' && !inQ) { result.push(cur.trim()); cur = ''; }
+    else cur += c;
+  }
+  result.push(cur.trim());
+  return result;
+}
+
+window.clearFile = function() {
+  rawData = []; columns = [];
+  document.getElementById('file-info').style.display = 'none';
+  document.getElementById('step1-next').disabled = true;
+  document.getElementById('file-input').value = '';
+};
+
+// ── STEP NAVIGATION ──
+window.goToStep = function(n) {
+  [1,2,3,4].forEach(i => {
+    document.getElementById('view-'+i).style.display = i===n ? '' : 'none';
+    const s = document.getElementById('step-'+i);
+    s.classList.remove('active','done');
+    if (i < n) s.classList.add('done');
+    if (i === n) s.classList.add('active');
+  });
+  if (n === 2) buildMappingTable();
+  if (n === 3) buildPreview();
+};
+
+// ── MAPPING TABLE ──
+function buildMappingTable() {
+  // Auto-detect mappings
+  mappings = {};
+  columns.forEach(col => { mappings[col] = autoDetect(col); });
+  const autoCount = Object.values(mappings).filter(v => v !== 'skip').length;
+  document.getElementById('map-auto-count').textContent = autoCount + ' auto-mapped';
+
+  const tbody = document.getElementById('map-tbody');
+  tbody.innerHTML = '';
+  const sample = rawData.slice(0, 3);
+
+  columns.forEach(col => {
+    const sampleVals = sample.map(r => r[col]).filter(Boolean).join(', ');
+    const detected = autoDetect(col);
+    const tr = document.createElement('tr');
+    const optionsHTML = FIELDS.map(f =>
+      `<option value="${f.value}" ${mappings[col]===f.value?'selected':''}>${f.label}</option>`
+    ).join('');
+    tr.innerHTML = `
+      <td><span class="col-name">${col}</span></td>
+      <td><span class="col-sample" title="${sampleVals}">${sampleVals||'—'}</span></td>
+      <td>
+        <select class="map-select ${detected!=='skip'?'mapped':''}" data-col="${col}"
+          onchange="onMapChange(this,'${col}')">
+          ${optionsHTML}
+        </select>
+      </td>
+      <td>
+        <span class="map-badge ${detected!=='skip'?'mb-auto':'mb-skip'}">
+          ${detected!=='skip'?'Auto-detected':'Unmatched'}
+        </span>
+      </td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+window.onMapChange = function(sel, col) {
+  mappings[col] = sel.value;
+  sel.className = 'map-select ' + (sel.value !== 'skip' ? 'mapped' : '');
+  // Check for duplicate mappings (except skip)
+  const used = {};
+  Object.entries(mappings).forEach(([c, f]) => {
+    if (f !== 'skip') { used[f] = (used[f]||0) + 1; }
+  });
+  document.querySelectorAll('.map-select').forEach(s => {
+    if (s.value !== 'skip' && used[s.value] > 1) s.classList.add('conflict');
+    else if (s.value !== 'skip') { s.classList.remove('conflict'); s.classList.add('mapped'); }
+  });
+};
+
+// ── PREVIEW ──
+function buildPreview() {
+  // Map raw rows to parsed rows
+  parsedRows = rawData.map((row, i) => {
+    const mapped = { _rowNum: i + 2, _issues: [] };
+    Object.entries(mappings).forEach(([col, field]) => {
+      if (field !== 'skip') mapped[field] = (row[col]||'').toString().trim();
+    });
+    // Infer type if not mapped
+    if (!mapped.type) mapped.type = 'contact';
+    else {
+      const t = mapped.type.toLowerCase();
+      if (t.includes('student')) mapped.type = 'student';
+      else if (t.includes('parent')||t.includes('mother')||t.includes('father')||t.includes('guardian')) mapped.type = 'parent';
+      else if (t.includes('vendor')||t.includes('supplier')) mapped.type = 'vendor';
+      else if (t.includes('donor')) mapped.type = 'donor';
+      else mapped.type = 'contact';
+    }
+    // Validation
+    if (!mapped.firstName && !mapped.lastName) mapped._issues.push('Missing name');
+    if (mapped.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(mapped.email)) mapped._issues.push('Invalid email');
+    return mapped;
+  });
+
+  const ok = parsedRows.filter(r => r._issues.length === 0).length;
+  const err = parsedRows.filter(r => r._issues.length > 0).length;
+  document.getElementById('prev-ok-count').textContent = ok + ' ready';
+  document.getElementById('prev-err-count').textContent = err + ' issues';
+  document.getElementById('prev-err-count').style.display = err > 0 ? '' : 'none';
+  document.getElementById('preview-sub').textContent = `${parsedRows.length.toLocaleString()} total rows · first 50 shown`;
+  document.getElementById('import-count').textContent = ok;
+
+  // Determine shown fields
+  const shownFields = FIELDS.filter(f => f.value !== 'skip' && Object.values(mappings).includes(f.value));
+
+  const thead = document.getElementById('prev-thead');
+  thead.innerHTML = '<tr><th>#</th><th>Type</th>' + shownFields.map(f=>`<th>${f.label}</th>`).join('') + '<th>Issues</th></tr>';
+
+  const tbody = document.getElementById('prev-tbody');
+  tbody.innerHTML = '';
+  parsedRows.slice(0, 50).forEach(row => {
+    const tr = document.createElement('tr');
+    if (row._issues.length > 0) tr.classList.add('row-issue');
+    const typeClass = {student:'tb-student',parent:'tb-parent',vendor:'tb-vendor',donor:'tb-donor'}[row.type]||'tb-other';
+    tr.innerHTML = `
+      <td style="font-family:var(--mono);font-size:11px;color:var(--muted2);">${row._rowNum}</td>
+      <td><span class="type-badge ${typeClass}">${row.type}</span></td>
+      ${shownFields.map(f=>`<td style="font-size:12.5px;">${row[f.value]||'—'}</td>`).join('')}
+      <td>${row._issues.length>0?row._issues.map(i=>`<div class="issue-txt">⚠ ${i}</div>`).join(''):'<span style="color:var(--accent);font-size:11px;">✓</span>'}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+// ── IMPORT ──
+window.runImport = async function() {
+  goToStep(4);
+  const total = parsedRows.length;
+  let done = 0, skip = 0, errors = 0;
+  document.getElementById('ip-total').textContent = total;
+
+  const dupMode = document.querySelector('input[name=dup]:checked')?.value || 'skip';
+
+  for (let i = 0; i < parsedRows.length; i++) {
+    const row = parsedRows[i];
+    // Update progress
+    const pct = Math.round(((i+1)/total)*100);
+    document.getElementById('ip-bar').style.width = pct + '%';
+    document.getElementById('ip-status').textContent = `Importing row ${i+1} of ${total}…`;
+
+    try {
+      const id = row.email
+        ? row.email.toLowerCase().replace(/[^a-z0-9]/g,'_')
+        : `contact_${Date.now()}_${i}`;
+
+      const colName = (['student','parent'].includes(row.type)?row.type+'s':'contacts');
+      const docRef = doc(db, colName, id);
+
+      if (dupMode === 'skip') {
+        const existing = await getDoc(docRef);
+        if (existing.exists()) { skip++; document.getElementById('ip-skip').textContent = skip; continue; }
+      }
+
+      const data = {
+        ...row,
+        _issues: undefined,
+        _rowNum: undefined,
+        importedAt: new Date().toISOString(),
+        importedBy: currentUser.uid,
+      };
+      delete data._issues;
+      delete data._rowNum;
+
+      await setDoc(docRef, data, { merge: dupMode === 'update' });
+      done++;
+      document.getElementById('ip-done').textContent = done;
+    } catch(e) {
+      errors++;
+      document.getElementById('ip-err').textContent = errors;
+    }
+
+    // Small delay to keep UI responsive
+    if (i % 10 === 0) await new Promise(r => setTimeout(r, 10));
+  }
+
+  // Show result
+  document.getElementById('import-progress').style.display = 'none';
+  document.getElementById('import-result').style.display = 'block';
+  document.getElementById('step4-title').textContent = errors > 0 ? 'Import Finished with Warnings' : 'Import Complete';
+  document.getElementById('res-icon').textContent = errors > 0 ? '⚠️' : '✅';
+  document.getElementById('res-title').textContent = errors > 0 ? 'Imported with some issues' : 'All contacts imported successfully';
+  document.getElementById('res-sub').textContent = `Your contacts have been saved to the database and are now available in Students, Parents, and other sections.`;
+  document.getElementById('res-stats').innerHTML = `
+    <div class="rs-item"><div class="rs-val" style="color:var(--accent);">${done}</div><div class="rs-lbl">Imported</div></div>
+    <div class="rs-item"><div class="rs-val" style="color:var(--muted);">${skip}</div><div class="rs-lbl">Skipped</div></div>
+    <div class="rs-item"><div class="rs-val" style="color:var(--red);">${errors}</div><div class="rs-lbl">Errors</div></div>`;
+};
+
+window.resetImport = function() {
+  rawData = []; columns = []; parsedRows = []; mappings = {};
+  clearFile();
+  document.getElementById('import-progress').style.display = 'block';
+  document.getElementById('import-result').style.display = 'none';
+  document.getElementById('ip-bar').style.width = '0%';
+  ['ip-done','ip-skip','ip-err','ip-total'].forEach(id => document.getElementById(id).textContent = '0');
+  goToStep(1);
+};
+
+// ── TEMPLATE DOWNLOAD ──
+window.downloadTemplate = function() {
+  const headers = ['Type','FirstName','LastName','Email','Phone','Grade','FamilyName','Address','City','Country','Notes','StudentID','DateOfBirth','EnrollYear'];
+  const sample = [
+    ['student','David','Cohen','david.cohen@email.com','+1-646-555-0142','Grade 8','Cohen Family','42 Maple St','Brooklyn','USA','Merit scholarship applied','1042','2012-03-14','2022'],
+    ['parent','Jonathan','Cohen','jonathan.cohen@email.com','+1-646-555-0143','','Cohen Family','42 Maple St','Brooklyn','USA','Primary payer','','',''],
+    ['vendor','','CleanCo Services','info@cleancoservices.com','+1-718-555-0200','','','180 Industrial Ave','Queens','USA','Janitorial vendor','','',''],
+  ];
+  const csv = [headers, ...sample].map(r => r.map(v => `"${v}"`).join(',')).join('\n');
+  const blob = new Blob([csv], {type:'text/csv'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'FinTrack_Contacts_Template.csv';
+  a.click();
+};
+</script>
+</body>
+</html>
