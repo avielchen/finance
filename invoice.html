@@ -252,49 +252,65 @@ input[type=date].input{min-width:128px;padding-right:4px;font-size:12.5px;}
 
 <div class="content">
 
-  <!-- META -->
-  <div class="section fi">
-    <div class="sec-body" style="padding:14px 16px;">
-      <div class="g3">
-        <div class="field"><label>Invoice Date</label><input type="date" class="input mono" id="inv-date" oninput="autoAdvanceDate(this)"></div>
-        <div class="field"><label>Invoice #</label><input type="text" class="input mono" value="#INV-1048"></div>
-        <div class="field"><label>School Year</label><select class="input"><option>2025 – 2026</option><option>2026 – 2027</option></select></div>
-      </div>
-    </div>
-  </div>
+  <!-- COMBINED META + SUMMARY — 2 tiles side by side -->
+  <div class="fi" style="display:grid;grid-template-columns:220px 1fr;gap:14px;margin-bottom:14px;">
 
-  <!-- SUMMARY (vertical + circle) -->
-  <div class="section fi" id="summary-section">
-    <div class="sec-hd">
-      <div class="sum-badge-row" style="flex:1;display:flex;align-items:center;justify-content:space-between;">
-        <span style="font-size:12.5px;font-weight:700;">Invoice Summary</span>
-        <span class="badge b-y" id="inv-badge">Draft</span>
+    <!-- TILE 1: Invoice meta (left) -->
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px 16px;display:flex;flex-direction:column;gap:14px;">
+      <div class="field"><label>Invoice #</label><input type="text" class="input mono" id="inv-number" value="#INV-1048"></div>
+      <div class="field"><label>Invoice Date</label><input type="date" class="input mono" id="inv-date" oninput="autoAdvanceDate(this)"></div>
+      <div class="field"><label>School Year</label><select class="input" id="inv-year"><option>2025 – 2026</option><option>2026 – 2027</option></select></div>
+      <div style="margin-top:auto;padding-top:4px;">
+        <span class="badge b-y" id="inv-badge" style="font-size:11px;">Draft</span>
       </div>
     </div>
-    <div class="summary-wrap">
-      <!-- Circle graph -->
-      <div class="sum-circle-wrap">
-        <svg id="sum-svg" width="110" height="110" viewBox="0 0 110 110">
-          <circle cx="55" cy="55" r="44" fill="none" stroke="#e6e6e0" stroke-width="12"/>
-          <circle id="sum-arc" cx="55" cy="55" r="44" fill="none" stroke="#1a6b4a" stroke-width="12"
-            stroke-dasharray="276.46" stroke-dashoffset="138.23" stroke-linecap="round"
-            transform="rotate(-90 55 55)"/>
-          <text x="55" y="51" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="14" font-weight="700" fill="#1c1c1a" id="sum-pct-txt">50%</text>
-          <text x="55" y="66" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-size="10" fill="#686860">collected</text>
+
+    <!-- TILE 2: Summary + circle (right) -->
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px 20px;display:grid;grid-template-columns:1fr auto;gap:20px;align-items:center;">
+
+      <!-- Left: summary rows -->
+      <div style="display:flex;flex-direction:column;gap:0;">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);">
+          <span style="font-size:12px;color:var(--muted);">Charges</span>
+          <span style="font-family:var(--mono);font-size:14px;font-weight:600;" id="s-charges">$21,300</span>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);">
+          <span style="font-size:12px;color:var(--muted);">Credits</span>
+          <span style="font-family:var(--mono);font-size:14px;font-weight:600;color:var(--red);" id="s-credits">−$2,500</span>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:2px solid var(--border);">
+          <span style="font-size:12.5px;font-weight:700;">Total Due</span>
+          <span style="font-family:var(--mono);font-size:15px;font-weight:700;color:var(--accent);" id="s-total">$18,800</span>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);">
+          <span style="font-size:12px;color:var(--muted);">Paid</span>
+          <span style="font-family:var(--mono);font-size:14px;font-weight:600;color:var(--accent);" id="s-paid">$9,474</span>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;">
+          <span style="font-size:12.5px;font-weight:700;color:var(--yellow);">Balance</span>
+          <span style="font-family:var(--mono);font-size:15px;font-weight:700;color:var(--yellow);" id="s-balance">$9,326</span>
+        </div>
+      </div>
+
+      <!-- Right: circle graph -->
+      <div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex-shrink:0;">
+        <svg id="sum-svg" width="100" height="100" viewBox="0 0 100 100">
+          <!-- Background track -->
+          <circle cx="50" cy="50" r="38" fill="none" stroke="#e6e6e0" stroke-width="9"/>
+          <!-- Filled arc — circumference = 2π×38 ≈ 238.76 -->
+          <circle id="sum-arc" cx="50" cy="50" r="38" fill="none" stroke="#1a6b4a" stroke-width="9"
+            stroke-dasharray="238.76" stroke-dashoffset="119.38"
+            stroke-linecap="round" transform="rotate(-90 50 50)"/>
+          <!-- Center text -->
+          <text x="50" y="46" text-anchor="middle"
+            font-family="IBM Plex Mono,monospace" font-size="13" font-weight="700" fill="#1c1c1a"
+            id="sum-pct-txt">50%</text>
+          <text x="50" y="60" text-anchor="middle"
+            font-family="IBM Plex Sans,sans-serif" font-size="9.5" fill="#686860">collected</text>
         </svg>
+        <div style="font-size:10.5px;color:var(--muted);text-align:center;" id="s-prog-lbl">$9,474 of $18,800</div>
       </div>
-      <!-- Amounts -->
-      <div class="sum-amounts">
-        <div class="sum-row"><div class="sum-lbl">Charges</div><div class="sum-val" id="s-charges">$21,300</div></div>
-        <div class="sum-divider"></div>
-        <div class="sum-row"><div class="sum-lbl">Credits</div><div class="sum-val" style="color:var(--red);" id="s-credits">−$2,500</div></div>
-        <div class="sum-divider"></div>
-        <div class="sum-row"><div class="sum-lbl">Total Due</div><div class="sum-val" style="color:var(--accent);" id="s-total">$18,800</div></div>
-        <div class="sum-divider"></div>
-        <div class="sum-row"><div class="sum-lbl">Paid</div><div class="sum-val" style="color:var(--accent);" id="s-paid">$9,474</div></div>
-        <div class="sum-divider"></div>
-        <div class="sum-row"><div class="sum-lbl">Balance</div><div class="sum-val" style="color:var(--yellow);" id="s-balance">$9,326</div></div>
-      </div>
+
     </div>
   </div>
 
@@ -504,9 +520,9 @@ input[type=date].input{min-width:128px;padding-right:4px;font-size:12.5px;}
 <!-- ACTION BAR -->
 <div class="action-bar">
   <a href="students.html" style="display:flex;align-items:center;gap:7px;text-decoration:none;color:var(--text);">
-    <div style="width:22px;height:22px;border-radius:50%;background:var(--accent);color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">DC</div>
-    <span style="font-size:12px;font-weight:600;">David Cohen</span>
-    <span style="font-size:11px;color:var(--muted2);font-family:var(--mono);">#INV-1048</span>
+    <div id="ab-av" style="width:22px;height:22px;border-radius:50%;background:var(--accent);color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">DC</div>
+    <span style="font-size:12px;font-weight:600;" id="ab-name">David Cohen</span>
+    <span style="font-size:11px;color:var(--muted2);font-family:var(--mono);" id="ab-inv">#INV-1048</span>
   </a>
   <span style="color:var(--border2);">|</span>
   <span style="font-family:var(--mono);font-size:12px;color:var(--yellow);" id="ab-bal">Balance: $9,326</span>
@@ -617,12 +633,13 @@ function recalcAll() {
   el('inst-total-ref', '$' + fmtK(total));
   el('ab-bal', 'Balance: $' + fmtK(bal));
 
-  // Update circle
-  const circumference = 276.46;
+  // Update circle — circumference = 2π×38 = 238.76
+  const circumference = 238.76;
   const offset = circumference - (pct / 100) * circumference;
   const arc = document.getElementById('sum-arc');
   if (arc) arc.setAttribute('stroke-dashoffset', offset.toFixed(2));
   el('sum-pct-txt', Math.round(pct) + '%');
+  el('s-prog-lbl', '$' + fmtK(paid) + ' of $' + fmtK(total));
 
   // Badge
   const badge = document.getElementById('inv-badge');
@@ -909,8 +926,387 @@ recalcAll();
 </script>
 
 <script type="module">
-import { initNav } from './nav.js';
-initNav({ currentPage: 'tuition' });
+import { initNav, loadSettings, getNextInvoiceNumber, bumpInvoiceNumber, getDefaultDateValue } from './nav.js';
+import {
+  getCurrentOrgId, getContact, getInvoice, saveInvoice,
+  getContacts, getOrgSettings, fmt as dbFmt
+} from './db.js';
+
+// ── AUTH + ORG ──
+await initNav({ currentPage: 'tuition' });
+const orgId = getCurrentOrgId();
+const settings = loadSettings();
+
+// ── URL PARAMS ──
+const params = new URLSearchParams(window.location.search);
+const invoiceId = params.get('id');       // editing existing invoice
+const contactId = params.get('contactId'); // new invoice for a contact
+const contactName = params.get('contactName');
+const isEdit = !!invoiceId || params.get('edit') === '1';
+
+// Update page label (also done in inline script but ensure module version wins)
+const modeLabel = document.getElementById('page-mode-label');
+if (modeLabel) modeLabel.textContent = isEdit ? 'Edit Invoice' : 'New Invoice';
+const saveBtn = document.getElementById('save-btn');
+if (saveBtn) saveBtn.textContent = isEdit ? '💾 Save Changes' : '✉ Save & Send';
+
+// ── LOAD ORG SETTINGS → populate charge type dropdowns ──
+async function loadChargeTypes() {
+  try {
+    const orgSettings = await getOrgSettings(orgId);
+    const chargeTypes = orgSettings.chargeTypes || settings.chargeTypes || [];
+    const creditTypes = orgSettings.creditTypes || settings.creditTypes || [];
+    const instTypes = orgSettings.instTypes || settings.instTypes || ['Deposit','Registration Fee','Installment','Final Payment','Other'];
+
+    // Update all existing fee type selects
+    if (chargeTypes.length > 0) {
+      const chargeOpts = chargeTypes.filter(t => t.active !== false)
+        .map(t => `<option value="${t.name}" data-amount="${t.amount||0}">${t.name}</option>`).join('');
+      document.querySelectorAll('.fee-outer.type-fee select').forEach(sel => {
+        const cur = sel.value;
+        sel.innerHTML = chargeOpts;
+        // Try to restore previous value
+        if ([...sel.options].some(o => o.value === cur)) sel.value = cur;
+      });
+    }
+
+    // Store for new rows
+    window._chargeTypes = chargeTypes.filter(t => t.active !== false);
+    window._creditTypes = creditTypes.filter(t => t.active !== false);
+    window._instTypes = instTypes;
+
+    // Update invoice number from settings
+    const invNumEl = document.getElementById('inv-number');
+    if (invNumEl && !isEdit) invNumEl.value = getNextInvoiceNumber();
+
+    // Update school years
+    const yearSel = document.getElementById('inv-year');
+    if (yearSel) {
+      const cy = new Date().getFullYear();
+      yearSel.innerHTML = [0,1,2].map(i =>
+        `<option value="${cy+i-1} – ${cy+i}">${cy+i-1} – ${cy+i}</option>`
+      ).join('');
+    }
+
+  } catch (e) {
+    console.warn('Could not load org settings:', e.message);
+    window._chargeTypes = [];
+    window._creditTypes = [];
+    window._instTypes = ['Deposit','Registration Fee','Installment','Final Payment','Other'];
+  }
+}
+
+// ── LOAD CONTACT (student/patient) ──
+async function loadContact() {
+  const cid = contactId || (isEdit ? null : null);
+  if (!cid && !contactName) return;
+
+  let name = contactName ? decodeURIComponent(contactName) : '';
+  let grade = '', avatarColor = '#1a6b4a', cid2 = cid;
+
+  if (cid) {
+    try {
+      const contact = await getContact(orgId, cid);
+      if (contact) {
+        name = `${contact.firstName||''} ${contact.lastName||''}`.trim();
+        grade = contact.grade || '';
+        avatarColor = contact.avatarColor || '#1a6b4a';
+        cid2 = contact.id;
+      }
+    } catch(e) { /* use URL param name */ }
+  }
+
+  if (!name) return;
+
+  // Update student chip
+  const chip = document.querySelector('.student-chip');
+  if (chip) {
+    chip.href = cid2 ? `students.html?id=${cid2}` : 'students.html';
+    const av = chip.querySelector('.sc-av');
+    if (av) {
+      const initials = name.split(' ').map(p => p[0]).join('').slice(0,2).toUpperCase();
+      av.textContent = initials;
+      av.style.background = avatarColor;
+    }
+    const nm = chip.querySelector('.sc-name');
+    if (nm) nm.textContent = name;
+    const meta = chip.querySelector('.sc-meta');
+    const invNum = document.getElementById('inv-number')?.value || '';
+    if (meta) meta.textContent = [grade, invNum].filter(Boolean).join(' · ');
+  }
+
+  // Update action bar
+  const abAv = document.getElementById('ab-av');
+  const abName = document.getElementById('ab-name');
+  const abInv = document.getElementById('ab-inv');
+  if (abAv) {
+    const initials = name.split(' ').map(p => p[0]).join('').slice(0,2).toUpperCase();
+    abAv.textContent = initials;
+    abAv.style.background = avatarColor;
+  }
+  if (abName) abName.textContent = name;
+
+  // Store for save
+  window._contactId = cid2;
+  window._contactName = name;
+}
+
+// ── LOAD EXISTING INVOICE (edit mode) ──
+async function loadExistingInvoice() {
+  if (!invoiceId) return;
+  try {
+    const inv = await getInvoice(orgId, invoiceId);
+    if (!inv) { alert('Invoice not found.'); return; }
+
+    // Meta fields
+    const dateEl = document.getElementById('inv-date');
+    const numEl = document.getElementById('inv-number');
+    const yearEl = document.getElementById('inv-year');
+    if (dateEl && inv.date) dateEl.value = inv.date;
+    if (numEl && inv.invoiceNumber) numEl.value = inv.invoiceNumber;
+    if (yearEl && inv.schoolYear) {
+      [...yearEl.options].forEach(o => { if (o.value === inv.schoolYear) o.selected = true; });
+    }
+
+    // Populate contact chip
+    if (inv.contactId) {
+      params.set('contactId', inv.contactId);
+      if (inv.contactName) params.set('contactName', inv.contactName);
+      window._contactId = inv.contactId;
+      window._contactName = inv.contactName || '';
+      await loadContact();
+    }
+
+    // Clear existing demo rows
+    document.getElementById('fee-rows').innerHTML = '';
+
+    // Rebuild fee rows from saved data
+    if (inv.lineItems && inv.lineItems.length > 0) {
+      inv.lineItems.forEach(item => {
+        if (item.type === 'credit') {
+          addCreditRowData(item);
+        } else {
+          addFeeRowData(item);
+        }
+      });
+      rebuildSubtotals();
+    }
+
+    // Rebuild installment plan
+    if (inv.installments && inv.installments.length > 0) {
+      showInstSection();
+      document.getElementById('inst-setup-block').style.display = 'none';
+      document.getElementById('inst-rows-wrap').style.display = '';
+      inv.installments.forEach(row => addInstRowData(row.type, row.date, row.amount));
+      setupInstDrag();
+      recalcInst();
+    }
+
+    recalcAll();
+    window._invoiceId = invoiceId;
+  } catch (e) {
+    console.error('Could not load invoice:', e.message);
+  }
+}
+
+// Helper to add a fee row from saved data
+function addFeeRowData(item) {
+  const id = item.id || ('r' + Math.random().toString(36).slice(2,7));
+  const wrap = document.getElementById('fee-rows');
+  const div = document.createElement('div');
+  div.className = 'fee-outer type-fee';
+  div.draggable = true;
+  div.dataset.id = id; div.dataset.type = 'fee';
+  div.dataset.amount = item.amount || 0;
+  div.dataset.paid = item.paid || 0;
+
+  const pct = item.amount > 0 ? Math.min((item.paid||0)/item.amount*100,100) : 0;
+  const sbClass = pct >= 100 ? 'sb-paid' : pct > 0 ? 'sb-partial' : item.overdue ? 'sb-overdue' : 'sb-unpaid';
+  const sbTxt = pct >= 100 ? '✓ Paid' : pct > 0 ? Math.round(pct)+'% paid' : item.overdue ? 'Overdue' : 'Unpaid';
+
+  div.innerHTML = `
+    <div class="row-bar bar-fee"></div>
+    <div class="fee-inner">
+      <div class="dh">⠿</div>
+      <select class="input" style="font-size:12px;" onchange="onTypeChange(this)">
+        <option selected>${item.itemType||'Other'}</option>
+      </select>
+      <input class="input" value="${escHtml(item.description||'')}" style="font-size:12.5px;" oninput="recalcAll()">
+      <input class="input mono" type="number" value="${item.qty||1}" min="1" style="font-size:13px;" oninput="calcFeeRow(this)">
+      <div class="ipfx"><span class="pfx">$</span><input class="input mono" type="number" value="${item.price||0}" step="0.01" oninput="calcFeeRow(this)"></div>
+      <input type="date" class="input mono" value="${item.dueDate||''}" oninput="checkDue(this);autoAdvanceDate(this)">
+      <div class="sb ${sbClass}" id="sb-${id}"><div class="sb-fill" style="width:${pct}%;"></div><div class="sb-txt">${sbTxt}</div></div>
+      <div class="row-total">${item.type==='credit'?'−':''}$${fmtK(item.amount||0)}</div>
+      <button class="del-btn" onclick="deleteRow(this,'${id}')">×</button>
+    </div>`;
+  wrap.appendChild(div);
+  setupFeeDrag(div);
+}
+
+function addCreditRowData(item) {
+  const id = item.id || ('r' + Math.random().toString(36).slice(2,7));
+  const wrap = document.getElementById('fee-rows');
+  const div = document.createElement('div');
+  div.className = 'fee-outer type-credit';
+  div.draggable = true;
+  div.dataset.id = id; div.dataset.type = 'credit'; div.dataset.amount = item.amount||0; div.dataset.paid = 0;
+  div.innerHTML = `
+    <div class="row-bar bar-credit"></div>
+    <div class="fee-inner">
+      <div class="dh">⠿</div>
+      <select class="input" style="font-size:12px;background:var(--pink);">
+        <option selected>${item.itemType||'Credit'}</option>
+      </select>
+      <input class="input" value="${escHtml(item.description||'')}" style="font-size:12.5px;background:var(--pink);" oninput="recalcAll()">
+      <input class="input mono" type="number" value="${item.qty||1}" style="font-size:13px;background:var(--pink);" oninput="calcFeeRow(this)">
+      <div class="ipfx"><span class="pfx">$</span><input class="input mono" type="number" value="${item.price||0}" step="0.01" style="background:var(--pink);" oninput="calcFeeRow(this)"></div>
+      <input type="date" class="input mono" value="${item.dueDate||''}" style="background:var(--pink);" oninput="autoAdvanceDate(this)">
+      <div class="sb" style="background:transparent;border:none;"></div>
+      <div class="row-total" style="color:var(--red);">−$${fmtK(item.amount||0)}</div>
+      <button class="del-btn" onclick="deleteRow(this,'${id}')">×</button>
+    </div>`;
+  wrap.appendChild(div);
+  setupFeeDrag(div);
+}
+
+function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;'); }
+
+// ── COLLECT INVOICE DATA FOR SAVE ──
+function collectInvoiceData() {
+  const lineItems = [];
+  document.querySelectorAll('#fee-rows .fee-outer').forEach(row => {
+    const inputs = row.querySelectorAll('input');
+    const sel = row.querySelector('select');
+    const dateInp = row.querySelector('input[type=date]');
+    const numInputs = row.querySelectorAll('input[type=number]');
+    const qty = parseFloat(numInputs[0]?.value) || 1;
+    const price = parseFloat(numInputs[1]?.value) || 0;
+    lineItems.push({
+      id: row.dataset.id,
+      type: row.dataset.type || 'fee',
+      itemType: sel?.value || '',
+      description: row.querySelector('input[type=text], input:not([type]):not(.mono)') ?.value || '',
+      qty, price,
+      amount: qty * price,
+      paid: parseFloat(row.dataset.paid) || 0,
+      dueDate: dateInp?.value || '',
+    });
+  });
+
+  const installments = [];
+  document.querySelectorAll('#inst-rows .inst-outer').forEach(row => {
+    const sel = row.querySelector('select');
+    const dateInp = row.querySelector('input[type=date]');
+    const amtInp = row.querySelector('input[type=number]');
+    installments.push({
+      type: sel?.value || 'Installment',
+      date: dateInp?.value || '',
+      amount: parseFloat(amtInp?.value) || 0,
+    });
+  });
+
+  const invNum = document.getElementById('inv-number')?.value || '';
+  const invDate = document.getElementById('inv-date')?.value || new Date().toISOString().split('T')[0];
+  const schoolYear = document.getElementById('inv-year')?.value || '';
+
+  let charges = 0, credits = 0;
+  lineItems.forEach(i => { if (i.type === 'credit') credits += i.amount; else charges += i.amount; });
+  const totalAmount = charges - credits;
+  const totalPaid = lineItems.reduce((s, i) => s + (i.paid||0), 0);
+
+  return {
+    contactId: window._contactId || '',
+    contactName: window._contactName || '',
+    invoiceNumber: invNum,
+    date: invDate,
+    schoolYear,
+    lineItems,
+    installments: installments.length > 0 ? installments : [],
+    totalAmount,
+    totalPaid,
+    status: totalPaid >= totalAmount ? 'paid' : totalPaid > 0 ? 'partial' : 'unpaid',
+    dueDate: lineItems.find(i => i.dueDate)?.dueDate || '',
+  };
+}
+
+// ── SAVE INVOICE ──
+window._saveInvoice = async function(andSend = false) {
+  const btn = document.getElementById('save-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
+  try {
+    const data = collectInvoiceData();
+    const savedId = await saveInvoice(orgId, window._invoiceId || null, data);
+    window._invoiceId = savedId;
+
+    // Bump invoice number if new invoice
+    if (!isEdit) bumpInvoiceNumber();
+
+    // Update URL to edit mode
+    const newUrl = `${window.location.pathname}?id=${savedId}&edit=1`;
+    window.history.replaceState({}, '', newUrl);
+
+    // Update mode label
+    const ml = document.getElementById('page-mode-label');
+    if (ml) ml.textContent = 'Edit Invoice';
+
+    showToast('Invoice saved ✓');
+    if (btn) { btn.disabled = false; btn.textContent = '💾 Save Changes'; }
+  } catch (e) {
+    alert('Failed to save: ' + e.message);
+    if (btn) { btn.disabled = false; btn.textContent = isEdit ? '💾 Save Changes' : '✉ Save & Send'; }
+  }
+};
+
+// Wire save buttons
+const saveBtn2 = document.getElementById('save-btn');
+if (saveBtn2) saveBtn2.onclick = () => window._saveInvoice(false);
+const draftBtn = document.querySelector('[onclick*="Draft"]');
+
+// Toast helper
+function showToast(msg) {
+  let t = document.getElementById('ft-toast');
+  if (!t) {
+    t = document.createElement('div');
+    t.id = 'ft-toast';
+    t.style.cssText = 'position:fixed;bottom:70px;right:24px;background:var(--accent);color:#fff;padding:8px 16px;border-radius:8px;font-size:12.5px;z-index:500;opacity:0;transition:opacity .2s;pointer-events:none;font-family:var(--sans);';
+    document.body.appendChild(t);
+  }
+  t.textContent = msg;
+  t.style.opacity = '1';
+  clearTimeout(t._t);
+  t._t = setTimeout(() => { t.style.opacity = '0'; }, 2500);
+}
+
+// ── OVERRIDE addFeeRow / addCreditRow to use org charge types ──
+window._addFeeRowWithTypes = function() {
+  const types = window._chargeTypes || [];
+  if (types.length === 0) { addFeeRow(); return; }
+  // addFeeRow is defined in the inline script — just call it
+  // The inline script will use TD defaults; org types override happens on type change
+  addFeeRow();
+  // Rebuild the type dropdown in the new row with org types
+  const rows = document.querySelectorAll('#fee-rows .fee-outer.type-fee');
+  const lastRow = rows[rows.length - 1];
+  if (lastRow) {
+    const sel = lastRow.querySelector('select');
+    if (sel) {
+      sel.innerHTML = types.map(t => `<option value="${t.name}" data-amount="${t.amount||0}">${t.name}</option>`).join('');
+    }
+  }
+};
+
+// ── RUN ──
+await loadChargeTypes();
+await loadContact();
+if (isEdit && invoiceId) {
+  await loadExistingInvoice();
+} else {
+  // New invoice — set default date
+  const dateEl = document.getElementById('inv-date');
+  if (dateEl && !dateEl.value) {
+    dateEl.value = getDefaultDateValue('');
+  }
+}
 </script>
 </body>
 </html>
