@@ -166,7 +166,7 @@ input[type=date].input{min-width:128px;padding-right:4px;font-size:12px;}
 .fi{animation:fu .2s ease both;}
 </style>
 </head>
-<body>
+<body data-page="payments">
 <div class="shell">
 <aside class="sidebar" id="sidebar">
   <div class="sidebar-top">
@@ -446,11 +446,7 @@ input[type=date].input{min-width:128px;padding-right:4px;font-size:12px;}
 
 <script>
 // ── SIDEBAR ──
-let sidebarOpen = false;
-function toggleSidebar() {
-  sidebarOpen = !sidebarOpen;
-  document.getElementById('sidebar').classList.toggle('open', sidebarOpen);
-}
+function toggleSidebar(){ window._ftToggleSidebar(); }
 
 // ── DATE AUTO-ADVANCE ──
 let lastDate = '';
@@ -741,6 +737,11 @@ function filterCards() {
 
 function fmt(n) { return (parseFloat(n) || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
 function fmtK(n) { const v = parseFloat(n) || 0; return v % 1 === 0 ? v.toLocaleString('en-US') : v.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+</script>
+
+<script type="module">
+import { initNav } from './nav.js';
+initNav({ currentPage: 'payments' });
 </script>
 </body>
 </html>

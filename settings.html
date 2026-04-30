@@ -144,7 +144,7 @@ select.input{cursor:pointer;}
 .fi{animation:fu .2s ease both;}
 </style>
 </head>
-<body>
+<body data-page="settings">
 <div class="shell">
 
 <aside class="sidebar" id="sidebar">
@@ -210,7 +210,7 @@ select.input{cursor:pointer;}
         <div class="sec-hd"><div><div class="sec-title">Organization</div><div class="sec-sub">Details used on invoices and receipts</div></div></div>
         <div class="sec-body">
           <div class="g2" style="margin-bottom:14px;">
-            <div class="field"><label>Organization Name</label><input class="input" value="Ninaviguas School"></div>
+            <div class="field"><label>Organization Name</label><input class="input" id="org-name" value="Ninaviguas School"></div>
             <div class="field"><label>Tax ID / EIN</label><input class="input" placeholder="12-3456789"></div>
           </div>
           <div class="g2" style="margin-bottom:14px;">
@@ -219,7 +219,7 @@ select.input{cursor:pointer;}
           </div>
           <div class="field" style="margin-bottom:14px;"><label>Invoice Footer Text</label><input class="input" value="Thank you for your payment. Please contact us with any questions."></div>
           <div class="field"><label>Address</label><input class="input" placeholder="School address..."></div>
-          <div style="margin-top:16px;"><button class="btn btn-p btn-sm">Save Changes</button></div>
+          <div style="margin-top:16px;"><button class="btn btn-p btn-sm" onclick="saveOrg()">Save Changes</button></div>
         </div>
       </div>
     </div>
@@ -230,13 +230,13 @@ select.input{cursor:pointer;}
       <div class="section">
         <div class="sec-hd"><div><div class="sec-title">Main Features</div><div class="sec-sub">Show or hide main menu items. Disabled features are removed from the sidebar.</div></div></div>
         <div class="sec-body">
-          <div class="tog-row"><div><div class="tog-lbl">Tuition / Invoicing</div><div class="tog-desc">Invoice creation, installments, and payment tracking</div></div><button class="tog on" onclick="this.classList.toggle('on');toggleNav('tuition',this)"></button></div>
-          <div class="tog-row"><div><div class="tog-lbl">Donations</div><div class="tog-desc">Donor management, campaigns, and pledge tracking</div></div><button class="tog on" onclick="this.classList.toggle('on');toggleNav('donations',this)"></button></div>
-          <div class="tog-row"><div><div class="tog-lbl">Payments</div><div class="tog-desc">Record and allocate payments to invoices</div></div><button class="tog on" onclick="this.classList.toggle('on');toggleNav('payments',this)"></button></div>
-          <div class="tog-row"><div><div class="tog-lbl">Vendors</div><div class="tog-desc">Vendor management and invoice approvals</div></div><button class="tog on" onclick="this.classList.toggle('on');toggleNav('vendors',this)"></button></div>
-          <div class="tog-row"><div><div class="tog-lbl">Students</div><div class="tog-desc">Student profiles and enrollment</div></div><button class="tog on" onclick="this.classList.toggle('on')"></button></div>
-          <div class="tog-row"><div><div class="tog-lbl">Parents</div><div class="tog-desc">Parent and family contact management</div></div><button class="tog on" onclick="this.classList.toggle('on')"></button></div>
-          <div class="tog-row"><div><div class="tog-lbl">Reports</div><div class="tog-desc">Financial reports and exports</div></div><button class="tog on" onclick="this.classList.toggle('on')"></button></div>
+          <div class="tog-row"><div><div class="tog-lbl">Tuition / Invoicing</div><div class="tog-desc">Invoice creation, installments, and payment tracking</div></div><button class="tog on" id="tog-tuition" onclick="this.classList.toggle('on');toggleNav('tuition',this)"></button></div>
+          <div class="tog-row"><div><div class="tog-lbl">Donations</div><div class="tog-desc">Donor management, campaigns, and pledge tracking</div></div><button class="tog on" id="tog-donations" onclick="this.classList.toggle('on');toggleNav('donations',this)"></button></div>
+          <div class="tog-row"><div><div class="tog-lbl">Payments</div><div class="tog-desc">Record and allocate payments to invoices</div></div><button class="tog on" id="tog-payments" onclick="this.classList.toggle('on');toggleNav('payments',this)"></button></div>
+          <div class="tog-row"><div><div class="tog-lbl">Vendors</div><div class="tog-desc">Vendor management and invoice approvals</div></div><button class="tog on" id="tog-vendors" onclick="this.classList.toggle('on');toggleNav('vendors',this)"></button></div>
+          <div class="tog-row"><div><div class="tog-lbl">Students</div><div class="tog-desc">Student profiles and enrollment</div></div><button class="tog on" id="tog-students" onclick="this.classList.toggle('on');toggleNav('students',this)"></button></div>
+          <div class="tog-row"><div><div class="tog-lbl">Parents</div><div class="tog-desc">Parent and family contact management</div></div><button class="tog on" id="tog-parents" onclick="this.classList.toggle('on');toggleNav('parents',this)"></button></div>
+          <div class="tog-row"><div><div class="tog-lbl">Reports</div><div class="tog-desc">Financial reports and exports</div></div><button class="tog on" id="tog-reports" onclick="this.classList.toggle('on');toggleNav('reports',this)"></button></div>
         </div>
       </div>
       <!-- Optional Features -->
@@ -277,18 +277,37 @@ select.input{cursor:pointer;}
           <div style="margin-bottom:20px;">
             <div style="font-size:12.5px;font-weight:700;margin-bottom:10px;">Invoice Number Format</div>
             <div class="g2">
-              <div class="field"><label>Prefix</label><input class="input mono" value="INV-"></div>
-              <div class="field"><label>Next Number</label><input class="input mono" value="1049" type="number"></div>
+              <div class="field"><label>Prefix</label><input class="input mono" id="pref-inv-prefix" value="INV-"></div>
+              <div class="field"><label>Next Number</label><input class="input mono" id="pref-inv-next" value="1049" type="number"></div>
             </div>
           </div>
-          <div>
+          <div style="margin-bottom:20px;">
             <div style="font-size:12.5px;font-weight:700;margin-bottom:10px;">Payment Number Format</div>
             <div class="g2">
-              <div class="field"><label>Prefix</label><input class="input mono" value="PAY-"></div>
-              <div class="field"><label>Next Number</label><input class="input mono" value="0042" type="number"></div>
+              <div class="field"><label>Prefix</label><input class="input mono" id="pref-pay-prefix" value="PAY-"></div>
+              <div class="field"><label>Next Number</label><input class="input mono" id="pref-pay-next" value="0042" type="number"></div>
             </div>
           </div>
-          <div style="margin-top:16px;"><button class="btn btn-p btn-sm">Save Preferences</button></div>
+          <!-- TERMINOLOGY -->
+          <div style="margin-bottom:10px;">
+            <div style="font-size:12.5px;font-weight:700;margin-bottom:6px;">Menu Terminology</div>
+            <div style="font-size:12px;color:var(--muted);margin-bottom:12px;">Rename menus to match your organization type (e.g. Students → Patients, Parents → Payers).</div>
+            <div class="g2" style="margin-bottom:10px;">
+              <div class="field"><label>Tuition menu</label><input class="input" id="term-tuition" placeholder="Tuition"></div>
+              <div class="field"><label>Donations menu</label><input class="input" id="term-donations" placeholder="Donations"></div>
+              <div class="field"><label>Payments menu</label><input class="input" id="term-payments" placeholder="Payments"></div>
+              <div class="field"><label>Vendors menu</label><input class="input" id="term-vendors" placeholder="Vendors"></div>
+              <div class="field"><label>Students menu</label><input class="input" id="term-students" placeholder="Students"></div>
+              <div class="field"><label>Parents menu</label><input class="input" id="term-parents" placeholder="Parents"></div>
+              <div class="field"><label>Reports menu</label><input class="input" id="term-reports" placeholder="Reports"></div>
+              <div class="field"><label>Student (singular)</label><input class="input" id="term-student" placeholder="Student"></div>
+              <div class="field"><label>Parent (singular)</label><input class="input" id="term-parent" placeholder="Parent"></div>
+              <div class="field"><label>Vendor (singular)</label><input class="input" id="term-vendor" placeholder="Vendor"></div>
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:16px;">
+            <button class="btn btn-p btn-sm" onclick="savePreferences();saveTerminology();">Save Preferences & Terminology</button>
+          </div>
         </div>
       </div>
     </div>
@@ -316,6 +335,7 @@ select.input{cursor:pointer;}
           </table>
           <div style="padding:10px 18px;"><button class="add-row-btn" onclick="addChargeRow()">＋ Add charge type</button></div>
         </div>
+        <div style="padding:0 18px 14px;"><button class="btn btn-p btn-sm" onclick="saveChargeTypes()">Save Charge & Credit Types</button></div>
       </div>
       <!-- Credit Types -->
       <div class="section">
@@ -440,6 +460,7 @@ select.input{cursor:pointer;}
           </table>
           <div style="padding:10px 18px;"><button class="add-row-btn" onclick="addInstTypeRow()">＋ Add installment type</button></div>
         </div>
+        <div style="padding:0 18px 14px;"><button class="btn btn-p btn-sm" onclick="saveInstTypes()">Save Installment Types</button></div>
       </div>
     </div>
 
@@ -585,11 +606,16 @@ select.input{cursor:pointer;}
 </main>
 </div>
 
-<script>
+<script type="module">
+import { initNav, loadSettings, saveSettings, getNextInvoiceNumber, getNextPaymentNumber } from './nav.js';
+
+// ── INIT ──
+await initNav({ currentPage: 'settings' });
+const S = loadSettings();
+
 // ── SIDEBAR ──
-function toggleSidebar(){
-  document.getElementById('sidebar').classList.toggle('open');
-}
+// handled by nav.js
+window.toggleSidebar = function(){ window._ftToggleSidebar(); };
 
 // ── TABS ──
 function showTab(id, el) {
@@ -713,10 +739,162 @@ function updateFundCircle(inp) {
   // Placeholder — in production would recalculate the SVG arc
 }
 
-// ── TOGGLE NAV (for modules) ──
-function toggleNav(key, btn) {
-  // In production this would hide/show sidebar items
+// ── TOGGLE NAV — saves module visibility immediately ──
+window.toggleNav = function(key, btn) {
+  const s = loadSettings();
+  s.modules[key] = btn.classList.contains('on');
+  saveSettings(s);
+  // nav.js picks up ft-settings-changed and re-renders sidebar live
+};
+
+// ── LOAD MODULE TOGGLE STATES from settings ──
+function loadModuleToggles() {
+  const s = loadSettings();
+  const map = { tuition:'tog-tuition', donations:'tog-donations', payments:'tog-payments', vendors:'tog-vendors', students:'tog-students', parents:'tog-parents', reports:'tog-reports' };
+  Object.entries(map).forEach(([key, id]) => {
+    const btn = document.getElementById(id);
+    if (btn) {
+      if (s.modules[key]) btn.classList.add('on');
+      else btn.classList.remove('on');
+    }
+  });
 }
+
+// ── LOAD TERMINOLOGY INPUTS ──
+function loadTermInputs() {
+  const s = loadSettings();
+  const fields = ['tuition','donations','payments','vendors','students','parents','reports','student','parent','vendor'];
+  fields.forEach(k => {
+    const el = document.getElementById('term-' + k);
+    if (el) el.value = s.terms[k] || '';
+  });
+}
+
+// ── SAVE TERMINOLOGY ──
+window.saveTerminology = function() {
+  const s = loadSettings();
+  const fields = ['tuition','donations','payments','vendors','students','parents','reports','student','parent','vendor'];
+  fields.forEach(k => {
+    const el = document.getElementById('term-' + k);
+    if (el && el.value.trim()) s.terms[k] = el.value.trim();
+  });
+  saveSettings(s);
+  showToast('Terminology saved');
+};
+
+// ── SAVE PREFERENCES ──
+window.savePreferences = function() {
+  const s = loadSettings();
+  const dp = document.querySelector('input[name="date-pref"]:checked');
+  if (dp) s.datePref = dp.value;
+  const ip = document.getElementById('pref-inv-prefix');
+  const in_ = document.getElementById('pref-inv-next');
+  const pp = document.getElementById('pref-pay-prefix');
+  const pn = document.getElementById('pref-pay-next');
+  if (ip) s.invoicePrefix = ip.value;
+  if (in_) s.invoiceNext = parseInt(in_.value) || s.invoiceNext;
+  if (pp) s.paymentPrefix = pp.value;
+  if (pn) s.paymentNext = parseInt(pn.value) || s.paymentNext;
+  saveSettings(s);
+  showToast('Preferences saved');
+};
+
+// ── SAVE ORG ──
+window.saveOrg = function() {
+  const s = loadSettings();
+  const name = document.getElementById('org-name');
+  if (name) s.orgName = name.value.trim() || s.orgName;
+  saveSettings(s);
+  showToast('Organization saved');
+};
+
+// ── SAVE CHARGE TYPES ──
+window.saveChargeTypes = function() {
+  const s = loadSettings();
+  s.chargeTypes = [];
+  document.querySelectorAll('#charge-types-tbody tr').forEach(tr => {
+    const inputs = tr.querySelectorAll('input');
+    const tog = tr.querySelector('.tog');
+    const name = inputs[0]?.value?.trim();
+    const amount = parseFloat(inputs[1]?.value) || 0;
+    if (name) s.chargeTypes.push({ name, amount, active: tog?.classList.contains('on') ?? true });
+  });
+  s.creditTypes = [];
+  document.querySelectorAll('#credit-types-tbody tr').forEach(tr => {
+    const inputs = tr.querySelectorAll('input');
+    const tog = tr.querySelector('.tog');
+    const name = inputs[0]?.value?.trim();
+    const amount = parseFloat(inputs[1]?.value) || null;
+    if (name) s.creditTypes.push({ name, amount, active: tog?.classList.contains('on') ?? true });
+  });
+  saveSettings(s);
+  showToast('Charge & credit types saved');
+};
+
+// ── SAVE PAYMENT FEES ──
+window.savePayFees = function() {
+  const s = loadSettings();
+  s.paymentFees = [];
+  document.querySelectorAll('#pay-fees-tbody tr').forEach(tr => {
+    const inputs = tr.querySelectorAll('input');
+    const method = inputs[0]?.value?.trim();
+    const flat = parseFloat(inputs[1]?.value) || 0;
+    const pct = parseFloat(inputs[2]?.value) || 0;
+    if (method) s.paymentFees.push({ method, flat, pct });
+  });
+  saveSettings(s);
+  showToast('Payment fees saved');
+};
+
+// ── SAVE INSTALLMENT TYPES ──
+window.saveInstTypes = function() {
+  const s = loadSettings();
+  s.instTypes = [];
+  document.querySelectorAll('#inst-types-tbody tr').forEach(tr => {
+    const input = tr.querySelector('input[type=text], input:not([type])');
+    const tog = tr.querySelector('.tog');
+    const label = input?.value?.trim();
+    if (label) s.instTypes.push({ label, isDeposit: tog?.classList.contains('on') ?? false });
+  });
+  localStorage.setItem('instTypes', JSON.stringify(s.instTypes.map(t => t.label)));
+  saveSettings(s);
+  showToast('Installment types saved');
+};
+
+// ── LOAD PREFERENCES INTO FORM ──
+function loadPreferencesForm() {
+  const s = loadSettings();
+  const radio = document.querySelector(`input[name="date-pref"][value="${s.datePref}"]`);
+  if (radio) radio.checked = true;
+  const ip = document.getElementById('pref-inv-prefix');
+  const in_ = document.getElementById('pref-inv-next');
+  const pp = document.getElementById('pref-pay-prefix');
+  const pn = document.getElementById('pref-pay-next');
+  if (ip) ip.value = s.invoicePrefix;
+  if (in_) in_.value = s.invoiceNext;
+  if (pp) pp.value = s.paymentPrefix;
+  if (pn) pn.value = s.paymentNext;
+}
+
+// ── TOAST ──
+function showToast(msg) {
+  let t = document.getElementById('settings-toast');
+  if (!t) {
+    t = document.createElement('div');
+    t.id = 'settings-toast';
+    t.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1c1c1a;color:#fff;padding:8px 18px;border-radius:8px;font-size:12.5px;z-index:500;opacity:0;transition:opacity .2s;pointer-events:none;';
+    document.body.appendChild(t);
+  }
+  t.textContent = '✓ ' + msg;
+  t.style.opacity = '1';
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => { t.style.opacity = '0'; }, 2500);
+}
+
+// ── INIT FORM ──
+loadModuleToggles();
+loadTermInputs();
+loadPreferencesForm();
 </script>
 </body>
 </html>

@@ -90,7 +90,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
 .fi{animation:fu .25s ease both;}
 </style>
 </head>
-<body>
+<body data-page="dashboard">
 
 <!-- Loading state while auth checks -->
 <div id="loading-state">
@@ -216,10 +216,10 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
 </div>
 
 <script type="module">
-import { requireAuth } from './auth.js';
+import { initNav } from './nav.js';
 
 // Show loading, wait for auth
-const user = await requireAuth();
+const user = await initNav({ currentPage: 'dashboard', requireLogin: true, showLoadingScreen: true });
 
 // Hide loading, show app
 document.getElementById('loading-state').style.display = 'none';

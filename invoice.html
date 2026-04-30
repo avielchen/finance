@@ -201,7 +201,7 @@ input[type=date].input{min-width:128px;padding-right:4px;font-size:12.5px;}
 .fi{animation:fadeUp .2s ease both;}
 </style>
 </head>
-<body>
+<body data-page="tuition">
 <div class="shell">
 
 <aside class="sidebar" id="sidebar">
@@ -528,11 +528,7 @@ input[type=date].input{min-width:128px;padding-right:4px;font-size:12.5px;}
 
 <script>
 // ── SIDEBAR — stays open until manually closed ──
-let sidebarOpen = false;
-function toggleSidebar() {
-  sidebarOpen = !sidebarOpen;
-  document.getElementById('sidebar').classList.toggle('open', sidebarOpen);
-}
+function toggleSidebar(){ window._ftToggleSidebar(); }
 
 // ── DETECT EDIT VS NEW ──
 const urlParams = new URLSearchParams(window.location.search);
@@ -910,6 +906,11 @@ function fmtK(n) { const v = parseFloat(n) || 0; return v % 1 === 0 ? v.toLocale
 // ── INIT ──
 document.querySelectorAll('input[type=date]').forEach(inp => { if (inp.value) checkDue(inp); else applyDatePref(inp); });
 recalcAll();
+</script>
+
+<script type="module">
+import { initNav } from './nav.js';
+initNav({ currentPage: 'tuition' });
 </script>
 </body>
 </html>
