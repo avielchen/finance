@@ -6,10 +6,23 @@
 <title>FinTrack — Settings</title>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#f5f5f0;--surface:#fff;--surface2:#f0f0eb;--border:#e2e2da;--border2:#d0d0c8;--text:#1a1a18;--muted:#6b6b65;--muted2:#9b9b95;--accent:#1a6b4a;--accent-light:#e8f4ee;--accent-mid:#2d9068;--red:#c0392b;--red-light:#fdf0ef;--yellow:#b07d00;--yellow-light:#fdf8e8;--blue:#1a4a8a;--blue-light:#eef3fb;--sans:'IBM Plex Sans',sans-serif;--mono:'IBM Plex Mono',monospace;--sc:56px;--se:210px;--tb:52px;}
+:root{
+  --bg:#f7f7f3;--surface:#fff;--s2:#f0f0eb;--s3:#e6e6e0;
+  --border:#e0e0d8;--border2:#ccccc4;
+  --text:#1c1c1a;--muted:#686860;--muted2:#a0a098;
+  --accent:#1a6b4a;--al:#e6f4ee;--am:#2d9068;
+  --red:#b83232;--rl:#fdf0f0;--rb:#e8b8b8;
+  --yellow:#a07000;--yl:#fdf8e6;--yb:#e8d890;
+  --blue:#1a4a8a;--bl:#eef3fc;--bb:#b0c8f0;
+  --purple:#5b2d8e;--pl:#f3eeff;
+  --sans:'IBM Plex Sans',sans-serif;--mono:'IBM Plex Mono',monospace;
+  --sc:56px;--se:210px;--tb:52px;
+}
 *{margin:0;padding:0;box-sizing:border-box;}
 body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;min-height:100vh;}
 .shell{display:flex;min-height:100vh;}
+
+/* SIDEBAR */
 .sidebar{width:var(--sc);background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100;transition:width .22s ease;overflow:hidden;}
 .sidebar.open{width:var(--se);}
 .sidebar-top{height:var(--tb);display:flex;align-items:center;padding:0 14px;border-bottom:1px solid var(--border);flex-shrink:0;gap:12px;}
@@ -21,69 +34,122 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
 .nav-sec{padding:16px 0 8px;border-bottom:1px solid var(--border);}
 .nav-sec:last-of-type{border-bottom:none;}
 .ni{display:flex;align-items:center;gap:12px;padding:9px 14px;cursor:pointer;color:var(--muted);font-size:13px;font-weight:500;white-space:nowrap;transition:all .15s;border-left:2px solid transparent;text-decoration:none;}
-.ni:hover{background:var(--surface2);color:var(--text);}
-.ni.active{color:var(--accent);border-left-color:var(--accent);background:var(--accent-light);}
+.ni:hover{background:var(--s2);color:var(--text);}
+.ni.active{color:var(--accent);border-left-color:var(--accent);background:var(--al);}
 .nic{width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
 .nl{opacity:0;transition:opacity .15s;}
 .sidebar.open .nl{opacity:1;}
+
+/* MAIN */
 .main{margin-left:var(--sc);flex:1;display:flex;flex-direction:column;transition:margin-left .22s ease;}
 .sidebar.open~.main{margin-left:var(--se);}
-.topbar{height:var(--tb);background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 28px;position:sticky;top:0;z-index:50;}
+
+/* TOPBAR */
+.topbar{height:var(--tb);background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 24px;position:sticky;top:0;z-index:50;}
 .pt{font-size:15px;font-weight:600;}
 .bc{font-family:var(--mono);font-size:11px;color:var(--muted2);margin-top:1px;}
-.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:6px;font-family:var(--sans);font-size:13px;font-weight:500;cursor:pointer;border:none;transition:all .15s;white-space:nowrap;}
-.btn-p{background:var(--accent);color:#fff;}.btn-p:hover{background:var(--accent-mid);}
-.btn-g{background:transparent;color:var(--muted);border:1px solid var(--border2);}.btn-g:hover{background:var(--surface2);color:var(--text);}
-.btn-sm{padding:5px 10px;font-size:12px;}
-.content{padding:24px 28px;flex:1;}
-.settings-layout{display:grid;grid-template-columns:200px 1fr;gap:24px;align-items:start;}
-.settings-nav{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;position:sticky;top:72px;}
-.sn-group{padding:8px 0;border-bottom:1px solid var(--border);}
-.sn-group:last-child{border-bottom:none;}
-.sn-label{font-size:10.5px;font-weight:700;color:var(--muted2);text-transform:uppercase;letter-spacing:.08em;padding:8px 14px 4px;}
+.btn{display:inline-flex;align-items:center;gap:5px;padding:6px 13px;border-radius:6px;font-family:var(--sans);font-size:12.5px;font-weight:500;cursor:pointer;border:none;transition:all .15s;white-space:nowrap;}
+.btn-p{background:var(--accent);color:#fff;}.btn-p:hover{background:var(--am);}
+.btn-g{background:var(--surface);color:var(--muted);border:1px solid var(--border2);}.btn-g:hover{background:var(--s2);color:var(--text);}
+.btn-sm{padding:4px 9px;font-size:12px;}
+.btn-xs{padding:3px 7px;font-size:11px;}
+.btn-danger{background:var(--rl);color:var(--red);border:1px solid var(--rb);}.btn-danger:hover{background:var(--rb);}
+
+/* LAYOUT */
+.content{padding:24px;flex:1;}
+.settings-layout{display:grid;grid-template-columns:200px 1fr;gap:20px;align-items:start;}
+
+/* SETTINGS NAV */
+.sn{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;position:sticky;top:72px;}
+.sn-grp{padding:8px 0;border-bottom:1px solid var(--border);}
+.sn-grp:last-child{border-bottom:none;}
+.sn-lbl{font-size:10px;font-weight:700;color:var(--muted2);text-transform:uppercase;letter-spacing:.08em;padding:8px 14px 4px;}
 .sn-item{display:block;padding:8px 14px;font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;transition:all .15s;border-left:2px solid transparent;text-decoration:none;}
-.sn-item:hover{background:var(--surface2);color:var(--text);}
-.sn-item.active{color:var(--accent);border-left-color:var(--accent);background:var(--accent-light);}
+.sn-item:hover{background:var(--s2);color:var(--text);}
+.sn-item.active{color:var(--accent);border-left-color:var(--accent);background:var(--al);}
+
+/* TABS */
 .stab{display:none;}
 .stab.active{display:block;}
+
+/* SECTION */
 .section{background:var(--surface);border:1px solid var(--border);border-radius:10px;margin-bottom:16px;overflow:hidden;}
-.sec-hd{padding:14px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.sec-hd{padding:13px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
 .sec-title{font-size:13px;font-weight:700;}
 .sec-sub{font-size:11.5px;color:var(--muted);margin-top:2px;}
-.sec-body{padding:20px;}
-.field{display:flex;flex-direction:column;gap:5px;margin-bottom:14px;}
+.sec-body{padding:18px;}
+
+/* FORM */
+.field{display:flex;flex-direction:column;gap:4px;}
 .field label{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;}
-.input{height:36px;padding:0 10px;background:var(--bg);border:1px solid var(--border2);border-radius:6px;font-family:var(--sans);font-size:13px;color:var(--text);outline:none;transition:border-color .15s;width:100%;}
+.input{height:34px;padding:0 10px;background:var(--bg);border:1px solid var(--border2);border-radius:6px;font-family:var(--sans);font-size:13px;color:var(--text);outline:none;transition:border-color .15s;width:100%;}
 .input:focus{border-color:var(--accent);background:#fff;}
-.form-row2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
-.form-row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;}
-.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:13px 0;border-bottom:1px solid var(--border);}
-.toggle-row:last-child{border-bottom:none;}
-.toggle-lbl{font-size:13.5px;font-weight:500;}
-.toggle-desc{font-size:12px;color:var(--muted);margin-top:2px;}
-.toggle{width:38px;height:22px;background:var(--border2);border-radius:11px;border:none;position:relative;cursor:pointer;transition:background .2s;flex-shrink:0;}
-.toggle.on{background:var(--accent);}
-.toggle::after{content:'';position:absolute;width:14px;height:14px;background:#fff;border-radius:50%;top:4px;left:4px;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,.2);}
-.toggle.on::after{left:20px;}
-.tag-row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;}
-.tag{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border:1px solid var(--border2);border-radius:6px;font-size:12.5px;background:var(--surface2);}
-.tag-del{background:none;border:none;cursor:pointer;color:var(--muted2);font-size:13px;padding:0;line-height:1;}
-.tag-del:hover{color:var(--red);}
-.add-tag{display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border:1px dashed var(--border2);border-radius:6px;font-size:12.5px;color:var(--accent);cursor:pointer;background:none;transition:all .15s;}
-.add-tag:hover{background:var(--accent-light);}
-.fee-row{display:grid;grid-template-columns:1fr 100px 60px;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);}
-.fee-row:last-child{border-bottom:none;}
-.fee-name{font-size:13px;font-weight:500;}
-.hint{font-size:11.5px;color:var(--muted2);margin-top:4px;line-height:1.5;}
-@keyframes fi{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
-.fi{animation:fi .2s ease both;}
+select.input{cursor:pointer;}
+.input.mono{font-family:var(--mono);}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;}
+.ipfx{position:relative;}
+.ipfx .pfx{position:absolute;left:9px;top:50%;transform:translateY(-50%);font-family:var(--mono);font-size:12px;color:var(--muted2);pointer-events:none;}
+.ipfx .input{padding-left:22px;}
+
+/* TOGGLE */
+.tog-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border);}
+.tog-row:last-child{border-bottom:none;}
+.tog-lbl{font-size:13.5px;font-weight:500;}
+.tog-desc{font-size:12px;color:var(--muted);margin-top:2px;}
+.tog{width:38px;height:22px;background:var(--border2);border-radius:11px;border:none;position:relative;cursor:pointer;transition:background .2s;flex-shrink:0;}
+.tog.on{background:var(--accent);}
+.tog::after{content:'';position:absolute;width:14px;height:14px;background:#fff;border-radius:50%;top:4px;left:4px;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,.2);}
+.tog.on::after{left:20px;}
+
+/* TABLE */
+.dt{width:100%;border-collapse:collapse;}
+.dt th{font-size:10.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;padding:7px 10px;text-align:left;border-bottom:2px solid var(--border);}
+.dt td{padding:7px 10px;border-bottom:1px solid var(--border);vertical-align:middle;}
+.dt tr:last-child td{border-bottom:none;}
+.dt tr:hover td{background:var(--s2);}
+.dt .input{height:30px;font-size:12.5px;}
+.del-btn{width:24px;height:24px;border:none;background:transparent;color:var(--muted2);cursor:pointer;border-radius:4px;font-size:14px;display:flex;align-items:center;justify-content:center;transition:all .15s;padding:0;}
+.del-btn:hover{background:var(--rl);color:var(--red);}
+.add-row-btn{display:flex;align-items:center;gap:5px;padding:6px 0;font-size:12.5px;color:var(--accent);background:none;border:none;cursor:pointer;transition:opacity .15s;}
+.add-row-btn:hover{opacity:.7;}
+
+/* BADGE */
+.badge{display:inline-flex;align-items:center;padding:2px 7px;border-radius:4px;font-family:var(--mono);font-size:10.5px;font-weight:500;}
+.b-g{background:var(--al);color:var(--accent);}
+.b-gr{background:var(--s3);color:var(--muted);}
+
+/* CIRCLE GRAPH (donations) */
+.fund-card{border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:12px;background:var(--bg);}
+.fund-card-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.fund-card-name{font-size:14px;font-weight:700;}
+.fund-card-body{display:flex;align-items:center;gap:20px;}
+.fund-circle{flex-shrink:0;}
+.fund-stats{flex:1;display:flex;flex-direction:column;gap:6px;}
+.fund-stat-row{display:flex;justify-content:space-between;font-size:12.5px;}
+.fund-stat-lbl{color:var(--muted);}
+.fund-stat-val{font-family:var(--mono);font-weight:600;}
+.fund-prog{height:5px;background:var(--s3);border-radius:3px;overflow:hidden;margin-top:4px;}
+.fund-prog-fill{height:100%;border-radius:3px;transition:width .4s;}
+
+/* Radio group */
+.radio-group{display:flex;flex-direction:column;gap:8px;}
+.radio-opt{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border:1px solid var(--border);border-radius:7px;cursor:pointer;background:var(--bg);transition:all .15s;}
+.radio-opt:hover{border-color:var(--accent);background:var(--al);}
+.radio-opt input[type=radio]{margin-top:2px;accent-color:var(--accent);flex-shrink:0;}
+.radio-opt-lbl{font-size:13px;font-weight:600;}
+.radio-opt-desc{font-size:11.5px;color:var(--muted);margin-top:2px;}
+
+@keyframes fu{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+.fi{animation:fu .2s ease both;}
 </style>
 </head>
 <body>
 <div class="shell">
+
 <aside class="sidebar" id="sidebar">
   <div class="sidebar-top">
-    <button class="hbg" onclick="document.getElementById('sidebar').classList.toggle('open')"><span></span><span></span><span></span></button>
+    <button class="hbg" onclick="toggleSidebar()"><span></span><span></span><span></span></button>
     <div class="s-logo">FinTrack</div>
   </div>
   <div class="nav-sec"><a class="ni" href="index.html"><span class="nic">⊞</span><span class="nl">Dashboard</span></a></div>
@@ -102,197 +168,554 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
     <a class="ni active" href="settings.html"><span class="nic">⚙</span><span class="nl">Settings</span></a>
   </div>
 </aside>
+
 <main class="main">
-  <div class="topbar">
-    <div><div class="pt">Settings</div><div class="bc">Configuration</div></div>
-  </div>
-  <div class="content fi">
-    <div class="settings-layout">
+<div class="topbar">
+  <div><div class="pt">Settings</div><div class="bc">Configuration</div></div>
+</div>
+<div class="content fi">
+<div class="settings-layout">
 
-      <!-- LEFT NAV -->
-      <div class="settings-nav">
-        <div class="sn-group">
-          <div class="sn-label">General</div>
-          <a class="sn-item active" onclick="showTab('org',this)">Organization</a>
-          <a class="sn-item" onclick="showTab('modules',this)">Modules</a>
-        </div>
-        <div class="sn-group">
-          <div class="sn-label">Invoicing</div>
-          <a class="sn-item" onclick="showTab('line-types',this)">Line Item Types</a>
-          <a class="sn-item" onclick="showTab('credit-types',this)">Credit Types</a>
-          <a class="sn-item" onclick="showTab('fees',this)">Payment Fees</a>
-          <a class="sn-item" onclick="showTab('currency',this)">Currency</a>
-        </div>
-        <div class="sn-group">
-          <div class="sn-label">Donations</div>
-          <a class="sn-item" onclick="showTab('funds',this)">Funds</a>
-        </div>
-        <div class="sn-group">
-          <div class="sn-label">System</div>
-          <a class="sn-item" onclick="showTab('notifications',this)">Notifications</a>
-        </div>
-      </div>
-
-      <!-- RIGHT CONTENT -->
-      <div>
-
-        <!-- ORG -->
-        <div class="stab active" id="stab-org">
-          <div class="section">
-            <div class="sec-hd"><div><div class="sec-title">Organization</div><div class="sec-sub">Basic details used on invoices and receipts</div></div></div>
-            <div class="sec-body">
-              <div class="form-row2">
-                <div class="field"><label>Organization Name</label><input class="input" value="Ninaviguas School"></div>
-                <div class="field"><label>Tax ID / EIN</label><input class="input" placeholder="12-3456789"></div>
-              </div>
-              <div class="form-row2">
-                <div class="field"><label>Fiscal Year Start</label><select class="input"><option>September</option><option>January</option><option>July</option></select></div>
-                <div class="field"><label>Default Currency</label><select class="input"><option>USD — $</option><option>ILS — ₪</option><option>EUR — €</option><option>GBP — £</option></select></div>
-              </div>
-              <div class="field"><label>Invoice Footer Text</label><input class="input" value="Thank you for your payment. Please contact us with any questions."></div>
-              <div class="field"><label>Address</label><input class="input" placeholder="School address..."></div>
-              <button class="btn btn-p btn-sm" style="margin-top:4px;">Save Changes</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- MODULES -->
-        <div class="stab" id="stab-modules">
-          <div class="section">
-            <div class="sec-hd"><div><div class="sec-title">Active Modules</div><div class="sec-sub">Turn features on or off. Disabled modules are hidden from the sidebar.</div></div></div>
-            <div class="sec-body">
-              <div class="toggle-row"><div><div class="toggle-lbl">Tuition / Invoicing</div><div class="toggle-desc">Invoice creation, installments, and payment tracking</div></div><button class="toggle on" onclick="this.classList.toggle('on')"></button></div>
-              <div class="toggle-row"><div><div class="toggle-lbl">Donations</div><div class="toggle-desc">Donor management, campaigns, and pledge tracking</div></div><button class="toggle on" onclick="this.classList.toggle('on')"></button></div>
-              <div class="toggle-row"><div><div class="toggle-lbl">Vendors</div><div class="toggle-desc">Vendor management and invoice approvals</div></div><button class="toggle on" onclick="this.classList.toggle('on')"></button></div>
-              <div class="toggle-row"><div><div class="toggle-lbl">Petty Cash</div><div class="toggle-desc">Petty cash fund tracking with low-balance alerts</div></div><button class="toggle" onclick="this.classList.toggle('on')"></button></div>
-              <div class="toggle-row"><div><div class="toggle-lbl">Multi-Currency</div><div class="toggle-desc">Create invoices in different currencies with exchange rates</div></div><button class="toggle on" onclick="this.classList.toggle('on')"></button></div>
-              <div class="toggle-row"><div><div class="toggle-lbl">Parent Portal</div><div class="toggle-desc">Allow parents to log in, view invoices, and make payments</div></div><button class="toggle" onclick="this.classList.toggle('on')"></button></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- LINE ITEM TYPES -->
-        <div class="stab" id="stab-line-types">
-          <div class="section">
-            <div class="sec-hd"><div><div class="sec-title">Line Item Types</div><div class="sec-sub">What you can charge for on an invoice</div></div><button class="btn btn-g btn-sm" onclick="addTag('line-tags','New Type')">+ Add</button></div>
-            <div class="sec-body">
-              <div class="tag-row" id="line-tags">
-                <span class="tag">Tuition <button class="tag-del" onclick="this.parentElement.remove()">×</button></span>
-                <span class="tag">Meal Plan <button class="tag-del" onclick="this.parentElement.remove()">×</button></span>
-                <span class="tag">Dorm / Housing <button class="tag-del" onclick="this.parentElement.remove()">×</button></span>
-                <span class="tag">Laundry <button class="tag-del" onclick="this.parentElement.remove()">×</button></span>
-                <span class="tag">Technology Fee <button class="tag-del" onclick="this.parentElement.remove()">×</button></span>
-                <span class="tag">Transportation <button class="tag-del" onclick="this.parentElement.remove()">×</button></span>
-                <span class="tag">Registration <button class="tag-del" onclick="this.parentElement.remove()">×</button></span>
-                <span class="tag">Activity Fee <button class="tag-del" onclick="this.parentElement.remove()">×</button></span>
-              </div>
-              <button class="add-tag" onclick="promptAddTag('line-tags')">+ Add line item type</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- CREDIT TYPES -->
-        <div class="stab" id="stab-credit-types">
-          <div class="section">
-            <div class="sec-hd"><div><div class="sec-title">Credit & Scholarship Types</div><div class="sec-sub">Types of discounts or credits that reduce invoice totals</div></div><button class="btn btn-g btn-sm" onclick="promptAddTag('credit-tags')">+ Add</button></div>
-            <div class="sec-body">
-              <div class="tag-row" id="credit-tags">
-                <span class="tag">Merit Scholarship <button class="tag-del" onclick="this.parentElement.remove()">×</button></span>
-                <span class="tag">Financial Aid <button class="tag-del" onclick="this.parentElement.remove()">×</button></span>
-                <span class="tag">Sibling Discount <button class="tag-del" onclick="this.parentElement.remove()">×</button></span>
-                <span class="tag">Staff Discount <button class="tag-del" onclick="this.parentElement.remove()">×</button></span>
-                <span class="tag">Early Enrollment <button class="tag-del" onclick="this.parentElement.remove()">×</button></span>
-              </div>
-              <button class="add-tag" onclick="promptAddTag('credit-tags')">+ Add credit type</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- FEES -->
-        <div class="stab" id="stab-fees">
-          <div class="section">
-            <div class="sec-hd"><div><div class="sec-title">Payment Method Fees</div><div class="sec-sub">Surcharges added to invoices per payment method</div></div></div>
-            <div class="sec-body">
-              <div class="fee-row"><div class="fee-name">Credit Card</div><input class="input" value="2.5" type="number" step="0.1" style="font-family:var(--mono);"><span style="color:var(--muted);font-size:13px;">%</span></div>
-              <div class="fee-row"><div class="fee-name">Bank Transfer</div><input class="input" value="0.0" type="number" step="0.1" style="font-family:var(--mono);"><span style="color:var(--muted);font-size:13px;">%</span></div>
-              <div class="fee-row"><div class="fee-name">Check</div><input class="input" value="0.0" type="number" step="0.1" style="font-family:var(--mono);"><span style="color:var(--muted);font-size:13px;">%</span></div>
-              <div class="fee-row"><div class="fee-name">Cash</div><input class="input" value="0.0" type="number" step="0.1" style="font-family:var(--mono);"><span style="color:var(--muted);font-size:13px;">%</span></div>
-              <div class="fee-row"><div class="fee-name">Zelle / Venmo</div><input class="input" value="0.0" type="number" step="0.1" style="font-family:var(--mono);"><span style="color:var(--muted);font-size:13px;">%</span></div>
-              <div style="margin-top:14px;"><button class="btn btn-p btn-sm">Save Fees</button></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- CURRENCY -->
-        <div class="stab" id="stab-currency">
-          <div class="section">
-            <div class="sec-hd"><div><div class="sec-title">Currency & Exchange Rates</div><div class="sec-sub">Used when invoices are created in non-default currencies</div></div></div>
-            <div class="sec-body">
-              <div class="form-row2" style="margin-bottom:20px;">
-                <div class="field"><label>Default Currency</label><select class="input"><option>USD — US Dollar</option><option>ILS — Israeli Shekel</option><option>EUR — Euro</option><option>GBP — British Pound</option></select></div>
-                <div class="field"><label>Currency Display</label><select class="input"><option>Symbol ($)</option><option>Code (USD)</option><option>Both ($USD)</option></select></div>
-              </div>
-              <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:12px;">Exchange Rates (vs. default currency)</div>
-              <div class="fee-row"><div class="fee-name">USD → ILS</div><input class="input" value="3.72" type="number" step="0.01" style="font-family:var(--mono);"><span style="font-size:11.5px;color:var(--muted);">per $1</span></div>
-              <div class="fee-row"><div class="fee-name">USD → EUR</div><input class="input" value="0.92" type="number" step="0.01" style="font-family:var(--mono);"><span style="font-size:11.5px;color:var(--muted);">per $1</span></div>
-              <div class="fee-row"><div class="fee-name">USD → GBP</div><input class="input" value="0.79" type="number" step="0.01" style="font-family:var(--mono);"><span style="font-size:11.5px;color:var(--muted);">per $1</span></div>
-              <div class="hint" style="margin-top:10px;">Update manually or connect to a live exchange rate API in a future version.</div>
-              <div style="margin-top:14px;"><button class="btn btn-p btn-sm">Save Rates</button></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- FUNDS -->
-        <div class="stab" id="stab-funds">
-          <div class="section">
-            <div class="sec-hd"><div><div class="sec-title">Donation Funds</div><div class="sec-sub">Funds that donations can be directed to</div></div><button class="btn btn-g btn-sm" onclick="promptAddTag('fund-tags')">+ Add Fund</button></div>
-            <div class="sec-body">
-              <div class="tag-row" id="fund-tags">
-                <span class="tag">General Fund <button class="tag-del" onclick="this.parentElement.remove()">×</button></span>
-                <span class="tag">Scholarship Fund <button class="tag-del" onclick="this.parentElement.remove()">×</button></span>
-                <span class="tag">Building Fund <button class="tag-del" onclick="this.parentElement.remove()">×</button></span>
-                <span class="tag">Technology Fund <button class="tag-del" onclick="this.parentElement.remove()">×</button></span>
-              </div>
-              <button class="add-tag" onclick="promptAddTag('fund-tags')">+ Add fund</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- NOTIFICATIONS -->
-        <div class="stab" id="stab-notifications">
-          <div class="section">
-            <div class="sec-hd"><div><div class="sec-title">Notifications</div><div class="sec-sub">Alerts sent to admins</div></div></div>
-            <div class="sec-body">
-              <div class="toggle-row"><div><div class="toggle-lbl">Overdue tuition alerts</div><div class="toggle-desc">When a tuition payment is 7+ days past due</div></div><button class="toggle on" onclick="this.classList.toggle('on')"></button></div>
-              <div class="toggle-row"><div><div class="toggle-lbl">Pending invoice approvals</div><div class="toggle-desc">When vendor invoices are awaiting approval</div></div><button class="toggle on" onclick="this.classList.toggle('on')"></button></div>
-              <div class="toggle-row"><div><div class="toggle-lbl">Petty cash low balance</div><div class="toggle-desc">When petty cash drops below your set threshold</div></div><button class="toggle on" onclick="this.classList.toggle('on')"></button></div>
-              <div class="toggle-row"><div><div class="toggle-lbl">New donation received</div><div class="toggle-desc">Real-time alert for each new donation</div></div><button class="toggle" onclick="this.classList.toggle('on')"></button></div>
-              <div class="toggle-row"><div><div class="toggle-lbl">Monthly report auto-generated</div><div class="toggle-desc">Sent on the 1st of each month</div></div><button class="toggle" onclick="this.classList.toggle('on')"></button></div>
-              <div class="toggle-row"><div><div class="toggle-lbl">Open pledge reminders</div><div class="toggle-desc">Weekly reminder for unpaid pledges</div></div><button class="toggle on" onclick="this.classList.toggle('on')"></button></div>
-            </div>
-          </div>
-        </div>
-
-      </div>
+  <!-- LEFT NAV -->
+  <div class="sn">
+    <div class="sn-grp">
+      <div class="sn-lbl">General</div>
+      <a class="sn-item active" onclick="showTab('org',this)">Organization</a>
+      <a class="sn-item" onclick="showTab('modules',this)">Modules</a>
+      <a class="sn-item" onclick="showTab('prefs',this)">Preferences</a>
+    </div>
+    <div class="sn-grp">
+      <div class="sn-lbl">Invoicing</div>
+      <a class="sn-item" onclick="showTab('line-types',this)">Charge Types</a>
+      <a class="sn-item" onclick="showTab('pay-fees',this)">Payment Fees</a>
+      <a class="sn-item" onclick="showTab('currency',this)">Currency</a>
+      <a class="sn-item" onclick="showTab('inst-types',this)">Installment Types</a>
+    </div>
+    <div class="sn-grp">
+      <div class="sn-lbl">Donations</div>
+      <a class="sn-item" onclick="showTab('funds',this)">Funds & Campaigns</a>
+    </div>
+    <div class="sn-grp">
+      <div class="sn-lbl">System</div>
+      <a class="sn-item" onclick="showTab('notifs',this)">Notifications</a>
     </div>
   </div>
+
+  <!-- RIGHT CONTENT -->
+  <div>
+
+    <!-- ═══ ORGANIZATION ═══ -->
+    <div class="stab active" id="stab-org">
+      <div class="section">
+        <div class="sec-hd"><div><div class="sec-title">Organization</div><div class="sec-sub">Details used on invoices and receipts</div></div></div>
+        <div class="sec-body">
+          <div class="g2" style="margin-bottom:14px;">
+            <div class="field"><label>Organization Name</label><input class="input" value="Ninaviguas School"></div>
+            <div class="field"><label>Tax ID / EIN</label><input class="input" placeholder="12-3456789"></div>
+          </div>
+          <div class="g2" style="margin-bottom:14px;">
+            <div class="field"><label>Fiscal Year Start</label><select class="input"><option>September</option><option>January</option><option>July</option></select></div>
+            <div class="field"><label>Default Currency</label><select class="input"><option>USD — $</option><option>ILS — ₪</option><option>EUR — €</option><option>GBP — £</option></select></div>
+          </div>
+          <div class="field" style="margin-bottom:14px;"><label>Invoice Footer Text</label><input class="input" value="Thank you for your payment. Please contact us with any questions."></div>
+          <div class="field"><label>Address</label><input class="input" placeholder="School address..."></div>
+          <div style="margin-top:16px;"><button class="btn btn-p btn-sm">Save Changes</button></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ MODULES ═══ -->
+    <div class="stab" id="stab-modules">
+      <!-- Main Features -->
+      <div class="section">
+        <div class="sec-hd"><div><div class="sec-title">Main Features</div><div class="sec-sub">Show or hide main menu items. Disabled features are removed from the sidebar.</div></div></div>
+        <div class="sec-body">
+          <div class="tog-row"><div><div class="tog-lbl">Tuition / Invoicing</div><div class="tog-desc">Invoice creation, installments, and payment tracking</div></div><button class="tog on" onclick="this.classList.toggle('on');toggleNav('tuition',this)"></button></div>
+          <div class="tog-row"><div><div class="tog-lbl">Donations</div><div class="tog-desc">Donor management, campaigns, and pledge tracking</div></div><button class="tog on" onclick="this.classList.toggle('on');toggleNav('donations',this)"></button></div>
+          <div class="tog-row"><div><div class="tog-lbl">Payments</div><div class="tog-desc">Record and allocate payments to invoices</div></div><button class="tog on" onclick="this.classList.toggle('on');toggleNav('payments',this)"></button></div>
+          <div class="tog-row"><div><div class="tog-lbl">Vendors</div><div class="tog-desc">Vendor management and invoice approvals</div></div><button class="tog on" onclick="this.classList.toggle('on');toggleNav('vendors',this)"></button></div>
+          <div class="tog-row"><div><div class="tog-lbl">Students</div><div class="tog-desc">Student profiles and enrollment</div></div><button class="tog on" onclick="this.classList.toggle('on')"></button></div>
+          <div class="tog-row"><div><div class="tog-lbl">Parents</div><div class="tog-desc">Parent and family contact management</div></div><button class="tog on" onclick="this.classList.toggle('on')"></button></div>
+          <div class="tog-row"><div><div class="tog-lbl">Reports</div><div class="tog-desc">Financial reports and exports</div></div><button class="tog on" onclick="this.classList.toggle('on')"></button></div>
+        </div>
+      </div>
+      <!-- Optional Features -->
+      <div class="section">
+        <div class="sec-hd"><div><div class="sec-title">Optional Features</div><div class="sec-sub">Enable or disable specific capabilities within the system.</div></div></div>
+        <div class="sec-body">
+          <div class="tog-row"><div><div class="tog-lbl">Parent Portal</div><div class="tog-desc">Allow parents to log in, view invoices, and make payments online</div></div><button class="tog" onclick="this.classList.toggle('on')"></button></div>
+          <div class="tog-row"><div><div class="tog-lbl">Petty Cash</div><div class="tog-desc">Dedicated petty cash fund tracking with low-balance alerts</div></div><button class="tog" onclick="this.classList.toggle('on')"></button></div>
+          <div class="tog-row"><div><div class="tog-lbl">Multi-Currency</div><div class="tog-desc">Create invoices in different currencies with exchange rates</div></div><button class="tog on" id="tog-multicurrency" onclick="this.classList.toggle('on')"></button></div>
+          <div class="tog-row"><div><div class="tog-lbl">Scholarship Tracking</div><div class="tog-desc">Track scholarships and credits given separately from general discounts</div></div><button class="tog on" onclick="this.classList.toggle('on')"></button></div>
+          <div class="tog-row"><div><div class="tog-lbl">SMS Reminders</div><div class="tog-desc">Send automated SMS payment reminders (requires third-party integration)</div></div><button class="tog" onclick="this.classList.toggle('on')"></button></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ PREFERENCES ═══ -->
+    <div class="stab" id="stab-prefs">
+      <div class="section">
+        <div class="sec-hd"><div><div class="sec-title">Preferences</div><div class="sec-sub">Customize how the system behaves for your workflow</div></div></div>
+        <div class="sec-body">
+          <div style="margin-bottom:20px;">
+            <div style="font-size:12.5px;font-weight:700;margin-bottom:10px;">Date Field Default</div>
+            <div class="radio-group">
+              <label class="radio-opt">
+                <input type="radio" name="date-pref" value="today" checked>
+                <div><div class="radio-opt-lbl">Always use today's date</div><div class="radio-opt-desc">Every date field opens with today's date pre-filled.</div></div>
+              </label>
+              <label class="radio-opt">
+                <input type="radio" name="date-pref" value="last">
+                <div><div class="radio-opt-lbl">Use last entered date</div><div class="radio-opt-desc">Date fields remember the last date you typed and pre-fill with it.</div></div>
+              </label>
+              <label class="radio-opt">
+                <input type="radio" name="date-pref" value="blank">
+                <div><div class="radio-opt-lbl">Leave blank</div><div class="radio-opt-desc">Date fields start empty and require manual entry every time.</div></div>
+              </label>
+            </div>
+          </div>
+          <div style="margin-bottom:20px;">
+            <div style="font-size:12.5px;font-weight:700;margin-bottom:10px;">Invoice Number Format</div>
+            <div class="g2">
+              <div class="field"><label>Prefix</label><input class="input mono" value="INV-"></div>
+              <div class="field"><label>Next Number</label><input class="input mono" value="1049" type="number"></div>
+            </div>
+          </div>
+          <div>
+            <div style="font-size:12.5px;font-weight:700;margin-bottom:10px;">Payment Number Format</div>
+            <div class="g2">
+              <div class="field"><label>Prefix</label><input class="input mono" value="PAY-"></div>
+              <div class="field"><label>Next Number</label><input class="input mono" value="0042" type="number"></div>
+            </div>
+          </div>
+          <div style="margin-top:16px;"><button class="btn btn-p btn-sm">Save Preferences</button></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ CHARGE TYPES ═══ -->
+    <div class="stab" id="stab-line-types">
+      <!-- Charge Types -->
+      <div class="section">
+        <div class="sec-hd">
+          <div><div class="sec-title">Charge Types</div><div class="sec-sub">Fee types available when adding line items to an invoice. Set a default amount to auto-fill.</div></div>
+          <button class="btn btn-g btn-sm" onclick="addChargeRow()">+ Add</button>
+        </div>
+        <div class="sec-body" style="padding:0;">
+          <table class="dt">
+            <thead><tr><th>Name</th><th>Default Amount</th><th>Active</th><th></th></tr></thead>
+            <tbody id="charge-types-tbody">
+              <tr><td><input class="input" value="Tuition"></td><td><div class="ipfx"><span class="pfx">$</span><input class="input mono" type="number" value="18500" step="0.01"></div></td><td><button class="tog on" onclick="this.classList.toggle('on')"></button></td><td><button class="del-btn" onclick="this.closest('tr').remove()">×</button></td></tr>
+              <tr><td><input class="input" value="Meal Plan"></td><td><div class="ipfx"><span class="pfx">$</span><input class="input mono" type="number" value="2000" step="0.01"></div></td><td><button class="tog on" onclick="this.classList.toggle('on')"></button></td><td><button class="del-btn" onclick="this.closest('tr').remove()">×</button></td></tr>
+              <tr><td><input class="input" value="Dorm / Housing"></td><td><div class="ipfx"><span class="pfx">$</span><input class="input mono" type="number" value="5000" step="0.01"></div></td><td><button class="tog on" onclick="this.classList.toggle('on')"></button></td><td><button class="del-btn" onclick="this.closest('tr').remove()">×</button></td></tr>
+              <tr><td><input class="input" value="Laundry"></td><td><div class="ipfx"><span class="pfx">$</span><input class="input mono" type="number" value="500" step="0.01"></div></td><td><button class="tog on" onclick="this.classList.toggle('on')"></button></td><td><button class="del-btn" onclick="this.closest('tr').remove()">×</button></td></tr>
+              <tr><td><input class="input" value="Technology Fee"></td><td><div class="ipfx"><span class="pfx">$</span><input class="input mono" type="number" value="300" step="0.01"></div></td><td><button class="tog on" onclick="this.classList.toggle('on')"></button></td><td><button class="del-btn" onclick="this.closest('tr').remove()">×</button></td></tr>
+              <tr><td><input class="input" value="Registration"></td><td><div class="ipfx"><span class="pfx">$</span><input class="input mono" type="number" value="250" step="0.01"></div></td><td><button class="tog" onclick="this.classList.toggle('on')"></button></td><td><button class="del-btn" onclick="this.closest('tr').remove()">×</button></td></tr>
+              <tr><td><input class="input" value="Activity Fee"></td><td><div class="ipfx"><span class="pfx">$</span><input class="input mono" type="number" value="180" step="0.01"></div></td><td><button class="tog" onclick="this.classList.toggle('on')"></button></td><td><button class="del-btn" onclick="this.closest('tr').remove()">×</button></td></tr>
+            </tbody>
+          </table>
+          <div style="padding:10px 18px;"><button class="add-row-btn" onclick="addChargeRow()">＋ Add charge type</button></div>
+        </div>
+      </div>
+      <!-- Credit Types -->
+      <div class="section">
+        <div class="sec-hd">
+          <div><div class="sec-title">Credit & Scholarship Types</div><div class="sec-sub">Credit types that reduce invoice totals. Set a default amount or leave blank for manual entry.</div></div>
+          <button class="btn btn-g btn-sm" onclick="addCreditRow()">+ Add</button>
+        </div>
+        <div class="sec-body" style="padding:0;">
+          <table class="dt">
+            <thead><tr><th>Name</th><th>Default Amount</th><th>Active</th><th></th></tr></thead>
+            <tbody id="credit-types-tbody">
+              <tr><td><input class="input" value="Merit Scholarship"></td><td><div class="ipfx"><span class="pfx">$</span><input class="input mono" type="number" value="" placeholder="manual" step="0.01"></div></td><td><button class="tog on" onclick="this.classList.toggle('on')"></button></td><td><button class="del-btn" onclick="this.closest('tr').remove()">×</button></td></tr>
+              <tr><td><input class="input" value="Financial Aid"></td><td><div class="ipfx"><span class="pfx">$</span><input class="input mono" type="number" value="" placeholder="manual" step="0.01"></div></td><td><button class="tog on" onclick="this.classList.toggle('on')"></button></td><td><button class="del-btn" onclick="this.closest('tr').remove()">×</button></td></tr>
+              <tr><td><input class="input" value="Sibling Discount"></td><td><div class="ipfx"><span class="pfx">$</span><input class="input mono" type="number" value="" placeholder="manual" step="0.01"></div></td><td><button class="tog on" onclick="this.classList.toggle('on')"></button></td><td><button class="del-btn" onclick="this.closest('tr').remove()">×</button></td></tr>
+              <tr><td><input class="input" value="Staff Discount"></td><td><div class="ipfx"><span class="pfx">$</span><input class="input mono" type="number" value="" placeholder="manual" step="0.01"></div></td><td><button class="tog" onclick="this.classList.toggle('on')"></button></td><td><button class="del-btn" onclick="this.closest('tr').remove()">×</button></td></tr>
+              <tr><td><input class="input" value="Early Enrollment"></td><td><div class="ipfx"><span class="pfx">$</span><input class="input mono" type="number" value="" placeholder="manual" step="0.01"></div></td><td><button class="tog" onclick="this.classList.toggle('on')"></button></td><td><button class="del-btn" onclick="this.closest('tr').remove()">×</button></td></tr>
+            </tbody>
+          </table>
+          <div style="padding:10px 18px;"><button class="add-row-btn" onclick="addCreditRow()">＋ Add credit type</button></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ PAYMENT FEES ═══ -->
+    <div class="stab" id="stab-pay-fees">
+      <div class="section">
+        <div class="sec-hd">
+          <div><div class="sec-title">Payment Method Fees</div><div class="sec-sub">Surcharges added when a specific payment method is used. Supports a flat fee + percentage.</div></div>
+          <button class="btn btn-g btn-sm" onclick="addPayFeeRow()">+ Add Method</button>
+        </div>
+        <div class="sec-body" style="padding:0;">
+          <table class="dt">
+            <thead><tr><th>Payment Method</th><th>Flat Fee ($)</th><th>Percentage (%)</th><th>Example on $1,000</th><th></th></tr></thead>
+            <tbody id="pay-fees-tbody">
+              <tr>
+                <td><input class="input" value="Credit Card"></td>
+                <td><div class="ipfx"><span class="pfx">$</span><input class="input mono" type="number" value="0" step="0.01" oninput="calcExample(this)"></div></td>
+                <td><div style="display:flex;align-items:center;gap:4px;"><input class="input mono" type="number" value="2.5" step="0.1" style="width:70px;" oninput="calcExample(this)"><span style="font-size:12px;color:var(--muted);">%</span></div></td>
+                <td><span class="fee-example mono" style="font-size:12.5px;color:var(--muted);">+$25.00</span></td>
+                <td><button class="del-btn" onclick="this.closest('tr').remove()">×</button></td>
+              </tr>
+              <tr>
+                <td><input class="input" value="Bank Transfer"></td>
+                <td><div class="ipfx"><span class="pfx">$</span><input class="input mono" type="number" value="0" step="0.01" oninput="calcExample(this)"></div></td>
+                <td><div style="display:flex;align-items:center;gap:4px;"><input class="input mono" type="number" value="0" step="0.1" style="width:70px;" oninput="calcExample(this)"><span style="font-size:12px;color:var(--muted);">%</span></div></td>
+                <td><span class="fee-example mono" style="font-size:12.5px;color:var(--muted);">$0.00</span></td>
+                <td><button class="del-btn" onclick="this.closest('tr').remove()">×</button></td>
+              </tr>
+              <tr>
+                <td><input class="input" value="Check"></td>
+                <td><div class="ipfx"><span class="pfx">$</span><input class="input mono" type="number" value="0" step="0.01" oninput="calcExample(this)"></div></td>
+                <td><div style="display:flex;align-items:center;gap:4px;"><input class="input mono" type="number" value="0" step="0.1" style="width:70px;" oninput="calcExample(this)"><span style="font-size:12px;color:var(--muted);">%</span></div></td>
+                <td><span class="fee-example mono" style="font-size:12.5px;color:var(--muted);">$0.00</span></td>
+                <td><button class="del-btn" onclick="this.closest('tr').remove()">×</button></td>
+              </tr>
+              <tr>
+                <td><input class="input" value="Cash"></td>
+                <td><div class="ipfx"><span class="pfx">$</span><input class="input mono" type="number" value="0" step="0.01" oninput="calcExample(this)"></div></td>
+                <td><div style="display:flex;align-items:center;gap:4px;"><input class="input mono" type="number" value="0" step="0.1" style="width:70px;" oninput="calcExample(this)"><span style="font-size:12px;color:var(--muted);">%</span></div></td>
+                <td><span class="fee-example mono" style="font-size:12.5px;color:var(--muted);">$0.00</span></td>
+                <td><button class="del-btn" onclick="this.closest('tr').remove()">×</button></td>
+              </tr>
+              <tr>
+                <td><input class="input" value="Zelle / Venmo"></td>
+                <td><div class="ipfx"><span class="pfx">$</span><input class="input mono" type="number" value="1" step="0.01" oninput="calcExample(this)"></div></td>
+                <td><div style="display:flex;align-items:center;gap:4px;"><input class="input mono" type="number" value="2" step="0.1" style="width:70px;" oninput="calcExample(this)"><span style="font-size:12px;color:var(--muted);">%</span></div></td>
+                <td><span class="fee-example mono" style="font-size:12.5px;color:var(--muted);">+$21.00</span></td>
+                <td><button class="del-btn" onclick="this.closest('tr').remove()">×</button></td>
+              </tr>
+            </tbody>
+          </table>
+          <div style="padding:10px 18px;"><button class="add-row-btn" onclick="addPayFeeRow()">＋ Add payment method</button></div>
+        </div>
+        <div style="padding:0 18px 14px;"><button class="btn btn-p btn-sm">Save Fees</button></div>
+      </div>
+    </div>
+
+    <!-- ═══ CURRENCY ═══ -->
+    <div class="stab" id="stab-currency">
+      <div class="section">
+        <div class="sec-hd">
+          <div><div class="sec-title">Currency & Exchange Rates</div><div class="sec-sub">Used when invoices are created in non-default currencies</div></div>
+          <button class="tog on" id="tog-mc" onclick="this.classList.toggle('on')" title="Enable multi-currency"></button>
+        </div>
+        <div class="sec-body">
+          <div class="g2" style="margin-bottom:20px;">
+            <div class="field"><label>Default Currency</label><select class="input"><option>USD — US Dollar ($)</option><option>ILS — Israeli Shekel (₪)</option><option>EUR — Euro (€)</option><option>GBP — British Pound (£)</option></select></div>
+            <div class="field"><label>Currency Display Format</label><select class="input"><option>Symbol — $1,000</option><option>Code — USD 1,000</option><option>Both — $1,000 USD</option></select></div>
+          </div>
+          <div style="font-size:12.5px;font-weight:700;margin-bottom:12px;">Exchange Rates (1 USD =)</div>
+          <table class="dt" style="margin-bottom:10px;">
+            <thead><tr><th>Currency</th><th>Rate</th><th>Last Updated</th></tr></thead>
+            <tbody>
+              <tr><td style="font-weight:600;">ILS — Israeli Shekel</td><td><input class="input mono" type="number" value="3.72" step="0.01" style="width:100px;"></td><td style="font-size:11.5px;color:var(--muted2);">Manual</td></tr>
+              <tr><td style="font-weight:600;">EUR — Euro</td><td><input class="input mono" type="number" value="0.92" step="0.01" style="width:100px;"></td><td style="font-size:11.5px;color:var(--muted2);">Manual</td></tr>
+              <tr><td style="font-weight:600;">GBP — British Pound</td><td><input class="input mono" type="number" value="0.79" step="0.01" style="width:100px;"></td><td style="font-size:11.5px;color:var(--muted2);">Manual</td></tr>
+            </tbody>
+          </table>
+          <button class="btn btn-p btn-sm">Save Rates</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ INSTALLMENT TYPES ═══ -->
+    <div class="stab" id="stab-inst-types">
+      <div class="section">
+        <div class="sec-hd">
+          <div><div class="sec-title">Installment Types</div><div class="sec-sub">Labels used when creating installment plan rows on an invoice.</div></div>
+          <button class="btn btn-g btn-sm" onclick="addInstTypeRow()">+ Add</button>
+        </div>
+        <div class="sec-body" style="padding:0;">
+          <table class="dt">
+            <thead><tr><th>Label</th><th>Is Upfront / Deposit?</th><th></th></tr></thead>
+            <tbody id="inst-types-tbody">
+              <tr><td><input class="input" value="Deposit"></td><td><button class="tog on" onclick="this.classList.toggle('on')"></button></td><td><button class="del-btn" onclick="this.closest('tr').remove()">×</button></td></tr>
+              <tr><td><input class="input" value="Registration Fee"></td><td><button class="tog on" onclick="this.classList.toggle('on')"></button></td><td><button class="del-btn" onclick="this.closest('tr').remove()">×</button></td></tr>
+              <tr><td><input class="input" value="Application Fee"></td><td><button class="tog on" onclick="this.classList.toggle('on')"></button></td><td><button class="del-btn" onclick="this.closest('tr').remove()">×</button></td></tr>
+              <tr><td><input class="input" value="Installment"></td><td><button class="tog" onclick="this.classList.toggle('on')"></button></td><td><button class="del-btn" onclick="this.closest('tr').remove()">×</button></td></tr>
+              <tr><td><input class="input" value="Final Payment"></td><td><button class="tog" onclick="this.classList.toggle('on')"></button></td><td><button class="del-btn" onclick="this.closest('tr').remove()">×</button></td></tr>
+              <tr><td><input class="input" value="Other"></td><td><button class="tog" onclick="this.classList.toggle('on')"></button></td><td><button class="del-btn" onclick="this.closest('tr').remove()">×</button></td></tr>
+            </tbody>
+          </table>
+          <div style="padding:10px 18px;"><button class="add-row-btn" onclick="addInstTypeRow()">＋ Add installment type</button></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ FUNDS ═══ -->
+    <div class="stab" id="stab-funds">
+      <div class="section">
+        <div class="sec-hd">
+          <div><div class="sec-title">Funds & Campaigns</div><div class="sec-sub">Manage donation funds and track campaign progress</div></div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <label style="display:flex;align-items:center;gap:6px;font-size:12.5px;cursor:pointer;">
+              <input type="checkbox" id="hide-inactive-funds" style="accent-color:var(--accent);" onchange="filterFunds()">
+              Hide inactive
+            </label>
+            <button class="btn btn-p btn-sm" onclick="addFundCard()">+ New Fund</button>
+          </div>
+        </div>
+        <div class="sec-body" id="funds-body">
+
+          <div class="fund-card" data-active="true">
+            <div class="fund-card-hd">
+              <div style="display:flex;align-items:center;gap:10px;">
+                <input class="input" value="General Fund" style="width:200px;font-weight:700;font-size:14px;">
+                <span class="badge b-g">Active</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px;">
+                <button class="tog on" onclick="this.classList.toggle('on');toggleFundActive(this)" title="Active/Inactive"></button>
+                <button class="del-btn" onclick="this.closest('.fund-card').remove()">×</button>
+              </div>
+            </div>
+            <div class="fund-card-body">
+              <div class="fund-circle">
+                <svg width="80" height="80" viewBox="0 0 80 80">
+                  <circle cx="40" cy="40" r="32" fill="none" stroke="#e6e6e0" stroke-width="10"/>
+                  <circle cx="40" cy="40" r="32" fill="none" stroke="#1a6b4a" stroke-width="10"
+                    stroke-dasharray="201" stroke-dashoffset="33" stroke-linecap="round"
+                    transform="rotate(-90 40 40)"/>
+                  <text x="40" y="38" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" font-weight="700" fill="#1c1c1a">84%</text>
+                  <text x="40" y="52" text-anchor="middle" font-family="IBM Plex Sans" font-size="9" fill="#686860">raised</text>
+                </svg>
+              </div>
+              <div class="fund-stats">
+                <div class="fund-stat-row"><span class="fund-stat-lbl">Raised</span><span class="fund-stat-val" style="color:var(--accent);">$8,420</span></div>
+                <div class="fund-stat-row">
+                  <span class="fund-stat-lbl">Goal</span>
+                  <div class="ipfx" style="width:120px;"><span class="pfx">$</span><input class="input mono" type="number" value="10000" style="height:26px;font-size:12px;" oninput="updateFundCircle(this)"></div>
+                </div>
+                <div class="fund-stat-row"><span class="fund-stat-lbl">Donors</span><span class="fund-stat-val">24</span></div>
+                <div class="fund-prog"><div class="fund-prog-fill" style="width:84%;background:var(--accent);"></div></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="fund-card" data-active="true">
+            <div class="fund-card-hd">
+              <div style="display:flex;align-items:center;gap:10px;">
+                <input class="input" value="Scholarship Fund" style="width:200px;font-weight:700;font-size:14px;">
+                <span class="badge b-g">Active</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px;">
+                <button class="tog on" onclick="this.classList.toggle('on');toggleFundActive(this)" title="Active/Inactive"></button>
+                <button class="del-btn" onclick="this.closest('.fund-card').remove()">×</button>
+              </div>
+            </div>
+            <div class="fund-card-body">
+              <div class="fund-circle">
+                <svg width="80" height="80" viewBox="0 0 80 80">
+                  <circle cx="40" cy="40" r="32" fill="none" stroke="#e6e6e0" stroke-width="10"/>
+                  <circle cx="40" cy="40" r="32" fill="none" stroke="#1a4a8a" stroke-width="10"
+                    stroke-dasharray="201" stroke-dashoffset="78" stroke-linecap="round"
+                    transform="rotate(-90 40 40)"/>
+                  <text x="40" y="38" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" font-weight="700" fill="#1c1c1a">61%</text>
+                  <text x="40" y="52" text-anchor="middle" font-family="IBM Plex Sans" font-size="9" fill="#686860">raised</text>
+                </svg>
+              </div>
+              <div class="fund-stats">
+                <div class="fund-stat-row"><span class="fund-stat-lbl">Raised</span><span class="fund-stat-val" style="color:var(--blue);">$9,200</span></div>
+                <div class="fund-stat-row">
+                  <span class="fund-stat-lbl">Goal</span>
+                  <div class="ipfx" style="width:120px;"><span class="pfx">$</span><input class="input mono" type="number" value="15000" style="height:26px;font-size:12px;" oninput="updateFundCircle(this)"></div>
+                </div>
+                <div class="fund-stat-row"><span class="fund-stat-lbl">Donors</span><span class="fund-stat-val">28</span></div>
+                <div class="fund-prog"><div class="fund-prog-fill" style="width:61%;background:var(--blue);"></div></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="fund-card" data-active="false" style="opacity:.5;">
+            <div class="fund-card-hd">
+              <div style="display:flex;align-items:center;gap:10px;">
+                <input class="input" value="Building Fund" style="width:200px;font-weight:700;font-size:14px;">
+                <span class="badge b-gr">Inactive</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px;">
+                <button class="tog" onclick="this.classList.toggle('on');toggleFundActive(this)" title="Active/Inactive"></button>
+                <button class="del-btn" onclick="this.closest('.fund-card').remove()">×</button>
+              </div>
+            </div>
+            <div class="fund-card-body">
+              <div class="fund-circle">
+                <svg width="80" height="80" viewBox="0 0 80 80">
+                  <circle cx="40" cy="40" r="32" fill="none" stroke="#e6e6e0" stroke-width="10"/>
+                  <circle cx="40" cy="40" r="32" fill="none" stroke="#5b2d8e" stroke-width="10"
+                    stroke-dasharray="201" stroke-dashoffset="117" stroke-linecap="round"
+                    transform="rotate(-90 40 40)"/>
+                  <text x="40" y="38" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" font-weight="700" fill="#1c1c1a">42%</text>
+                  <text x="40" y="52" text-anchor="middle" font-family="IBM Plex Sans" font-size="9" fill="#686860">raised</text>
+                </svg>
+              </div>
+              <div class="fund-stats">
+                <div class="fund-stat-row"><span class="fund-stat-lbl">Raised</span><span class="fund-stat-val" style="color:var(--purple);">$7,200</span></div>
+                <div class="fund-stat-row">
+                  <span class="fund-stat-lbl">Goal</span>
+                  <div class="ipfx" style="width:120px;"><span class="pfx">$</span><input class="input mono" type="number" value="17000" style="height:26px;font-size:12px;"></div>
+                </div>
+                <div class="fund-stat-row"><span class="fund-stat-lbl">Donors</span><span class="fund-stat-val">14</span></div>
+                <div class="fund-prog"><div class="fund-prog-fill" style="width:42%;background:var(--purple);"></div></div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ NOTIFICATIONS ═══ -->
+    <div class="stab" id="stab-notifs">
+      <div class="section">
+        <div class="sec-hd"><div><div class="sec-title">Notifications</div><div class="sec-sub">Alerts sent to admins</div></div></div>
+        <div class="sec-body">
+          <div class="tog-row"><div><div class="tog-lbl">Overdue tuition alerts</div><div class="tog-desc">When a tuition payment is 7+ days past due</div></div><button class="tog on" onclick="this.classList.toggle('on')"></button></div>
+          <div class="tog-row"><div><div class="tog-lbl">Pending invoice approvals</div><div class="tog-desc">When vendor invoices are awaiting approval</div></div><button class="tog on" onclick="this.classList.toggle('on')"></button></div>
+          <div class="tog-row"><div><div class="tog-lbl">Petty cash low balance</div><div class="tog-desc">When petty cash drops below your set threshold</div></div><button class="tog on" onclick="this.classList.toggle('on')"></button></div>
+          <div class="tog-row"><div><div class="tog-lbl">New donation received</div><div class="tog-desc">Real-time alert for each new donation</div></div><button class="tog" onclick="this.classList.toggle('on')"></button></div>
+          <div class="tog-row"><div><div class="tog-lbl">Monthly report auto-generated</div><div class="tog-desc">Sent on the 1st of each month</div></div><button class="tog" onclick="this.classList.toggle('on')"></button></div>
+          <div class="tog-row"><div><div class="tog-lbl">Open pledge reminders</div><div class="tog-desc">Weekly reminder for unpaid pledges</div></div><button class="tog on" onclick="this.classList.toggle('on')"></button></div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /right -->
+</div>
+</div><!-- /content -->
 </main>
 </div>
+
 <script>
+// ── SIDEBAR ──
+function toggleSidebar(){
+  document.getElementById('sidebar').classList.toggle('open');
+}
+
+// ── TABS ──
 function showTab(id, el) {
   document.querySelectorAll('.stab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.sn-item').forEach(i => i.classList.remove('active'));
   document.getElementById('stab-' + id).classList.add('active');
   el.classList.add('active');
 }
-function promptAddTag(targetId) {
-  const name = prompt('Enter name:');
-  if (!name || !name.trim()) return;
-  const wrap = document.getElementById(targetId);
-  const tag = document.createElement('span');
-  tag.className = 'tag';
-  tag.innerHTML = name.trim() + ' <button class="tag-del" onclick="this.parentElement.remove()">×</button>';
-  wrap.appendChild(tag);
+
+// ── ADD ROWS ──
+function addChargeRow() {
+  const tbody = document.getElementById('charge-types-tbody');
+  const tr = document.createElement('tr');
+  tr.innerHTML = `<td><input class="input" placeholder="Type name"></td><td><div class="ipfx"><span class="pfx">$</span><input class="input mono" type="number" value="0" step="0.01"></div></td><td><button class="tog on" onclick="this.classList.toggle('on')"></button></td><td><button class="del-btn" onclick="this.closest('tr').remove()">×</button></td>`;
+  tbody.appendChild(tr);
+  tr.querySelector('input').focus();
+}
+
+function addCreditRow() {
+  const tbody = document.getElementById('credit-types-tbody');
+  const tr = document.createElement('tr');
+  tr.innerHTML = `<td><input class="input" placeholder="Credit name"></td><td><div class="ipfx"><span class="pfx">$</span><input class="input mono" type="number" value="" placeholder="manual" step="0.01"></div></td><td><button class="tog on" onclick="this.classList.toggle('on')"></button></td><td><button class="del-btn" onclick="this.closest('tr').remove()">×</button></td>`;
+  tbody.appendChild(tr);
+  tr.querySelector('input').focus();
+}
+
+function addInstTypeRow() {
+  const tbody = document.getElementById('inst-types-tbody');
+  const tr = document.createElement('tr');
+  tr.innerHTML = `<td><input class="input" placeholder="Label"></td><td><button class="tog" onclick="this.classList.toggle('on')"></button></td><td><button class="del-btn" onclick="this.closest('tr').remove()">×</button></td>`;
+  tbody.appendChild(tr);
+  tr.querySelector('input').focus();
+}
+
+function addPayFeeRow() {
+  const tbody = document.getElementById('pay-fees-tbody');
+  const tr = document.createElement('tr');
+  tr.innerHTML = `
+    <td><input class="input" placeholder="Method name"></td>
+    <td><div class="ipfx"><span class="pfx">$</span><input class="input mono" type="number" value="0" step="0.01" oninput="calcExample(this)"></div></td>
+    <td><div style="display:flex;align-items:center;gap:4px;"><input class="input mono" type="number" value="0" step="0.1" style="width:70px;" oninput="calcExample(this)"><span style="font-size:12px;color:var(--muted);">%</span></div></td>
+    <td><span class="fee-example mono" style="font-size:12.5px;color:var(--muted);">$0.00</span></td>
+    <td><button class="del-btn" onclick="this.closest('tr').remove()">×</button></td>`;
+  tbody.appendChild(tr);
+  tr.querySelector('input').focus();
+}
+
+// ── FEE EXAMPLE ──
+function calcExample(inp) {
+  const row = inp.closest('tr');
+  const inputs = row.querySelectorAll('input[type=number]');
+  const flat = parseFloat(inputs[0]?.value) || 0;
+  const pct = parseFloat(inputs[1]?.value) || 0;
+  const example = flat + 1000 * (pct / 100);
+  const el = row.querySelector('.fee-example');
+  if (el) el.textContent = (example > 0 ? '+' : '') + '$' + example.toFixed(2);
+}
+
+// ── FUND CARDS ──
+function addFundCard() {
+  const body = document.getElementById('funds-body');
+  const colors = ['#1a6b4a','#1a4a8a','#5b2d8e','#a07000'];
+  const c = colors[body.children.length % colors.length];
+  const div = document.createElement('div');
+  div.className = 'fund-card';
+  div.dataset.active = 'true';
+  div.innerHTML = `
+    <div class="fund-card-hd">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <input class="input" placeholder="Fund name" style="width:200px;font-weight:700;font-size:14px;">
+        <span class="badge b-g">Active</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <button class="tog on" onclick="this.classList.toggle('on');toggleFundActive(this)"></button>
+        <button class="del-btn" onclick="this.closest('.fund-card').remove()">×</button>
+      </div>
+    </div>
+    <div class="fund-card-body">
+      <div class="fund-circle">
+        <svg width="80" height="80" viewBox="0 0 80 80">
+          <circle cx="40" cy="40" r="32" fill="none" stroke="#e6e6e0" stroke-width="10"/>
+          <circle cx="40" cy="40" r="32" fill="none" stroke="${c}" stroke-width="10"
+            stroke-dasharray="201" stroke-dashoffset="201" stroke-linecap="round"
+            transform="rotate(-90 40 40)"/>
+          <text x="40" y="38" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" font-weight="700" fill="#1c1c1a">0%</text>
+          <text x="40" y="52" text-anchor="middle" font-family="IBM Plex Sans" font-size="9" fill="#686860">raised</text>
+        </svg>
+      </div>
+      <div class="fund-stats">
+        <div class="fund-stat-row"><span class="fund-stat-lbl">Raised</span><span class="fund-stat-val" style="color:${c};">$0</span></div>
+        <div class="fund-stat-row">
+          <span class="fund-stat-lbl">Goal</span>
+          <div class="ipfx" style="width:120px;"><span class="pfx">$</span><input class="input mono" type="number" value="10000" style="height:26px;font-size:12px;" oninput="updateFundCircle(this)"></div>
+        </div>
+        <div class="fund-stat-row"><span class="fund-stat-lbl">Donors</span><span class="fund-stat-val">0</span></div>
+        <div class="fund-prog"><div class="fund-prog-fill" style="width:0%;background:${c};"></div></div>
+      </div>
+    </div>`;
+  body.appendChild(div);
+  div.querySelector('input').focus();
+}
+
+function toggleFundActive(btn) {
+  const card = btn.closest('.fund-card');
+  const isOn = btn.classList.contains('on');
+  card.dataset.active = isOn ? 'true' : 'false';
+  card.style.opacity = isOn ? '1' : '0.5';
+  const badge = card.querySelector('.badge');
+  if (badge) { badge.textContent = isOn ? 'Active' : 'Inactive'; badge.className = 'badge ' + (isOn ? 'b-g' : 'b-gr'); }
+}
+
+function filterFunds() {
+  const hide = document.getElementById('hide-inactive-funds').checked;
+  document.querySelectorAll('.fund-card').forEach(card => {
+    if (hide && card.dataset.active === 'false') card.style.display = 'none';
+    else card.style.display = '';
+  });
+}
+
+function updateFundCircle(inp) {
+  // Placeholder — in production would recalculate the SVG arc
+}
+
+// ── TOGGLE NAV (for modules) ──
+function toggleNav(key, btn) {
+  // In production this would hide/show sidebar items
 }
 </script>
 </body>

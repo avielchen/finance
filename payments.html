@@ -48,22 +48,24 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
 .btn-sm{padding:4px 9px;font-size:12px;}
 .btn-xs{padding:3px 7px;font-size:11px;}
 .content{padding:20px 24px;flex:1;}
+
+/* FORM ELEMENTS */
 .input{height:33px;padding:0 9px;background:var(--bg);border:1px solid var(--border2);border-radius:6px;font-family:var(--sans);font-size:12.5px;color:var(--text);outline:none;transition:border-color .15s;width:100%;}
 .input:focus{border-color:var(--accent);background:#fff;}
 select.input{cursor:pointer;}
-.num{font-family:var(--mono);}
+.mono{font-family:var(--mono);}
+input[type=date].input{min-width:128px;padding-right:4px;font-size:12px;}
 .ipfx{position:relative;}
 .ipfx .pfx{position:absolute;left:8px;top:50%;transform:translateY(-50%);font-family:var(--mono);font-size:11px;color:var(--muted2);pointer-events:none;}
 .ipfx .input{padding-left:20px;}
+.field{display:flex;flex-direction:column;gap:4px;}
+.field label{font-size:10.5px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;}
 .badge{display:inline-flex;align-items:center;padding:2px 7px;border-radius:4px;font-family:var(--mono);font-size:10.5px;font-weight:500;}
 .b-g{background:var(--al);color:var(--accent);}
 .b-y{background:var(--yl);color:var(--yellow);}
 .b-r{background:var(--rl);color:var(--red);}
-.b-b{background:var(--bl);color:var(--blue);}
 .b-gr{background:var(--s3);color:var(--muted);}
-.field{display:flex;flex-direction:column;gap:4px;}
-.field label{font-size:10.5px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;}
-input[type=date].input{min-width:130px;padding-right:4px;}
+.b-b{background:var(--bl);color:var(--blue);}
 
 /* KPI */
 .kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px;}
@@ -71,9 +73,9 @@ input[type=date].input{min-width:130px;padding-right:4px;}
 .kpi-l{font-size:10.5px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;}
 .kpi-v{font-family:var(--mono);font-size:20px;font-weight:700;letter-spacing:-.3px;}
 .kpi-d{font-size:11.5px;color:var(--muted);margin-top:3px;}
-.kpi-d.up{color:var(--accent);} .kpi-d.dn{color:var(--red);}
+.kpi-d.up{color:var(--accent);}.kpi-d.dn{color:var(--red);}
 
-/* Filter */
+/* FILTER */
 .filter-bar{display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;}
 .search-wrap{display:flex;align-items:center;gap:8px;flex:1;min-width:180px;background:var(--surface);border:1px solid var(--border2);border-radius:7px;padding:0 12px;height:33px;}
 .search-wrap input{flex:1;border:none;background:none;font-family:var(--sans);font-size:12.5px;color:var(--text);outline:none;}
@@ -82,8 +84,8 @@ input[type=date].input{min-width:130px;padding-right:4px;}
 .tog-btn.on{background:var(--al);color:var(--accent);border-color:#b0d8c0;}
 .tog-btn:hover{border-color:var(--accent);}
 
-/* Invoice card */
-.inv-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;margin-bottom:12px;overflow:hidden;transition:border-color .15s;}
+/* INVOICE CARD */
+.inv-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;margin-bottom:12px;overflow:hidden;}
 .inv-card-hd{display:flex;align-items:center;gap:12px;padding:13px 16px;cursor:pointer;background:var(--s2);transition:background .1s;}
 .inv-card-hd:hover{background:var(--s3);}
 .inv-av{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0;}
@@ -100,20 +102,18 @@ input[type=date].input{min-width:130px;padding-right:4px;}
 .caret.open{transform:rotate(180deg);}
 .inv-stripe{height:3px;}
 .inv-stripe-fill{height:100%;transition:width .4s;}
-
-/* Body */
 .inv-body{padding:14px 16px;}
 .inv-body.hidden{display:none;}
 .hist-lbl{font-size:10.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;}
 
-/* Saved payment block */
+/* SAVED PAYMENT BLOCK */
 .pay-block{border:1px solid var(--border);border-radius:7px;margin-bottom:8px;overflow:hidden;}
 .pay-block-hd{display:flex;align-items:center;gap:8px;padding:9px 12px;background:var(--s2);cursor:pointer;}
 .pay-block-hd:hover{background:var(--s3);}
 .pbh-date{font-family:var(--mono);font-size:11px;color:var(--muted2);}
+.pbh-no{font-family:var(--mono);font-size:11px;color:var(--blue);}
 .pbh-method{font-size:12.5px;font-weight:600;}
 .pbh-amt{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--accent);margin-left:auto;letter-spacing:-.2px;}
-/* Allocation list */
 .alloc-list{padding:8px 12px 10px;}
 .al-row{display:flex;align-items:baseline;flex-wrap:wrap;gap:6px;padding:3px 0 3px 10px;border-left:3px solid #b0d8c0;margin-bottom:3px;}
 .al-row:last-child{margin-bottom:0;}
@@ -122,22 +122,27 @@ input[type=date].input{min-width:130px;padding-right:4px;}
 .al-orig{font-family:var(--mono);font-size:11px;color:var(--muted);}
 .al-arr{color:var(--muted2);font-size:10px;}
 .al-new{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--accent);}
-.al-noalloc{font-size:11.5px;color:var(--muted2);padding:4px 0;}
 
-/* New payment form */
-.npf{border:1px solid #b0d8c0;border-radius:8px;background:var(--al);padding:14px;margin-top:10px;}
-.npf-title{font-size:12.5px;font-weight:700;color:var(--accent);margin-bottom:10px;display:flex;align-items:center;gap:6px;}
-.npf-hd{display:grid;grid-template-columns:140px 65px 130px 105px 1fr;gap:8px;align-items:end;margin-bottom:12px;}
-/* Summary bar */
+/* NEW PAYMENT FORM */
+.npf{border:1px solid #b0d8c0;border-radius:8px;background:var(--al);padding:16px;margin-top:10px;}
+.npf-title{font-size:12.5px;font-weight:700;color:var(--accent);margin-bottom:12px;display:flex;align-items:center;gap:6px;}
+
+/* Payment header row:
+   date(128) | pay-no(100) | method(130) | amount(100) | flat-fee(80) | pct(70) | total(100)
+*/
+.npf-hd{display:grid;grid-template-columns:128px 100px 130px 100px 80px 70px 100px;gap:8px;align-items:end;margin-bottom:12px;}
+
+/* Allocation bar */
 .asb{display:flex;align-items:center;gap:12px;padding:9px 13px;background:#fff;border:1px solid #b0d8c0;border-radius:7px;margin-bottom:10px;flex-wrap:wrap;}
 .asb-i{display:flex;flex-direction:column;gap:1px;}
 .asb-lbl{font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;}
 .asb-val{font-family:var(--mono);font-size:14px;font-weight:700;letter-spacing:-.2px;}
-.asb-d{width:1px;height:30px;background:#b0d8c0;}
-/* Sub-invoice rows */
-.si-col-hd{display:grid;grid-template-columns:20px 1fr 95px 100px 84px;gap:8px;padding:0 8px 6px;border-bottom:1px solid #b0d8c0;margin-bottom:3px;}
+.asb-d{width:1px;height:28px;background:#b0d8c0;}
+
+/* Sub-invoice checklist */
+.si-col-hd{display:grid;grid-template-columns:20px 1fr 90px 95px 80px;gap:8px;padding:0 8px 6px;border-bottom:1px solid #b0d8c0;margin-bottom:3px;}
 .si-col-hd span{font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;}
-.si-row{display:grid;grid-template-columns:20px 1fr 95px 100px 84px;gap:8px;align-items:center;padding:5px 8px;border-radius:6px;transition:background .1s;}
+.si-row{display:grid;grid-template-columns:20px 1fr 90px 95px 80px;gap:8px;align-items:center;padding:5px 8px;border-radius:6px;transition:background .1s;}
 .si-row:hover{background:rgba(255,255,255,.7);}
 .si-row.checked{background:#fff;border:1px solid #b0d8c0;}
 .si-chk{width:16px;height:16px;border-radius:4px;border:1.5px solid var(--border2);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .12s;}
@@ -147,12 +152,15 @@ input[type=date].input{min-width:130px;padding-right:4px;}
 .si-sub{font-size:11px;color:var(--muted);}
 .si-bal{font-family:var(--mono);font-size:12px;color:var(--muted);text-align:right;}
 .si-inp-wrap{position:relative;}
-.si-inp{height:28px;padding:0 6px 0 18px;background:var(--bg);border:1px solid var(--border2);border-radius:5px;font-family:var(--mono);font-size:12px;color:var(--text);outline:none;width:100%;transition:border-color .12s;}
+.si-inp{height:28px;padding:0 6px 0 18px;background:var(--bg);border:1px solid var(--border2);border-radius:5px;font-family:var(--mono);font-size:12px;color:var(--text);outline:none;width:100%;}
 .si-inp:focus{border-color:var(--accent);background:#fff;}
 .si-inp.ov{border-color:var(--yellow);background:var(--yl);}
 .si-inp-pfx{position:absolute;left:6px;top:50%;transform:translateY(-50%);font-family:var(--mono);font-size:10px;color:var(--muted2);pointer-events:none;}
 .si-new{font-family:var(--mono);font-size:12px;font-weight:700;text-align:right;}
 .npf-footer{display:flex;align-items:center;justify-content:flex-end;gap:8px;margin-top:10px;padding-top:10px;border-top:1px solid #b0d8c0;}
+
+/* Surcharge note */
+.surcharge-note{font-size:11px;color:var(--muted);margin-top:3px;font-family:var(--mono);}
 
 @keyframes fu{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
 .fi{animation:fu .2s ease both;}
@@ -161,7 +169,10 @@ input[type=date].input{min-width:130px;padding-right:4px;}
 <body>
 <div class="shell">
 <aside class="sidebar" id="sidebar">
-  <div class="sidebar-top"><button class="hbg" onclick="document.getElementById('sidebar').classList.toggle('open')"><span></span><span></span><span></span></button><div class="s-logo">FinTrack</div></div>
+  <div class="sidebar-top">
+    <button class="hbg" onclick="toggleSidebar()"><span></span><span></span><span></span></button>
+    <div class="s-logo">FinTrack</div>
+  </div>
   <div class="nav-sec"><a class="ni" href="index.html"><span class="nic">⊞</span><span class="nl">Dashboard</span></a></div>
   <div class="nav-sec">
     <a class="ni" href="invoice.html"><span class="nic">📄</span><span class="nl">Tuition</span></a>
@@ -216,7 +227,6 @@ input[type=date].input{min-width:130px;padding-right:4px;}
 
     <!-- ═══ CARD: David Cohen ═══ -->
     <div class="inv-card fi" id="card-c1" data-status="partial" data-yr="2025-2026" data-sname="david cohen">
-      <!-- HEADER (updated dynamically) -->
       <div class="inv-card-hd" onclick="toggleCard('c1')" id="hd-c1">
         <div class="inv-av" style="background:var(--accent);">DC</div>
         <div style="flex:1;min-width:0;">
@@ -242,12 +252,12 @@ input[type=date].input{min-width:130px;padding-right:4px;}
       <div class="inv-body" id="body-c1">
         <div class="hist-lbl">Payment History</div>
 
-        <!-- Saved payment 1 -->
         <div class="pay-block">
           <div class="pay-block-hd" onclick="toggleAllocList(this)">
             <span class="pbh-date">Apr 12, 2026</span>
+            <span class="pbh-no">PAY-0041</span>
             <span class="pbh-method">Credit Card</span>
-            <span class="badge b-gr">2.5%</span>
+            <span class="badge b-gr">2.5% + $0</span>
             <span class="pbh-amt">$5,482.92</span>
             <button class="btn btn-g btn-xs" style="margin-left:8px;" onclick="event.stopPropagation();">Edit</button>
             <span style="color:var(--muted2);font-size:11px;margin-left:4px;">▾</span>
@@ -258,12 +268,12 @@ input[type=date].input{min-width:130px;padding-right:4px;}
           </div>
         </div>
 
-        <!-- Saved payment 2 -->
         <div class="pay-block">
           <div class="pay-block-hd" onclick="toggleAllocList(this)">
             <span class="pbh-date">Mar 1, 2026</span>
+            <span class="pbh-no">PAY-0038</span>
             <span class="pbh-method">Bank Transfer</span>
-            <span class="badge b-gr">0%</span>
+            <span class="badge b-gr">0% + $0</span>
             <span class="pbh-amt">$3,991.46</span>
             <button class="btn btn-g btn-xs" style="margin-left:8px;" onclick="event.stopPropagation();">Edit</button>
             <span style="color:var(--muted2);font-size:11px;margin-left:4px;">▾</span>
@@ -275,35 +285,53 @@ input[type=date].input{min-width:130px;padding-right:4px;}
 
         <button class="btn btn-g btn-sm" id="addbtn-c1" onclick="showNPF('c1')">＋ Record Payment</button>
 
-        <!-- NEW PAYMENT FORM -->
         <div class="npf" id="npf-c1" style="display:none;">
           <div class="npf-title">💳 New Payment — David Cohen</div>
+
+          <!-- Header row: date | pay-no | method | amount | flat fee | % | total -->
           <div class="npf-hd">
-            <div class="field"><label>Method</label>
+            <div class="field">
+              <label>Date</label>
+              <input type="date" class="input mono" id="date-c1" style="height:32px;font-size:12px;" oninput="autoAdvanceDate(this)">
+            </div>
+            <div class="field">
+              <label>Payment No.</label>
+              <input class="input mono" id="payno-c1" value="PAY-0042" style="height:32px;font-size:12px;">
+            </div>
+            <div class="field">
+              <label>Method</label>
               <select class="input" style="height:32px;font-size:12px;" onchange="onMeth(this,'c1')" id="meth-c1">
-                <option>Bank Transfer</option><option selected>Credit Card</option><option>Check</option><option>Cash</option><option>Zelle / Venmo</option>
+                <option>Bank Transfer</option><option selected>Credit Card</option>
+                <option>Check</option><option>Cash</option><option>Zelle / Venmo</option>
               </select>
             </div>
-            <div class="field"><label>Surcharge</label>
+            <div class="field">
+              <label>Amount</label>
+              <div class="ipfx"><span class="pfx">$</span>
+                <input class="input mono" type="number" value="0" step="0.01" style="height:32px;font-size:13px;" id="amt-c1" oninput="onAmt('c1')">
+              </div>
+            </div>
+            <div class="field">
+              <label>Flat Fee</label>
+              <div class="ipfx"><span class="pfx">$</span>
+                <input class="input mono" type="number" value="0" step="0.01" style="height:32px;font-size:12px;" id="flat-c1" oninput="onAmt('c1')">
+              </div>
+            </div>
+            <div class="field">
+              <label>Surcharge</label>
               <div style="display:flex;align-items:center;gap:2px;">
-                <input class="input num" type="number" value="2.5" step="0.1" style="height:32px;font-size:12px;" id="rate-c1">
+                <input class="input mono" type="number" value="2.5" step="0.1" style="height:32px;font-size:12px;" id="rate-c1" oninput="onAmt('c1')">
                 <span style="font-size:10px;color:var(--muted);flex-shrink:0;">%</span>
               </div>
             </div>
-            <div class="field"><label>Date</label>
-              <input type="date" class="input num" value="2026-04-28" style="height:32px;font-size:11.5px;" id="date-c1">
-            </div>
-            <div class="field"><label>Amount</label>
-              <div class="ipfx"><span class="pfx">$</span>
-                <input class="input num" type="number" value="0" step="0.01" style="height:32px;font-size:13px;" id="amt-c1" oninput="onAmt('c1')">
-              </div>
-            </div>
-            <div class="field"><label>Reference</label>
-              <input class="input" placeholder="Optional ref #" style="height:32px;font-size:12px;">
+            <div class="field">
+              <label>Total (incl. fees)</label>
+              <div style="height:32px;display:flex;align-items:center;font-family:var(--mono);font-size:13px;font-weight:700;color:var(--accent);" id="total-with-fees-c1">$0.00</div>
             </div>
           </div>
+          <div class="surcharge-note" id="fee-note-c1">Flat fee $0.00 + 2.5% surcharge = $0.00 added</div>
 
-          <!-- Allocation bar -->
+          <!-- Allocation summary bar -->
           <div class="asb" id="asb-c1">
             <div class="asb-i"><div class="asb-lbl">Payment In</div><div class="asb-val" style="color:var(--accent);" id="asb-in-c1">$0.00</div></div>
             <div class="asb-d"></div>
@@ -313,14 +341,13 @@ input[type=date].input{min-width:130px;padding-right:4px;}
           </div>
 
           <div class="si-col-hd">
-            <span></span>
-            <span>Fee / Installment</span>
+            <span></span><span>Fee / Installment</span>
             <span style="text-align:right;">Balance</span>
             <span style="text-align:right;">Apply ($)</span>
             <span style="text-align:right;">After</span>
           </div>
 
-          <!-- Sub-invoices (ordered oldest/overdue first) -->
+          <!-- Sub-invoices ordered oldest/overdue first -->
           <div id="silist-c1">
             <div class="si-row" data-bal="2000" data-order="1" id="sir-c1-d"><div class="si-chk" onclick="togSI('c1','d')" id="chk-c1-d"></div><div><div class="si-name">Meal Plan</div><div class="si-sub" style="color:var(--red);">#INV-1042 · Overdue · Due Apr 1</div></div><div class="si-bal" style="color:var(--red);">$2,000.00</div><div class="si-inp-wrap"><span class="si-inp-pfx">$</span><input type="number" class="si-inp" id="sia-c1-d" value="0" step="0.01" disabled oninput="onSIOv('c1','d')"></div><div class="si-new" id="sin-c1-d" style="color:var(--muted2);">$2,000.00</div></div>
             <div class="si-row" data-bal="1017.08" data-order="2" id="sir-c1-a"><div class="si-chk" onclick="togSI('c1','a')" id="chk-c1-a"></div><div><div class="si-name">Tuition — Installment 1</div><div class="si-sub">#INV-1042 · Due Aug 1</div></div><div class="si-bal">$1,017.08</div><div class="si-inp-wrap"><span class="si-inp-pfx">$</span><input type="number" class="si-inp" id="sia-c1-a" value="0" step="0.01" disabled oninput="onSIOv('c1','a')"></div><div class="si-new" id="sin-c1-a" style="color:var(--muted2);">$1,017.08</div></div>
@@ -342,12 +369,18 @@ input[type=date].input{min-width:130px;padding-right:4px;}
     <div class="inv-card fi" id="card-c2" data-status="overdue" data-yr="2025-2026" data-sname="yossi katz" style="border-color:var(--rb);">
       <div class="inv-card-hd" onclick="toggleCard('c2')" id="hd-c2" style="background:var(--rl);">
         <div class="inv-av" style="background:#c0622b;">YK</div>
-        <div style="flex:1;min-width:0;"><div class="inv-name">Yossi Katz</div><div class="inv-meta">Grade 11 · #INV-1044 · 2025–26</div></div>
+        <div style="flex:1;min-width:0;">
+          <div class="inv-name">Yossi Katz</div>
+          <div class="inv-meta">Grade 11 · #INV-1044 · 2025–26</div>
+        </div>
         <div class="inv-prog-wrap">
-          <div class="inv-prog-lbl"><span id="pct-c2" style="color:var(--red);">0% paid — Overdue</span><span class="num" id="prog-nums-c2">$0 / $18,500</span></div>
+          <div class="inv-prog-lbl"><span id="pct-c2" style="color:var(--red);">0% — Overdue</span><span class="mono" id="prog-nums-c2">$0 / $18,500</span></div>
           <div class="inv-prog"><div class="inv-prog-fill" id="prog-fill-c2" style="width:0%;background:var(--red);"></div></div>
         </div>
-        <div class="inv-right"><div class="inv-total-val" id="total-c2">$18,500</div><div class="inv-bal-val" id="bal-c2" style="color:var(--red);">$18,500 overdue</div></div>
+        <div class="inv-right">
+          <div class="inv-total-val" id="total-c2">$18,500</div>
+          <div class="inv-bal-val" id="bal-c2" style="color:var(--red);">$18,500 overdue</div>
+        </div>
         <span class="badge b-r" id="badge-c2">Overdue</span>
         <span class="caret" id="caret-c2">▾</span>
       </div>
@@ -358,61 +391,46 @@ input[type=date].input{min-width:130px;padding-right:4px;}
         <div class="npf" id="npf-c2" style="display:none;">
           <div class="npf-title">💳 New Payment — Yossi Katz</div>
           <div class="npf-hd">
+            <div class="field"><label>Date</label><input type="date" class="input mono" id="date-c2" style="height:32px;font-size:12px;" oninput="autoAdvanceDate(this)"></div>
+            <div class="field"><label>Payment No.</label><input class="input mono" id="payno-c2" value="PAY-0042" style="height:32px;font-size:12px;"></div>
             <div class="field"><label>Method</label><select class="input" style="height:32px;font-size:12px;" onchange="onMeth(this,'c2')" id="meth-c2"><option>Bank Transfer</option><option selected>Credit Card</option><option>Check</option><option>Cash</option></select></div>
-            <div class="field"><label>Surcharge</label><div style="display:flex;align-items:center;gap:2px;"><input class="input num" type="number" value="2.5" step="0.1" style="height:32px;font-size:12px;" id="rate-c2"><span style="font-size:10px;color:var(--muted);flex-shrink:0;">%</span></div></div>
-            <div class="field"><label>Date</label><input type="date" class="input num" value="2026-04-28" style="height:32px;font-size:11.5px;" id="date-c2"></div>
-            <div class="field"><label>Amount</label><div class="ipfx"><span class="pfx">$</span><input class="input num" type="number" value="0" step="0.01" style="height:32px;font-size:13px;" id="amt-c2" oninput="onAmt('c2')"></div></div>
-            <div class="field"><label>Reference</label><input class="input" placeholder="Optional" style="height:32px;font-size:12px;"></div>
+            <div class="field"><label>Amount</label><div class="ipfx"><span class="pfx">$</span><input class="input mono" type="number" value="0" step="0.01" style="height:32px;font-size:13px;" id="amt-c2" oninput="onAmt('c2')"></div></div>
+            <div class="field"><label>Flat Fee</label><div class="ipfx"><span class="pfx">$</span><input class="input mono" type="number" value="0" step="0.01" style="height:32px;font-size:12px;" id="flat-c2" oninput="onAmt('c2')"></div></div>
+            <div class="field"><label>Surcharge</label><div style="display:flex;align-items:center;gap:2px;"><input class="input mono" type="number" value="2.5" step="0.1" style="height:32px;font-size:12px;" id="rate-c2" oninput="onAmt('c2')"><span style="font-size:10px;color:var(--muted);flex-shrink:0;">%</span></div></div>
+            <div class="field"><label>Total (incl. fees)</label><div style="height:32px;display:flex;align-items:center;font-family:var(--mono);font-size:13px;font-weight:700;color:var(--accent);" id="total-with-fees-c2">$0.00</div></div>
           </div>
+          <div class="surcharge-note" id="fee-note-c2">Flat fee $0.00 + 2.5% surcharge = $0.00 added</div>
           <div class="asb"><div class="asb-i"><div class="asb-lbl">Payment In</div><div class="asb-val" style="color:var(--accent);" id="asb-in-c2">$0.00</div></div><div class="asb-d"></div><div class="asb-i"><div class="asb-lbl">Allocated</div><div class="asb-val" style="color:var(--blue);" id="asb-al-c2">$0.00</div></div><div class="asb-d"></div><div class="asb-i"><div class="asb-lbl">Unallocated</div><div class="asb-val" style="color:var(--yellow);" id="asb-rem-c2">$0.00</div></div></div>
           <div class="si-col-hd"><span></span><span>Fee / Installment</span><span style="text-align:right;">Balance</span><span style="text-align:right;">Apply ($)</span><span style="text-align:right;">After</span></div>
           <div id="silist-c2">
-            <div class="si-row" data-bal="18500" data-order="1" id="sir-c2-a"><div class="si-chk" onclick="togSI('c2','a')" id="chk-c2-a"></div><div><div class="si-name">Annual Tuition</div><div class="si-sub" style="color:var(--red);">#INV-1044 · Overdue</div></div><div class="si-bal" style="color:var(--red);">$18,500.00</div><div class="si-inp-wrap"><span class="si-inp-pfx">$</span><input type="number" class="si-inp" id="sia-c2-a" value="0" step="0.01" disabled oninput="onSIOv('c2','a')"></div><div class="si-new" id="sin-c2-a" style="color:var(--muted2);">$18,500.00</div></div>
+            <div class="si-row" data-bal="18500" id="sir-c2-a"><div class="si-chk" onclick="togSI('c2','a')" id="chk-c2-a"></div><div><div class="si-name">Annual Tuition</div><div class="si-sub" style="color:var(--red);">#INV-1044 · Overdue</div></div><div class="si-bal" style="color:var(--red);">$18,500.00</div><div class="si-inp-wrap"><span class="si-inp-pfx">$</span><input type="number" class="si-inp" id="sia-c2-a" value="0" step="0.01" disabled oninput="onSIOv('c2','a')"></div><div class="si-new" id="sin-c2-a" style="color:var(--muted2);">$18,500.00</div></div>
           </div>
           <div class="npf-footer"><button class="btn btn-g btn-sm" onclick="cancelNPF('c2')">Cancel</button><button class="btn btn-p btn-sm" onclick="saveNPF('c2')">Save Payment</button></div>
         </div>
       </div>
     </div>
 
-    <!-- ═══ CARD: Rivka Shapiro ═══ -->
-    <div class="inv-card fi" id="card-c3" data-status="partial" data-yr="2025-2026" data-sname="rivka shapiro">
-      <div class="inv-card-hd" onclick="toggleCard('c3')" id="hd-c3">
-        <div class="inv-av" style="background:#7b52ab;">RS</div>
-        <div style="flex:1;min-width:0;"><div class="inv-name">Rivka Shapiro</div><div class="inv-meta">Grade 3 · #INV-1045 · 2025–26</div></div>
-        <div class="inv-prog-wrap">
-          <div class="inv-prog-lbl"><span id="pct-c3">30% paid</span><span class="num" id="prog-nums-c3">$4,350 / $14,500</span></div>
-          <div class="inv-prog"><div class="inv-prog-fill" id="prog-fill-c3" style="width:30%;background:var(--accent);"></div></div>
-        </div>
-        <div class="inv-right"><div class="inv-total-val" id="total-c3">$14,500</div><div class="inv-bal-val" id="bal-c3">$10,150 balance</div></div>
-        <span class="badge b-y" id="badge-c3">Partial</span>
-        <span class="caret" id="caret-c3">▾</span>
-      </div>
-      <div class="inv-stripe"><div class="inv-stripe-fill" id="stripe-c3" style="width:30%;background:var(--accent);"></div></div>
-      <div class="inv-body hidden" id="body-c3">
-        <div style="font-size:12px;color:var(--muted);padding:4px 0 10px;">1 payment recorded.</div>
-        <button class="btn btn-g btn-sm" id="addbtn-c3" onclick="showNPF('c3')">＋ Record Payment</button>
-        <div class="npf" id="npf-c3" style="display:none;"></div>
-      </div>
-    </div>
-
     <!-- ═══ CARD: Sara Goldstein — PAID (hidden) ═══ -->
-    <div class="inv-card fi" id="card-c4" data-status="paid" data-yr="2025-2026" data-sname="sara goldstein" style="display:none;opacity:.65;">
-      <div class="inv-card-hd" onclick="toggleCard('c4')" id="hd-c4">
+    <div class="inv-card fi" id="card-c3" data-status="paid" data-yr="2025-2026" data-sname="sara goldstein" style="display:none;opacity:.65;">
+      <div class="inv-card-hd" onclick="toggleCard('c3')" id="hd-c3">
         <div class="inv-av" style="background:var(--blue);">SG</div>
         <div style="flex:1;min-width:0;"><div class="inv-name">Sara Goldstein</div><div class="inv-meta">Grade 5 · #INV-1043 · 2025–26</div></div>
         <div class="inv-prog-wrap">
-          <div class="inv-prog-lbl"><span id="pct-c4">100% paid</span><span class="num" id="prog-nums-c4">$16,000 / $16,000</span></div>
-          <div class="inv-prog"><div class="inv-prog-fill" id="prog-fill-c4" style="width:100%;background:var(--accent);"></div></div>
+          <div class="inv-prog-lbl"><span id="pct-c3">100% paid</span><span class="mono" id="prog-nums-c3">$16,000 / $16,000</span></div>
+          <div class="inv-prog"><div class="inv-prog-fill" id="prog-fill-c3" style="width:100%;background:var(--accent);"></div></div>
         </div>
-        <div class="inv-right"><div class="inv-total-val" id="total-c4">$16,000</div><div class="inv-bal-val" id="bal-c4" style="color:var(--accent);">Paid in full</div></div>
-        <span class="badge b-g" id="badge-c4">Paid</span>
-        <span class="caret" id="caret-c4">▾</span>
+        <div class="inv-right"><div class="inv-total-val" id="total-c3">$16,000</div><div class="inv-bal-val" id="bal-c3" style="color:var(--accent);">Paid in full</div></div>
+        <span class="badge b-g" id="badge-c3">Paid</span>
+        <span class="caret" id="caret-c3">▾</span>
       </div>
-      <div class="inv-stripe"><div class="inv-stripe-fill" id="stripe-c4" style="width:100%;background:var(--accent);"></div></div>
-      <div class="inv-body hidden" id="body-c4">
+      <div class="inv-stripe"><div class="inv-stripe-fill" id="stripe-c3" style="width:100%;background:var(--accent);"></div></div>
+      <div class="inv-body hidden" id="body-c3">
         <div class="pay-block">
           <div class="pay-block-hd" onclick="toggleAllocList(this)">
-            <span class="pbh-date">Jan 10</span><span class="pbh-method">Check</span><span class="badge b-gr">0%</span>
+            <span class="pbh-date">Jan 10</span>
+            <span class="pbh-no">PAY-0021</span>
+            <span class="pbh-method">Check</span>
+            <span class="badge b-gr">0% + $0</span>
             <span class="pbh-amt">$16,000.00</span>
             <span style="color:var(--muted2);font-size:11px;margin-left:4px;">▾</span>
           </div>
@@ -421,333 +439,308 @@ input[type=date].input{min-width:130px;padding-right:4px;}
       </div>
     </div>
 
-  </div><!-- /cards -->
+  </div>
 </div>
 </main>
 </div>
 
 <script>
-// ── card state per invoice ──
-// Tracks: totalInvoice, totalPaid, balances per sub-invoice
-const cardState = {
-  c1: {
-    total: 18948,
-    paid: 9474.38,
-    subs: [
-      {id:'d', name:'Meal Plan', inv:'#INV-1042', due:'Apr 1', bal:2000, order:1, overdue:true},
-      {id:'a', name:'Tuition — Installment 1', inv:'#INV-1042', due:'Aug 1', bal:1017.08, order:2},
-      {id:'e', name:'Laundry Service', inv:'#INV-1042', due:'Jun 1', bal:500, order:3},
-      {id:'b', name:'Tuition — Installment 2', inv:'#INV-1042', due:'Nov 1', bal:6000, order:4},
-      {id:'c', name:'Tuition — Installment 3', inv:'#INV-1042', due:'Jan 1', bal:6000, order:5},
-    ]
-  },
-  c2: {
-    total: 18500,
-    paid: 0,
-    subs: [
-      {id:'a', name:'Annual Tuition', inv:'#INV-1044', due:'Overdue', bal:18500, order:1, overdue:true},
-    ]
+// ── SIDEBAR ──
+let sidebarOpen = false;
+function toggleSidebar() {
+  sidebarOpen = !sidebarOpen;
+  document.getElementById('sidebar').classList.toggle('open', sidebarOpen);
+}
+
+// ── DATE AUTO-ADVANCE ──
+let lastDate = '';
+function autoAdvanceDate(inp) {
+  if (inp.value) lastDate = inp.value;
+  if (inp.value && inp.value.length === 10) {
+    const all = [...document.querySelectorAll('input,select')].filter(el => !el.disabled && el.offsetParent);
+    const idx = all.indexOf(inp);
+    if (idx >= 0 && idx < all.length - 1) setTimeout(() => all[idx + 1].focus(), 50);
   }
-};
-
-// ── Toggle card ──
-function toggleCard(id){
-  const b=document.getElementById('body-'+id);
-  const c=document.getElementById('caret-'+id);
-  if(!b)return;
-  const h=b.classList.contains('hidden');
-  b.classList.toggle('hidden',!h);
-  if(c)c.classList.toggle('open',h);
 }
 
-// ── Toggle alloc list ──
-function toggleAllocList(hdEl){
-  const block=hdEl.closest('.pay-block');
-  const list=block?.querySelector('.alloc-list');
-  if(list)list.style.display=list.style.display==='none'?'':'none';
+// ── DATE DEFAULT ──
+const datePref = localStorage.getItem('datePref') || 'today';
+function getDefaultDate() {
+  if (datePref === 'today') return new Date().toISOString().split('T')[0];
+  if (datePref === 'last' && lastDate) return lastDate;
+  return '';
 }
 
-// ── Show/cancel NPF ──
-function showNPF(id){
-  const f=document.getElementById('npf-'+id);
-  const b=document.getElementById('addbtn-'+id);
-  if(f){f.style.display='';f.scrollIntoView({behavior:'smooth',block:'nearest'});}
-  if(b)b.style.display='none';
+// ── TOGGLE CARD ──
+function toggleCard(id) {
+  const b = document.getElementById('body-' + id);
+  const c = document.getElementById('caret-' + id);
+  if (!b) return;
+  const h = b.classList.contains('hidden');
+  b.classList.toggle('hidden', !h);
+  if (c) c.classList.toggle('open', h);
 }
-function cancelNPF(id){
-  document.getElementById('npf-'+id).style.display='none';
-  document.getElementById('addbtn-'+id).style.display='';
-  // Reset form
-  const amtEl=document.getElementById('amt-'+id);
-  if(amtEl)amtEl.value=0;
+
+function toggleAllocList(hdEl) {
+  const list = hdEl.closest('.pay-block')?.querySelector('.alloc-list');
+  if (list) list.style.display = list.style.display === 'none' ? '' : 'none';
+}
+
+// ── SHOW / CANCEL NPF ──
+function showNPF(id) {
+  const f = document.getElementById('npf-' + id);
+  const b = document.getElementById('addbtn-' + id);
+  const dateInp = document.getElementById('date-' + id);
+  if (dateInp && !dateInp.value) dateInp.value = getDefaultDate();
+  if (f) { f.style.display = ''; f.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
+  if (b) b.style.display = 'none';
+}
+function cancelNPF(id) {
+  document.getElementById('npf-' + id).style.display = 'none';
+  document.getElementById('addbtn-' + id).style.display = '';
+  const amtEl = document.getElementById('amt-' + id);
+  if (amtEl) amtEl.value = 0;
   resetSubs(id);
 }
 
-function resetSubs(invId){
-  const state=cardState[invId];
-  if(!state)return;
-  state.subs.forEach(sub=>{
-    const chk=document.getElementById('chk-'+invId+'-'+sub.id);
-    const inp=document.getElementById('sia-'+invId+'-'+sub.id);
-    const newEl=document.getElementById('sin-'+invId+'-'+sub.id);
-    const row=document.getElementById('sir-'+invId+'-'+sub.id);
-    chk?.classList.remove('on');
-    row?.classList.remove('checked');
-    if(inp){inp.disabled=true;inp.value=0;inp.classList.remove('ov');}
-    if(newEl){newEl.textContent='$'+fmt(sub.bal);newEl.style.color='var(--muted2)';}
-  });
-  updateASB(invId,0);
+// ── CARD STATE ──
+const cardState = {
+  c1: {
+    total: 18948, paid: 9474.38,
+    subs: [
+      { id: 'd', name: 'Meal Plan', inv: '#INV-1042', due: 'Apr 1', bal: 2000, order: 1, overdue: true },
+      { id: 'a', name: 'Tuition — Installment 1', inv: '#INV-1042', due: 'Aug 1', bal: 1017.08, order: 2 },
+      { id: 'e', name: 'Laundry Service', inv: '#INV-1042', due: 'Jun 1', bal: 500, order: 3 },
+      { id: 'b', name: 'Tuition — Installment 2', inv: '#INV-1042', due: 'Nov 1', bal: 6000, order: 4 },
+      { id: 'c', name: 'Tuition — Installment 3', inv: '#INV-1042', due: 'Jan 1', bal: 6000, order: 5 },
+    ]
+  },
+  c2: {
+    total: 18500, paid: 0,
+    subs: [{ id: 'a', name: 'Annual Tuition', inv: '#INV-1044', due: 'Overdue', bal: 18500, order: 1, overdue: true }]
+  }
+};
+
+// ── PAY METHOD ──
+const SR = { 'Bank Transfer': 0, 'Credit Card': 2.5, 'Check': 0, 'Cash': 0, 'Zelle / Venmo': 1 };
+const SF = { 'Bank Transfer': 0, 'Credit Card': 0, 'Check': 0, 'Cash': 0, 'Zelle / Venmo': 1 };
+function onMeth(sel, id) {
+  const r = document.getElementById('rate-' + id);
+  const f = document.getElementById('flat-' + id);
+  if (r) r.value = SR[sel.value] ?? 0;
+  if (f) f.value = SF[sel.value] ?? 0;
+  onAmt(id);
 }
 
-// ── Pay method surcharge ──
-const SR={'Bank Transfer':0,'Credit Card':2.5,'Check':0,'Cash':0,'Zelle / Venmo':0};
-function onMeth(sel,id){const r=document.getElementById('rate-'+id);if(r)r.value=SR[sel.value]??0;}
+// ── AMOUNT + FEE CALC ──
+function onAmt(id) {
+  const amt = parseFloat(document.getElementById('amt-' + id)?.value) || 0;
+  const flat = parseFloat(document.getElementById('flat-' + id)?.value) || 0;
+  const pct = parseFloat(document.getElementById('rate-' + id)?.value) || 0;
+  const surcharge = flat + amt * (pct / 100);
+  const totalWithFees = amt + surcharge;
 
-// ── Amount entered — auto-allocate oldest first ──
-function onAmt(id){
-  const total=parseFloat(document.getElementById('amt-'+id)?.value)||0;
-  document.getElementById('asb-in-'+id).textContent='$'+fmt(total);
-  autoAllocate(id,total);
+  const twfEl = document.getElementById('total-with-fees-' + id);
+  const noteEl = document.getElementById('fee-note-' + id);
+  const inEl = document.getElementById('asb-in-' + id);
+  if (twfEl) twfEl.textContent = '$' + fmt(totalWithFees);
+  if (noteEl) noteEl.textContent = `Flat fee $${fmt(flat)} + ${pct}% = $${fmt(surcharge)} added`;
+  if (inEl) inEl.textContent = '$' + fmt(amt);
+
+  autoAllocate(id, amt);
 }
 
-function autoAllocate(invId,total){
-  const state=cardState[invId];
-  if(!state)return;
-  // Sort subs by order (oldest/overdue first)
-  const sorted=[...state.subs].sort((a,b)=>a.order-b.order);
-  let rem=total;
-  sorted.forEach(sub=>{
-    const chk=document.getElementById('chk-'+invId+'-'+sub.id);
-    const inp=document.getElementById('sia-'+invId+'-'+sub.id);
-    const newEl=document.getElementById('sin-'+invId+'-'+sub.id);
-    const row=document.getElementById('sir-'+invId+'-'+sub.id);
-    if(rem>0&&sub.bal>0){
-      // Auto-check
+function autoAllocate(invId, total) {
+  const state = cardState[invId];
+  if (!state) return;
+  const sorted = [...state.subs].sort((a, b) => a.order - b.order);
+  let rem = total;
+  sorted.forEach(sub => {
+    const chk = document.getElementById('chk-' + invId + '-' + sub.id);
+    const inp = document.getElementById('sia-' + invId + '-' + sub.id);
+    const newEl = document.getElementById('sin-' + invId + '-' + sub.id);
+    const row = document.getElementById('sir-' + invId + '-' + sub.id);
+    if (rem > 0 && sub.bal > 0) {
       chk?.classList.add('on');
       row?.classList.add('checked');
-      if(inp)inp.disabled=false;
-      const apply=Math.min(rem,sub.bal);
-      if(inp&&!inp.classList.contains('ov'))inp.value=fmt(apply);
-      rem=Math.max(rem-apply,0);
-      if(newEl){
-        const after=Math.max(sub.bal-apply,0);
-        newEl.textContent='$'+fmt(after);
-        newEl.style.color=after===0?'var(--accent)':'var(--yellow)';
-      }
-    } else if(sub.bal<=0||rem<=0){
-      // uncheck if nothing to pay or no more money
-      if(sub.bal<=0){
-        chk?.classList.remove('on');
-        row?.classList.remove('checked');
-        if(inp){inp.disabled=true;inp.value=0;}
-        if(newEl){newEl.textContent='$0.00';newEl.style.color='var(--accent)';}
-      }
+      if (inp) inp.disabled = false;
+      const apply = Math.min(rem, sub.bal);
+      if (inp && !inp.classList.contains('ov')) inp.value = fmt(apply);
+      rem = Math.max(rem - apply, 0);
+      if (newEl) { const after = Math.max(sub.bal - apply, 0); newEl.textContent = '$' + fmt(after); newEl.style.color = after === 0 ? 'var(--accent)' : 'var(--yellow)'; }
     }
   });
-  updateASB(invId,total);
+  updateASB(invId, total);
 }
 
-function togSI(invId,siId){
-  const chk=document.getElementById('chk-'+invId+'-'+siId);
-  const inp=document.getElementById('sia-'+invId+'-'+siId);
-  const row=document.getElementById('sir-'+invId+'-'+siId);
-  const on=chk?.classList.contains('on');
-  const state=cardState[invId];
-  const sub=state?.subs.find(s=>s.id===siId);
-  if(on){
-    chk?.classList.remove('on');row?.classList.remove('checked');
-    if(inp){inp.disabled=true;inp.value=0;inp.classList.remove('ov');}
-    const newEl=document.getElementById('sin-'+invId+'-'+siId);
-    if(newEl&&sub){newEl.textContent='$'+fmt(sub.bal);newEl.style.color='var(--muted2)';}
+function resetSubs(invId) {
+  const state = cardState[invId];
+  if (!state) return;
+  state.subs.forEach(sub => {
+    const chk = document.getElementById('chk-' + invId + '-' + sub.id);
+    const inp = document.getElementById('sia-' + invId + '-' + sub.id);
+    const newEl = document.getElementById('sin-' + invId + '-' + sub.id);
+    const row = document.getElementById('sir-' + invId + '-' + sub.id);
+    chk?.classList.remove('on');
+    row?.classList.remove('checked');
+    if (inp) { inp.disabled = true; inp.value = 0; inp.classList.remove('ov'); }
+    if (newEl) { newEl.textContent = '$' + fmt(sub.bal); newEl.style.color = 'var(--muted2)'; }
+  });
+  updateASB(invId, 0);
+}
+
+function togSI(invId, siId) {
+  const chk = document.getElementById('chk-' + invId + '-' + siId);
+  const inp = document.getElementById('sia-' + invId + '-' + siId);
+  const row = document.getElementById('sir-' + invId + '-' + siId);
+  const state = cardState[invId];
+  const sub = state?.subs.find(s => s.id === siId);
+  const on = chk?.classList.contains('on');
+  if (on) {
+    chk?.classList.remove('on'); row?.classList.remove('checked');
+    if (inp) { inp.disabled = true; inp.value = 0; inp.classList.remove('ov'); }
+    const newEl = document.getElementById('sin-' + invId + '-' + siId);
+    if (newEl && sub) { newEl.textContent = '$' + fmt(sub.bal); newEl.style.color = 'var(--muted2)'; }
   } else {
-    chk?.classList.add('on');row?.classList.add('checked');
-    if(inp)inp.disabled=false;
+    chk?.classList.add('on'); row?.classList.add('checked');
+    if (inp) inp.disabled = false;
   }
-  const total=parseFloat(document.getElementById('amt-'+invId)?.value)||0;
-  // Re-run autoallocate for unchecked, but respect overrides
-  recomputeASB(invId,total);
+  const total = parseFloat(document.getElementById('amt-' + invId)?.value) || 0;
+  updateASB(invId, total);
 }
 
-function onSIOv(invId,siId){
-  const inp=document.getElementById('sia-'+invId+'-'+siId);
+function onSIOv(invId, siId) {
+  const inp = document.getElementById('sia-' + invId + '-' + siId);
   inp?.classList.add('ov');
-  const state=cardState[invId];
-  const sub=state?.subs.find(s=>s.id===siId);
-  if(!sub)return;
-  const applied=parseFloat(inp?.value)||0;
-  const newEl=document.getElementById('sin-'+invId+'-'+siId);
-  if(newEl){const after=Math.max(sub.bal-applied,0);newEl.textContent='$'+fmt(after);newEl.style.color=after===0?'var(--accent)':'var(--yellow)';}
-  const total=parseFloat(document.getElementById('amt-'+invId)?.value)||0;
-  recomputeASB(invId,total);
+  const state = cardState[invId];
+  const sub = state?.subs.find(s => s.id === siId);
+  if (!sub) return;
+  const applied = parseFloat(inp?.value) || 0;
+  const newEl = document.getElementById('sin-' + invId + '-' + siId);
+  if (newEl) { const after = Math.max(sub.bal - applied, 0); newEl.textContent = '$' + fmt(after); newEl.style.color = after === 0 ? 'var(--accent)' : 'var(--yellow)'; }
+  const total = parseFloat(document.getElementById('amt-' + invId)?.value) || 0;
+  updateASB(invId, total);
 }
 
-function recomputeASB(invId,total){
-  let alloc=0;
-  const state=cardState[invId];
-  if(!state)return;
-  state.subs.forEach(sub=>{
-    const chk=document.getElementById('chk-'+invId+'-'+sub.id);
-    if(chk?.classList.contains('on')){
-      alloc+=parseFloat(document.getElementById('sia-'+invId+'-'+sub.id)?.value)||0;
-    }
+function updateASB(invId, total) {
+  let alloc = 0;
+  const state = cardState[invId];
+  state?.subs.forEach(sub => {
+    const chk = document.getElementById('chk-' + invId + '-' + sub.id);
+    if (chk?.classList.contains('on')) alloc += parseFloat(document.getElementById('sia-' + invId + '-' + sub.id)?.value) || 0;
   });
-  updateASB(invId,total,alloc);
+  const rem = Math.max(total - alloc, 0);
+  const alEl = document.getElementById('asb-al-' + invId);
+  const remEl = document.getElementById('asb-rem-' + invId);
+  if (alEl) alEl.textContent = '$' + fmt(alloc);
+  if (remEl) { remEl.textContent = '$' + fmt(rem); remEl.style.color = rem < 0.01 ? 'var(--accent)' : 'var(--yellow)'; }
 }
 
-function updateASB(invId,total,allocOverride){
-  let alloc=allocOverride;
-  if(alloc===undefined){
-    alloc=0;
-    const state=cardState[invId];
-    state?.subs.forEach(sub=>{
-      const chk=document.getElementById('chk-'+invId+'-'+sub.id);
-      if(chk?.classList.contains('on')) alloc+=parseFloat(document.getElementById('sia-'+invId+'-'+sub.id)?.value)||0;
-    });
-  }
-  const rem=Math.max(total-alloc,0);
-  const alEl=document.getElementById('asb-al-'+invId);
-  const remEl=document.getElementById('asb-rem-'+invId);
-  if(alEl)alEl.textContent='$'+fmt(alloc);
-  if(remEl){remEl.textContent='$'+fmt(rem);remEl.style.color=rem<0.01?'var(--accent)':'var(--yellow)';}
-}
+// ── SAVE ──
+function saveNPF(invId) {
+  const amt = parseFloat(document.getElementById('amt-' + invId)?.value) || 0;
+  const flat = parseFloat(document.getElementById('flat-' + invId)?.value) || 0;
+  const pct = parseFloat(document.getElementById('rate-' + invId)?.value) || 0;
+  const surcharge = flat + amt * (pct / 100);
+  const totalWithFees = amt + surcharge;
+  const method = document.getElementById('meth-' + invId)?.value || 'Payment';
+  const payno = document.getElementById('payno-' + invId)?.value || '';
+  const date = document.getElementById('date-' + invId)?.value || '';
+  if (amt <= 0) { alert('Please enter a payment amount.'); return; }
 
-// ── SAVE PAYMENT ──
-function saveNPF(invId){
-  const total=parseFloat(document.getElementById('amt-'+invId)?.value)||0;
-  const method=document.getElementById('meth-'+invId)?.value||'Payment';
-  const rate=document.getElementById('rate-'+invId)?.value||'0';
-  const date=document.getElementById('date-'+invId)?.value||'Today';
-  if(total<=0){alert('Please enter a payment amount.');return;}
+  const state = cardState[invId];
+  if (!state) return;
 
-  const state=cardState[invId];
-  if(!state)return;
-
-  // Collect applied subs
-  const applied=[];
-  let totalApplied=0;
-  state.subs.forEach(sub=>{
-    const chk=document.getElementById('chk-'+invId+'-'+sub.id);
-    if(chk?.classList.contains('on')){
-      const amt=parseFloat(document.getElementById('sia-'+invId+'-'+sub.id)?.value)||0;
-      const newBal=Math.max(sub.bal-amt,0);
-      if(amt>0){
-        applied.push({name:sub.name,inv:sub.inv,origBal:sub.bal,amt,newBal});
-        totalApplied+=amt;
-        // Update state
-        sub.bal=newBal;
-      }
+  const applied = [];
+  let totalApplied = 0;
+  state.subs.forEach(sub => {
+    const chk = document.getElementById('chk-' + invId + '-' + sub.id);
+    if (chk?.classList.contains('on')) {
+      const a = parseFloat(document.getElementById('sia-' + invId + '-' + sub.id)?.value) || 0;
+      const newBal = Math.max(sub.bal - a, 0);
+      if (a > 0) { applied.push({ name: sub.name, inv: sub.inv, origBal: sub.bal, a, newBal }); totalApplied += a; sub.bal = newBal; }
     }
   });
 
-  // Update state totals
-  state.paid+=totalApplied;
+  state.paid += totalApplied;
+  const dFmt = date ? new Date(date + 'T12:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Today';
 
-  // Format date
-  const dFmt=date?new Date(date+'T12:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):date;
+  const allocHTML = applied.length > 0
+    ? applied.map(a => `<div class="al-row"><span class="al-name">${a.name}</span><span class="al-inv">${a.inv}</span><span class="al-orig">$${fmt(a.origBal)}</span><span class="al-arr">→</span><span class="al-new">$${fmt(a.newBal)} remaining</span></div>`).join('')
+    : '<div style="font-size:11.5px;color:var(--muted2);">No items allocated</div>';
 
-  // Build alloc HTML
-  const allocHTML=applied.length>0
-    ?applied.map(a=>`<div class="al-row"><span class="al-name">${a.name}</span><span class="al-inv">${a.inv}</span><span class="al-orig">$${fmt(a.origBal)}</span><span class="al-arr">→</span><span class="al-new">$${fmt(a.newBal)} remaining</span></div>`).join('')
-    :'<div class="al-noalloc">No items allocated</div>';
-
-  // Insert new payment block before the form
-  const block=document.createElement('div');
-  block.className='pay-block';
-  block.innerHTML=`
+  const block = document.createElement('div');
+  block.className = 'pay-block';
+  block.innerHTML = `
     <div class="pay-block-hd" onclick="toggleAllocList(this)">
       <span class="pbh-date">${dFmt}</span>
+      <span class="pbh-no">${payno}</span>
       <span class="pbh-method">${method}</span>
-      <span class="badge b-gr">${rate}%</span>
-      <span class="pbh-amt">$${fmt(total)}</span>
+      <span class="badge b-gr">${pct}% + $${fmt(flat)}</span>
+      <span class="pbh-amt">$${fmt(totalWithFees)}</span>
       <button class="btn btn-g btn-xs" style="margin-left:8px;" onclick="event.stopPropagation();">Edit</button>
       <span style="color:var(--muted2);font-size:11px;margin-left:4px;">▾</span>
     </div>
     <div class="alloc-list">${allocHTML}</div>`;
 
-  const npfEl=document.getElementById('npf-'+invId);
-  npfEl.parentNode.insertBefore(block,npfEl);
-
-  // Update sub-invoice rows to show new balances
-  state.subs.forEach(sub=>{
-    const inp=document.getElementById('sia-'+invId+'-'+sub.id);
-    const newEl=document.getElementById('sin-'+invId+'-'+sub.id);
-    const row=document.getElementById('sir-'+invId+'-'+sub.id);
-    const balEl=row?.querySelector('.si-bal');
-    if(balEl)balEl.textContent='$'+fmt(sub.bal);
-    if(newEl){newEl.textContent='$'+fmt(sub.bal);newEl.style.color='var(--muted2)';}
-    // Hide fully paid subs from future payments
-    if(sub.bal<=0&&row)row.style.display='none';
-  });
-
-  // ── UPDATE CARD HEADER SUMMARY ──
+  document.getElementById('npf-' + invId).parentNode.insertBefore(block, document.getElementById('npf-' + invId));
   updateCardHeader(invId);
-
-  // Reset and close form
   cancelNPF(invId);
 }
 
-function updateCardHeader(invId){
-  const state=cardState[invId];
-  if(!state)return;
-  const pct=state.total>0?Math.min(state.paid/state.total*100,100):0;
-  const bal=Math.max(state.total-state.paid,0);
-  const fill=document.getElementById('prog-fill-'+invId);
-  const pctEl=document.getElementById('pct-'+invId);
-  const numsEl=document.getElementById('prog-nums-'+invId);
-  const balEl=document.getElementById('bal-'+invId);
-  const badgeEl=document.getElementById('badge-'+invId);
-  const stripeEl=document.getElementById('stripe-'+invId);
-  if(fill){fill.style.width=pct+'%';fill.style.background=pct>=100?'var(--accent)':pct>0?'var(--accent)':'var(--red)';}
-  if(stripeEl){const sf=stripeEl.querySelector('.inv-stripe-fill')||stripeEl;sf.style.width=pct+'%';sf.style.background=pct>=100?'var(--accent)':'var(--accent)';}
-  if(pctEl)pctEl.textContent=Math.round(pct)+'% paid';
-  if(numsEl)numsEl.textContent='$'+fmtK(state.paid)+' / $'+fmtK(state.total);
-  if(balEl){
-    balEl.textContent=bal<=0?'Paid in full':'$'+fmtK(bal)+' balance';
-    balEl.style.color=bal<=0?'var(--accent)':bal===state.total?'var(--red)':'var(--yellow)';
+function updateCardHeader(invId) {
+  const state = cardState[invId];
+  if (!state) return;
+  const pct = state.total > 0 ? Math.min(state.paid / state.total * 100, 100) : 0;
+  const bal = Math.max(state.total - state.paid, 0);
+  const fill = document.getElementById('prog-fill-' + invId);
+  const pctEl = document.getElementById('pct-' + invId);
+  const numsEl = document.getElementById('prog-nums-' + invId);
+  const balEl = document.getElementById('bal-' + invId);
+  const badgeEl = document.getElementById('badge-' + invId);
+  const stripe = document.getElementById('stripe-' + invId);
+  if (fill) { fill.style.width = pct + '%'; }
+  if (stripe) { stripe.style.width = pct + '%'; }
+  if (pctEl) pctEl.textContent = Math.round(pct) + '% paid';
+  if (numsEl) numsEl.textContent = '$' + fmtK(state.paid) + ' / $' + fmtK(state.total);
+  if (balEl) { balEl.textContent = bal <= 0 ? 'Paid in full' : '$' + fmtK(bal) + ' balance'; balEl.style.color = bal <= 0 ? 'var(--accent)' : 'var(--yellow)'; }
+  if (badgeEl) {
+    if (pct >= 100) { badgeEl.textContent = 'Paid'; badgeEl.className = 'badge b-g'; }
+    else if (pct > 0) { badgeEl.textContent = 'Partial'; badgeEl.className = 'badge b-y'; }
+    else { badgeEl.textContent = 'Overdue'; badgeEl.className = 'badge b-r'; }
   }
-  if(badgeEl){
-    if(pct>=100){badgeEl.textContent='Paid';badgeEl.className='badge b-g';}
-    else if(pct>0){badgeEl.textContent='Partial';badgeEl.className='badge b-y';}
-    else{badgeEl.textContent='Overdue';badgeEl.className='badge b-r';}
-  }
-  // Update card data-status
-  const card=document.getElementById('card-'+invId);
-  if(card){
-    if(pct>=100)card.dataset.status='paid';
-    else if(pct>0)card.dataset.status='partial';
-    else card.dataset.status='overdue';
-  }
+  const card = document.getElementById('card-' + invId);
+  if (card) card.dataset.status = pct >= 100 ? 'paid' : pct > 0 ? 'partial' : 'overdue';
 }
 
 // ── FILTER ──
-let showPaid=false;
-function toggleShowPaid(){
-  showPaid=!showPaid;
-  const btn=document.getElementById('show-paid-btn');
-  btn.classList.toggle('on',showPaid);
-  btn.textContent=showPaid?'👁 Hide Paid':'👁 Show Paid';
+let showPaid = false;
+function toggleShowPaid() {
+  showPaid = !showPaid;
+  const btn = document.getElementById('show-paid-btn');
+  btn.classList.toggle('on', showPaid);
+  btn.textContent = showPaid ? '👁 Hide Paid' : '👁 Show Paid';
   filterCards();
 }
-function filterCards(){
-  const q=(document.getElementById('srch')?.value||'').toLowerCase();
-  const yr=document.getElementById('yr-sel')?.value||'all';
-  const st=document.getElementById('st-sel')?.value||'all';
-  document.querySelectorAll('#cards .inv-card').forEach(c=>{
-    const cs=c.dataset.status||'';
-    const cy=c.dataset.yr||'';
-    const cn=c.dataset.sname||'';
-    let show=true;
-    if(cs==='paid'&&!showPaid)show=false;
-    if(yr!=='all'&&cy!==yr)show=false;
-    if(st!=='all'&&cs!==st)show=false;
-    if(q&&!cn.includes(q))show=false;
-    c.style.display=show?'':'none';
+function filterCards() {
+  const q = (document.getElementById('srch')?.value || '').toLowerCase();
+  const yr = document.getElementById('yr-sel')?.value || 'all';
+  const st = document.getElementById('st-sel')?.value || 'all';
+  document.querySelectorAll('#cards .inv-card').forEach(c => {
+    const cs = c.dataset.status || '';
+    const cy = c.dataset.yr || '';
+    const cn = c.dataset.sname || '';
+    let show = true;
+    if (cs === 'paid' && !showPaid) show = false;
+    if (yr !== 'all' && cy !== yr) show = false;
+    if (st !== 'all' && cs !== st) show = false;
+    if (q && !cn.includes(q)) show = false;
+    c.style.display = show ? '' : 'none';
   });
 }
 
-// ── UTILS ──
-function fmt(n){return(parseFloat(n)||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});}
-function fmtK(n){const v=parseFloat(n)||0;return v%1===0?v.toLocaleString('en-US'):v.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});}
+function fmt(n) { return (parseFloat(n) || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+function fmtK(n) { const v = parseFloat(n) || 0; return v % 1 === 0 ? v.toLocaleString('en-US') : v.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
 </script>
 </body>
 </html>
