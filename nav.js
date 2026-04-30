@@ -165,25 +165,45 @@ function renderUserChip(user) {
   const photo = user.photoURL;
   const name = user.displayName || user.email || 'User';
   const initials = name.split(' ').map(p => p[0]).join('').slice(0, 2).toUpperCase();
+  const settings = loadSettings();
+  const orgName = settings.orgName || 'My Organization';
+  const orgId = localStorage.getItem('ft_orgId') || '';
 
   chip.innerHTML = `
     <div style="position:relative;width:100%;display:flex;justify-content:center;">
       <div onclick="document.getElementById('user-menu').classList.toggle('hidden')"
-        style="cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;padding:4px 6px;border-radius:8px;transition:background .15s;"
+        style="cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px;border-radius:8px;transition:background .15s;width:100%;"
         onmouseover="this.style.background='var(--s2)'" onmouseout="this.style.background=''">
         ${photo
-          ? `<img src="${photo}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;" alt="">`
+          ? `<img src="${photo}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;border:2px solid var(--al);" alt="">`
           : `<div style="width:28px;height:28px;border-radius:50%;background:var(--accent);color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;">${initials}</div>`
         }
       </div>
       <div id="user-menu" class="hidden"
-        style="position:fixed;bottom:60px;left:8px;width:220px;background:#fff;border:1px solid var(--border2);border-radius:10px;padding:6px;z-index:300;box-shadow:0 4px 20px rgba(0,0,0,.12);">
+        style="position:fixed;bottom:60px;left:8px;width:240px;background:#fff;border:1px solid var(--border2);border-radius:10px;padding:6px;z-index:300;box-shadow:0 4px 20px rgba(0,0,0,.14);">
+
+        <!-- User info -->
         <div style="padding:8px 10px;border-bottom:1px solid var(--border);margin-bottom:4px;">
-          <div style="font-size:12.5px;font-weight:600;">${name}</div>
-          <div style="font-size:11px;color:var(--muted);word-break:break-all;margin-top:1px;">${user.email}</div>
+          <div style="font-size:12.5px;font-weight:700;">${name}</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:1px;word-break:break-all;">${user.email}</div>
         </div>
+
+        <!-- Org block -->
+        <div style="padding:7px 10px;border-bottom:1px solid var(--border);margin-bottom:4px;">
+          <div style="font-size:10px;font-weight:700;color:var(--muted2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px;">Organization</div>
+          <div style="font-size:12.5px;font-weight:600;color:var(--accent);display:flex;align-items:center;gap:6px;">
+            <span style="width:8px;height:8px;border-radius:50%;background:var(--accent);flex-shrink:0;"></span>
+            ${orgName}
+          </div>
+          <div style="font-size:10px;color:var(--muted2);font-family:var(--mono);margin-top:2px;">${orgId.slice(0,12)}…</div>
+        </div>
+
+        <!-- Actions -->
         <a href="settings.html" style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:6px;font-size:13px;color:var(--text);text-decoration:none;"
           onmouseover="this.style.background='var(--s2)'" onmouseout="this.style.background=''">⚙ Settings</a>
+        <a href="onboarding.html" onclick="localStorage.removeItem('ft_orgId')"
+          style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:6px;font-size:13px;color:var(--blue);text-decoration:none;"
+          onmouseover="this.style.background='var(--bl)'" onmouseout="this.style.background=''">＋ Create / Switch Org</a>
         <div onclick="window._ftSignOut()"
           style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:6px;font-size:13px;color:var(--red);cursor:pointer;"
           onmouseover="this.style.background='var(--rl)'" onmouseout="this.style.background=''">→ Sign Out</div>
@@ -265,14 +285,15 @@ function applyTerminology(terms) {
 // ── MAIN INIT ─────────────────────────────────────────────────────────────
 export async function initNav(options = {}) {
   const {
-    requireLogin = true,  // redirect to login if not authenticated
+    requireLogin = true,
+    requireOrg = true,      // redirect to onboarding if no org set
     currentPage = document.body.dataset.page || 'dashboard',
     showLoadingScreen = false,
   } = options;
 
   const settings = loadSettings();
 
-  // Render sidebar immediately (will re-render after auth)
+  // Render sidebar immediately with cached settings
   renderSidebar(currentPage, settings);
   applyTerminology(settings.terms);
 
@@ -285,9 +306,17 @@ export async function initNav(options = {}) {
 
   return new Promise((resolve) => {
     const auth = getFirebaseAuth();
-    onAuthStateChanged(auth, user => {
+    onAuthStateChanged(auth, async user => {
+      // Not logged in
       if (!user && requireLogin) {
         window.location.href = 'login.html';
+        return;
+      }
+
+      // Logged in but no org set — go to onboarding
+      const orgId = localStorage.getItem('ft_orgId');
+      if (user && requireOrg && !orgId) {
+        window.location.href = 'onboarding.html';
         return;
       }
 
@@ -301,6 +330,25 @@ export async function initNav(options = {}) {
       if (user) {
         renderUserChip(user);
         renderTopbarChip(user);
+
+        // Try to load org settings from Firestore if orgId available
+        // Falls back silently to localStorage if offline
+        if (orgId) {
+          try {
+            const { getOrgSettings } = await import('./db.js');
+            const orgSettings = await getOrgSettings(orgId);
+            if (orgSettings) {
+              // Merge Firestore settings over localStorage
+              const merged = { ...loadSettings(), ...orgSettings };
+              saveSettings(merged);
+              renderSidebar(currentPage, merged);
+              applyTerminology(merged.terms || merged.terms);
+            }
+          } catch (e) {
+            // Offline or permission error — use cached localStorage settings
+            console.warn('Could not load org settings from Firestore, using cache:', e.message);
+          }
+        }
       }
 
       resolve(user);

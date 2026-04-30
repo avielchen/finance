@@ -123,6 +123,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword, onAuthStateChanged }
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getUserOrgs } from './db.js';
 
 const firebaseConfig = {
   apiKey: "AIzaSyCrCg11nB8I2f-3rQwN8NkwzSQrnQ9c8Rs",
@@ -139,11 +140,35 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 
+// After sign-in: check if user has an org already
+async function redirectAfterLogin(user) {
+  document.getElementById('loading-overlay').classList.add('show');
+  // Check localStorage first (fast)
+  const cachedOrg = localStorage.getItem('ft_orgId');
+  if (cachedOrg) {
+    window.location.href = 'index.html';
+    return;
+  }
+  // Check Firestore for existing orgs
+  try {
+    const orgs = await getUserOrgs(user.uid);
+    if (orgs && orgs.length > 0) {
+      // Use first org (in future: show org picker if multiple)
+      localStorage.setItem('ft_orgId', orgs[0].orgId);
+      window.location.href = 'index.html';
+    } else {
+      // No org — go to onboarding
+      window.location.href = 'onboarding.html';
+    }
+  } catch (e) {
+    // Firestore error (first login, rules not set yet, etc.) — go to onboarding
+    window.location.href = 'onboarding.html';
+  }
+}
+
 // Check if already logged in
 onAuthStateChanged(auth, user => {
-  if (user) {
-    window.location.href = 'index.html';
-  }
+  if (user) redirectAfterLogin(user);
 });
 
 // Google sign in
@@ -154,8 +179,7 @@ window.signInWithGoogle = async function() {
   showError('');
   try {
     await signInWithPopup(auth, provider);
-    document.getElementById('loading-overlay').classList.add('show');
-    window.location.href = 'index.html';
+    await redirectAfterLogin(auth.currentUser);
   } catch(e) {
     showError(friendlyError(e.code));
     btn.disabled = false;
@@ -174,8 +198,7 @@ window.signInEmail = async function() {
   showError('');
   try {
     await signInWithEmailAndPassword(auth, email, pass);
-    document.getElementById('loading-overlay').classList.add('show');
-    window.location.href = 'index.html';
+    await redirectAfterLogin(auth.currentUser);
   } catch(e) {
     showError(friendlyError(e.code));
     btn.disabled = false;

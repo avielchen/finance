@@ -148,10 +148,10 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
     </div>
 
     <div class="kpi-row fi">
-      <a href="payments.html" class="kpi"><div class="kpi-l">Total Income</div><div class="kpi-v">$48,320</div><div class="kpi-d up">▲ 12.4% vs last month</div></a>
-      <a href="payments.html" class="kpi"><div class="kpi-l">Outstanding</div><div class="kpi-v">$9,750</div><div class="kpi-d">14 open invoices</div></a>
-      <a href="payments.html" class="kpi"><div class="kpi-l">Overdue</div><div class="kpi-v" style="color:var(--red);">$2,550</div><div class="kpi-d dn">3 students past due</div></a>
-      <a href="donations.html" class="kpi"><div class="kpi-l">Donations</div><div class="kpi-v">$8,820</div><div class="kpi-d up">▲ 21% vs last month</div></a>
+      <a href="payments.html" class="kpi"><div class="kpi-l">Collected This Month</div><div class="kpi-v" id="kpi-collected">—</div><div class="kpi-d up" id="kpi-collected-d">Loading…</div></a>
+      <a href="payments.html" class="kpi"><div class="kpi-l">Outstanding</div><div class="kpi-v" id="kpi-outstanding">—</div><div class="kpi-d" id="kpi-outstanding-d">Loading…</div></a>
+      <a href="payments.html" class="kpi"><div class="kpi-l">Overdue</div><div class="kpi-v" id="kpi-overdue" style="color:var(--red);">—</div><div class="kpi-d dn" id="kpi-overdue-d">Loading…</div></a>
+      <a href="donations.html" class="kpi"><div class="kpi-l">Donations</div><div class="kpi-v" id="kpi-donations">—</div><div class="kpi-d up" id="kpi-donations-d">All campaigns</div></a>
     </div>
 
     <div class="grid2r fi">
@@ -162,11 +162,8 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
         </div>
         <table class="tbl">
           <thead><tr><th>Student</th><th>Amount</th><th>Due</th><th>Status</th></tr></thead>
-          <tbody>
-            <tr onclick="location='students.html'"><td><b>David Cohen</b><div style="font-size:10.5px;color:var(--muted);">Grade 8</div></td><td class="mono">$18,948</td><td class="mono" style="font-size:11px;color:var(--muted2);">May 1</td><td><span class="badge b-y">◑ Partial</span></td></tr>
-            <tr onclick="location='students.html'"><td><b>Sara Goldstein</b><div style="font-size:10.5px;color:var(--muted);">Grade 5</div></td><td class="mono">$16,000</td><td class="mono" style="font-size:11px;color:var(--muted2);">—</td><td><span class="badge b-g">● Paid</span></td></tr>
-            <tr onclick="location='students.html'"><td><b>Yossi Katz</b><div style="font-size:10.5px;color:var(--muted);">Grade 11</div></td><td class="mono">$18,500</td><td class="mono" style="font-size:11px;color:var(--red);">Apr 1</td><td><span class="badge b-r">⚠ Overdue</span></td></tr>
-            <tr onclick="location='students.html'"><td><b>Rivka Shapiro</b><div style="font-size:10.5px;color:var(--muted);">Grade 3</div></td><td class="mono">$14,500</td><td class="mono" style="font-size:11px;color:var(--muted2);">May 1</td><td><span class="badge b-y">⏳ Pending</span></td></tr>
+          <tbody id="recent-invoices-tbody">
+            <tr><td colspan="4" style="text-align:center;color:var(--muted2);font-size:12.5px;padding:16px;">Loading…</td></tr>
           </tbody>
         </table>
       </div>
@@ -181,9 +178,9 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
         </div>
         <div class="card">
           <div class="card-hd"><div class="card-t">Alerts</div></div>
-          <a href="students.html" class="alert-item"><div class="alert-dot" style="background:var(--red);"></div><div><div style="font-size:12.5px;"><b>Yossi Katz</b> overdue $18,500</div><div style="font-size:11px;color:var(--muted);margin-top:1px;">28 days past due</div></div></a>
-          <a href="payments.html" class="alert-item"><div class="alert-dot" style="background:var(--purple);"></div><div><div style="font-size:12.5px;"><b>Cohen Family</b> has $340 credit</div><div style="font-size:11px;color:var(--muted);margin-top:1px;">Apply or convert to donation</div></div></a>
-          <a href="donations.html" class="alert-item"><div class="alert-dot" style="background:var(--yellow);"></div><div><div style="font-size:12.5px;">6 open pledges awaiting payment</div><div style="font-size:11px;color:var(--muted);margin-top:1px;">$8,500 total outstanding</div></div></a>
+          <div id="alerts-list">
+            <div class="alert-item" style="cursor:default;"><div class="alert-dot" style="background:var(--muted2);"></div><div style="font-size:12.5px;color:var(--muted2);">Loading…</div></div>
+          </div>
         </div>
       </div>
     </div>
@@ -191,10 +188,8 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
     <div class="grid2 fi">
       <div class="card">
         <div class="card-hd"><div><div class="card-t">Donation Campaigns</div></div><a href="donations.html" class="lnk">All →</a></div>
-        <div style="padding:16px 18px;display:flex;flex-direction:column;gap:14px;">
-          <div><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;"><span style="font-weight:600;">General Fund</span><span class="mono" style="color:var(--accent);">$8,420 / $10,000</span></div><div class="prog"><div class="prog-fill" style="width:84%;background:var(--accent);"></div></div></div>
-          <div><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;"><span style="font-weight:600;">Scholarship Fund</span><span class="mono" style="color:var(--blue);">$9,200 / $15,000</span></div><div class="prog"><div class="prog-fill" style="width:61%;background:var(--blue);"></div></div></div>
-          <div><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;"><span style="font-weight:600;">Building Fund</span><span class="mono" style="color:var(--purple);">$7,200 / $17,000</span></div><div class="prog"><div class="prog-fill" style="width:42%;background:var(--purple);"></div></div></div>
+        <div style="padding:16px 18px;display:flex;flex-direction:column;gap:14px;" id="donation-funds-list">
+          <div style="font-size:12.5px;color:var(--muted2);text-align:center;padding:8px 0;">Loading…</div>
         </div>
       </div>
       <div class="card">
@@ -216,23 +211,149 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
 </div>
 
 <script type="module">
-import { initNav } from './nav.js';
+import { initNav, loadSettings } from './nav.js';
+import { getCurrentOrgId, getDashboardStats, getFunds, getDonations, fmt } from './db.js';
 
-// Show loading, wait for auth
+// Auth + nav
 const user = await initNav({ currentPage: 'dashboard', requireLogin: true, showLoadingScreen: true });
 
-// Hide loading, show app
-document.getElementById('loading-state').style.display = 'none';
-document.getElementById('app').style.display = 'flex';
-
-// Personalize
-const name = user.displayName?.split(' ')[0] || 'there';
+// Personalize greeting
+const name = user?.displayName?.split(' ')[0] || 'there';
+const settings = loadSettings();
 document.getElementById('wb-name').textContent = `Welcome back, ${name}`;
-
 const now = new Date();
 const dateStr = now.toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric', year:'numeric' });
 document.getElementById('today-date').textContent = dateStr;
 document.getElementById('wb-date').textContent = dateStr;
+
+// Update terminology labels on dashboard
+const terms = settings.terms || {};
+document.querySelectorAll('.kpi-l').forEach((el, i) => {
+  // Update "students past due" label based on terminology
+  if (el.textContent.includes('students')) el.textContent = el.textContent.replace('students', (terms.students || 'contacts').toLowerCase());
+});
+
+// ── LOAD LIVE DATA ──
+const orgId = getCurrentOrgId();
+if (orgId) {
+  // Show loading skeletons on KPIs
+  document.querySelectorAll('.kpi-v').forEach(el => {
+    el.style.color = 'var(--muted2)';
+    el.textContent = '—';
+  });
+
+  try {
+    const stats = await getDashboardStats(orgId);
+
+    // KPI 1: Collected this month
+    const kpi1 = document.getElementById('kpi-collected');
+    if (kpi1) {
+      kpi1.textContent = '$' + fmt(stats.collectedThisMonth);
+      kpi1.style.color = '';
+    }
+
+    // KPI 2: Outstanding
+    const kpi2 = document.getElementById('kpi-outstanding');
+    const kpi2d = document.getElementById('kpi-outstanding-d');
+    if (kpi2) { kpi2.textContent = '$' + fmt(stats.totalOutstanding); kpi2.style.color = ''; }
+    if (kpi2d) kpi2d.textContent = stats.openInvoiceCount + ' open invoices';
+
+    // KPI 3: Overdue
+    const kpi3 = document.getElementById('kpi-overdue');
+    const kpi3d = document.getElementById('kpi-overdue-d');
+    if (kpi3) { kpi3.textContent = '$' + fmt(stats.totalOverdue); kpi3.style.color = stats.totalOverdue > 0 ? 'var(--red)' : ''; }
+    if (kpi3d) {
+      const contactLabel = (terms.students || 'contacts').toLowerCase();
+      kpi3d.textContent = stats.overdueCount + ' ' + contactLabel + ' past due';
+    }
+
+    // Recent invoices table
+    const tbody = document.getElementById('recent-invoices-tbody');
+    if (tbody && stats.recentInvoices.length > 0) {
+      tbody.innerHTML = stats.recentInvoices.map(inv => {
+        const bal = (inv.totalAmount || 0) - (inv.totalPaid || 0);
+        const pct = inv.totalAmount > 0 ? (inv.totalPaid || 0) / inv.totalAmount * 100 : 0;
+        const statusBadge = pct >= 100
+          ? '<span class="badge b-g">● Paid</span>'
+          : bal > 0 && inv.dueDate && new Date(inv.dueDate) < now
+            ? '<span class="badge b-r">⚠ Overdue</span>'
+            : pct > 0
+              ? '<span class="badge b-y">◑ Partial</span>'
+              : '<span class="badge b-gr">○ Unpaid</span>';
+        const dueStr = inv.dueDate
+          ? new Date(inv.dueDate + 'T12:00').toLocaleDateString('en-US', { month:'short', day:'numeric' })
+          : '—';
+        const contactName = inv.contactName || 'Unknown';
+        const sub = inv.schoolYear || inv.contactGroup || '';
+        return `<tr onclick="location='invoice.html?id=${inv.id}'">
+          <td><b>${contactName}</b>${sub ? `<div style="font-size:10.5px;color:var(--muted);">${sub}</div>` : ''}</td>
+          <td class="mono">$${fmt(inv.totalAmount || 0)}</td>
+          <td class="mono" style="font-size:11px;color:var(--muted2);">${dueStr}</td>
+          <td>${statusBadge}</td>
+        </tr>`;
+      }).join('');
+    } else if (tbody && stats.recentInvoices.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:var(--muted2);font-size:12.5px;padding:20px;">No invoices yet. <a href="invoice.html" style="color:var(--accent);">Create your first →</a></td></tr>`;
+    }
+
+    // Alerts
+    const alertsEl = document.getElementById('alerts-list');
+    if (alertsEl) {
+      const alerts = [];
+      if (stats.overdueCount > 0) {
+        alerts.push({ color: 'var(--red)', title: `${stats.overdueCount} invoice${stats.overdueCount > 1 ? 's' : ''} overdue`, sub: `$${fmt(stats.totalOverdue)} total past due` });
+      }
+      if (stats.totalOutstanding > 0) {
+        alerts.push({ color: 'var(--yellow)', title: `$${fmt(stats.totalOutstanding)} outstanding`, sub: `${stats.openInvoiceCount} open invoices` });
+      }
+      if (alerts.length === 0) {
+        alerts.push({ color: 'var(--accent)', title: 'All invoices up to date', sub: 'No overdue or outstanding items' });
+      }
+      alertsEl.innerHTML = alerts.map(a => `
+        <a href="payments.html" class="alert-item">
+          <div class="alert-dot" style="background:${a.color};"></div>
+          <div><div style="font-size:12.5px;"><b>${a.title}</b></div><div style="font-size:11px;color:var(--muted);margin-top:1px;">${a.sub}</div></div>
+        </a>`).join('');
+    }
+
+    // Load donation funds
+    try {
+      const funds = await getFunds(orgId);
+      const fundsEl = document.getElementById('donation-funds-list');
+      if (fundsEl && funds.length > 0) {
+        fundsEl.innerHTML = funds.filter(f => f.active !== false).slice(0, 3).map(f => {
+          const pct = f.goal > 0 ? Math.min((f.raised || 0) / f.goal * 100, 100) : 0;
+          return `<div>
+            <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;">
+              <span style="font-weight:600;">${f.name}</span>
+              <span class="mono" style="color:var(--accent);">$${fmt(f.raised || 0)} / $${fmt(f.goal || 0)}</span>
+            </div>
+            <div class="prog"><div class="prog-fill" style="width:${pct.toFixed(1)}%;background:var(--accent);"></div></div>
+          </div>`;
+        }).join('');
+      } else if (fundsEl) {
+        fundsEl.innerHTML = `<div style="font-size:12.5px;color:var(--muted2);text-align:center;padding:12px 0;">No active campaigns. <a href="settings.html" style="color:var(--accent);">Set one up →</a></div>`;
+      }
+
+      // KPI 4: Donations total
+      const kpi4 = document.getElementById('kpi-donations');
+      if (kpi4 && funds.length > 0) {
+        const total = funds.reduce((s, f) => s + (f.raised || 0), 0);
+        kpi4.textContent = '$' + fmt(total);
+        kpi4.style.color = '';
+      }
+    } catch (e) {
+      // Donations disabled or no funds yet
+    }
+
+  } catch (e) {
+    console.warn('Dashboard stats error:', e.message);
+    // Leave skeleton state — data will show on next load
+  }
+} else {
+  // No org — shouldn't get here but handle gracefully
+  document.querySelectorAll('.kpi-v').forEach(el => { el.textContent = '—'; });
+}
 </script>
 </body>
 </html>

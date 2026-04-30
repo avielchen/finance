@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Financially — Set Up Your Organization</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f7f7f3;--surface:#fff;--s2:#f0f0eb;--s3:#e6e6e0;
+  --border:#e0e0d8;--border2:#ccccc4;
+  --text:#1c1c1a;--muted:#686860;--muted2:#a0a098;
+  --accent:#1a6b4a;--al:#e6f4ee;--am:#2d9068;
+  --red:#b83232;--rl:#fdf0f0;
+  --yellow:#a07000;--yl:#fdf8e6;
+  --blue:#1a4a8a;--bl:#eef3fc;
+  --purple:#5b2d8e;--pl:#f3eeff;
+  --sans:'IBM Plex Sans',sans-serif;--mono:'IBM Plex Mono',monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;min-height:100vh;display:flex;align-items:flex-start;justify-content:center;padding:40px 20px 60px;}
+
+.wrap{width:100%;max-width:680px;}
+
+/* LOGO */
+.logo{display:flex;align-items:center;gap:12px;margin-bottom:36px;}
+.logo-icon{width:40px;height:40px;background:var(--accent);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;box-shadow:0 4px 12px rgba(26,107,74,.25);}
+.logo-name{font-size:20px;font-weight:700;letter-spacing:-.4px;}
+.logo-sub{font-size:12px;color:var(--muted);margin-top:1px;}
+
+/* STEPS */
+.steps{display:flex;align-items:center;margin-bottom:32px;gap:0;}
+.step-item{display:flex;align-items:center;gap:8px;flex:1;}
+.step-num{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;border:2px solid var(--border2);color:var(--muted2);transition:all .2s;}
+.step-num.active{background:var(--accent);border-color:var(--accent);color:#fff;}
+.step-num.done{background:var(--accent);border-color:var(--accent);color:#fff;}
+.step-lbl{font-size:12.5px;font-weight:500;color:var(--muted2);}
+.step-lbl.active{color:var(--text);font-weight:600;}
+.step-line{flex:1;height:1px;background:var(--border);margin:0 8px;}
+.step-line.done{background:var(--accent);}
+
+/* CARD */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:16px;}
+.card-hd{padding:22px 24px 0;}
+.card-title{font-size:20px;font-weight:700;letter-spacing:-.3px;margin-bottom:5px;}
+.card-sub{font-size:13.5px;color:var(--muted);line-height:1.5;margin-bottom:20px;}
+.card-body{padding:0 24px 24px;}
+.card-footer{padding:16px 24px;background:var(--s2);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+
+/* FORM */
+.field{display:flex;flex-direction:column;gap:5px;margin-bottom:16px;}
+.field label{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;}
+.input{height:40px;padding:0 12px;background:var(--bg);border:1.5px solid var(--border2);border-radius:8px;font-family:var(--sans);font-size:13.5px;color:var(--text);outline:none;transition:border-color .15s;width:100%;}
+.input:focus{border-color:var(--accent);background:#fff;}
+.hint{font-size:11.5px;color:var(--muted2);margin-top:3px;}
+
+/* TEMPLATE GRID */
+.template-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:20px;}
+.tpl-card{border:2px solid var(--border);border-radius:10px;padding:16px 14px;cursor:pointer;transition:all .15s;text-align:center;background:var(--bg);}
+.tpl-card:hover{border-color:var(--accent);background:var(--al);}
+.tpl-card.selected{border-color:var(--accent);background:var(--al);}
+.tpl-icon{font-size:28px;margin-bottom:8px;}
+.tpl-name{font-size:13px;font-weight:700;margin-bottom:3px;}
+.tpl-desc{font-size:11px;color:var(--muted);line-height:1.4;}
+
+/* PREVIEW BLOCK */
+.preview-block{background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:14px 16px;margin-bottom:16px;}
+.prev-title{font-size:11.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;}
+.prev-row{display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);}
+.prev-row:last-child{border-bottom:none;}
+.prev-key{font-size:12.5px;color:var(--muted);}
+.prev-val{font-size:12.5px;font-weight:600;color:var(--text);}
+
+/* INVITE */
+.invite-row{display:flex;gap:8px;margin-bottom:10px;}
+.invite-row .input{flex:1;}
+.role-sel{height:40px;padding:0 10px;background:var(--bg);border:1.5px solid var(--border2);border-radius:8px;font-family:var(--sans);font-size:13px;color:var(--text);outline:none;cursor:pointer;width:130px;flex-shrink:0;}
+.role-sel:focus{border-color:var(--accent);}
+
+/* BTN */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 18px;border-radius:8px;font-family:var(--sans);font-size:13.5px;font-weight:600;cursor:pointer;border:none;transition:all .15s;white-space:nowrap;}
+.btn-p{background:var(--accent);color:#fff;}.btn-p:hover{background:var(--am);}
+.btn-p:disabled{opacity:.45;cursor:not-allowed;}
+.btn-g{background:var(--surface);color:var(--muted);border:1.5px solid var(--border2);}.btn-g:hover{background:var(--s2);color:var(--text);}
+.btn-xl{padding:12px 24px;font-size:14px;}
+
+/* SPINNER */
+.spinner{width:18px;height:18px;border:2.5px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ERROR */
+.error{background:var(--rl);border:1px solid #e8b8b8;border-radius:7px;padding:10px 14px;font-size:13px;color:var(--red);margin-bottom:14px;display:none;}
+.error.show{display:block;}
+
+/* SUCCESS */
+.success-wrap{text-align:center;padding:32px 24px;}
+.success-icon{font-size:56px;margin-bottom:16px;}
+.success-title{font-size:22px;font-weight:700;margin-bottom:8px;}
+.success-sub{font-size:14px;color:var(--muted);line-height:1.6;margin-bottom:24px;}
+.success-org{font-family:var(--mono);font-size:12px;color:var(--muted2);margin-bottom:20px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="logo">
+    <div class="logo-icon">💠</div>
+    <div><div class="logo-name">Financially</div><div class="logo-sub">Financial Management System</div></div>
+  </div>
+
+  <!-- STEPS -->
+  <div class="steps">
+    <div class="step-item">
+      <div class="step-num active" id="sn-1">1</div>
+      <div class="step-lbl active" id="sl-1">Organization</div>
+    </div>
+    <div class="step-line" id="sl-1-2"></div>
+    <div class="step-item">
+      <div class="step-num" id="sn-2">2</div>
+      <div class="step-lbl" id="sl-2">Template</div>
+    </div>
+    <div class="step-line" id="sl-2-3"></div>
+    <div class="step-item">
+      <div class="step-num" id="sn-3">3</div>
+      <div class="step-lbl" id="sl-3">Invite Team</div>
+    </div>
+    <div class="step-line" id="sl-3-4"></div>
+    <div class="step-item">
+      <div class="step-num" id="sn-4">4</div>
+      <div class="step-lbl" id="sl-4">Done</div>
+    </div>
+  </div>
+
+  <div id="error-box" class="error"></div>
+
+  <!-- ══ STEP 1: ORG NAME ══ -->
+  <div id="view-1">
+    <div class="card">
+      <div class="card-hd">
+        <div class="card-title">What's your organization called?</div>
+        <div class="card-sub">This is the name that will appear on invoices, receipts, and in the system. You can change it later in Settings.</div>
+      </div>
+      <div class="card-body">
+        <div class="field">
+          <label>Organization Name</label>
+          <input class="input" id="org-name" placeholder="e.g. Riverside Academy, Dr. Cohen Dental, Sunrise Fitness" autofocus>
+          <div class="hint">Use your full official name as it appears on documents.</div>
+        </div>
+        <div class="field">
+          <label>Your Role</label>
+          <select class="input" id="org-role-sel">
+            <option value="">Select your role…</option>
+            <option value="owner">Owner / Director</option>
+            <option value="admin">Administrator</option>
+            <option value="accountant">Accountant / Finance</option>
+            <option value="staff">Staff</option>
+          </select>
+        </div>
+      </div>
+      <div class="card-footer">
+        <div style="font-size:12px;color:var(--muted2);">Step 1 of 3</div>
+        <button class="btn btn-p" onclick="goStep2()">Next →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ STEP 2: TEMPLATE ══ -->
+  <div id="view-2" style="display:none;">
+    <div class="card">
+      <div class="card-hd">
+        <div class="card-title">What kind of organization is this?</div>
+        <div class="card-sub">We'll set up the right menu names, charge types, and terminology for you. Everything can be customized in Settings afterwards.</div>
+      </div>
+      <div class="card-body">
+        <div class="template-grid">
+
+          <div class="tpl-card" onclick="selectTemplate('school',this)">
+            <div class="tpl-icon">🎓</div>
+            <div class="tpl-name">School</div>
+            <div class="tpl-desc">Students, tuition, installments, scholarships, donations</div>
+          </div>
+
+          <div class="tpl-card" onclick="selectTemplate('dental',this)">
+            <div class="tpl-icon">🦷</div>
+            <div class="tpl-name">Dental / Medical</div>
+            <div class="tpl-desc">Patients, treatment fees, insurance credits, payers</div>
+          </div>
+
+          <div class="tpl-card" onclick="selectTemplate('gym',this)">
+            <div class="tpl-icon">🏋️</div>
+            <div class="tpl-name">Gym / Studio</div>
+            <div class="tpl-desc">Members, memberships, class fees, personal training</div>
+          </div>
+
+          <div class="tpl-card" onclick="selectTemplate('nonprofit',this)">
+            <div class="tpl-icon">🤝</div>
+            <div class="tpl-name">Nonprofit</div>
+            <div class="tpl-desc">Members, donations, campaigns, program fees</div>
+          </div>
+
+          <div class="tpl-card" onclick="selectTemplate('other',this)">
+            <div class="tpl-icon">🏢</div>
+            <div class="tpl-name">Other</div>
+            <div class="tpl-desc">General billing and payment tracking, fully customizable</div>
+          </div>
+
+        </div>
+
+        <!-- Preview of what will be set up -->
+        <div class="preview-block" id="template-preview" style="display:none;">
+          <div class="prev-title">What we'll set up for you</div>
+          <div id="preview-rows"></div>
+        </div>
+      </div>
+      <div class="card-footer">
+        <button class="btn btn-g" onclick="goStep(1)">← Back</button>
+        <button class="btn btn-p" id="step2-next" onclick="goStep3()" disabled>Next →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ STEP 3: INVITE ══ -->
+  <div id="view-3" style="display:none;">
+    <div class="card">
+      <div class="card-hd">
+        <div class="card-title">Invite your team</div>
+        <div class="card-sub">Add colleagues who will use Financially. They'll receive an email to set up their account. You can skip this and invite people later from Settings.</div>
+      </div>
+      <div class="card-body">
+        <div id="invite-rows">
+          <div class="invite-row">
+            <input class="input" type="email" placeholder="colleague@organization.com">
+            <select class="role-sel">
+              <option value="admin">Admin</option>
+              <option value="accountant" selected>Accountant</option>
+              <option value="viewer">Viewer</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn btn-g" style="font-size:12.5px;padding:6px 12px;margin-top:4px;" onclick="addInviteRow()">+ Add another</button>
+
+        <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border);">
+          <div style="font-size:12.5px;font-weight:700;margin-bottom:8px;">Role permissions</div>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;font-size:11.5px;">
+            <div style="font-weight:700;padding:6px;background:var(--s2);border-radius:5px;text-align:center;">Admin</div>
+            <div style="font-weight:700;padding:6px;background:var(--s2);border-radius:5px;text-align:center;">Accountant</div>
+            <div style="font-weight:700;padding:6px;background:var(--s2);border-radius:5px;text-align:center;">Viewer</div>
+            <div style="font-weight:700;padding:6px;background:var(--s2);border-radius:5px;text-align:center;">Staff</div>
+            <div style="padding:4px 6px;color:var(--muted);">Full access + settings</div>
+            <div style="padding:4px 6px;color:var(--muted);">Create + record payments</div>
+            <div style="padding:4px 6px;color:var(--muted);">Read only</div>
+            <div style="padding:4px 6px;color:var(--muted);">Limited access</div>
+          </div>
+        </div>
+      </div>
+      <div class="card-footer">
+        <button class="btn btn-g" onclick="goStep(2)">← Back</button>
+        <div style="display:flex;gap:10px;">
+          <button class="btn btn-g" onclick="skipInvites()">Skip for now</button>
+          <button class="btn btn-p" id="finish-btn" onclick="finishSetup()">
+            <span id="finish-lbl">Create Organization →</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ STEP 4: DONE ══ -->
+  <div id="view-4" style="display:none;">
+    <div class="card">
+      <div class="success-wrap">
+        <div class="success-icon">🎉</div>
+        <div class="success-title" id="success-title">You're all set!</div>
+        <div class="success-sub">
+          Your organization has been created. Your settings, terminology, and charge types have been configured based on your template. You can customize everything in Settings.
+        </div>
+        <div class="success-org" id="success-org-id"></div>
+        <button class="btn btn-p btn-xl" onclick="window.location.href='index.html'">Go to Dashboard →</button>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /wrap -->
+
+<script type="module">
+import { getFirebaseAuth } from './db.js';
+import { createOrg, addUserOrgMirror, getTemplateSettings, inviteMember } from './db.js';
+import { setCurrentOrgId } from './db.js';
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+let currentUser = null;
+let selectedTemplate = null;
+let currentStep = 1;
+
+// ── AUTH CHECK ──
+const auth = getFirebaseAuth();
+onAuthStateChanged(auth, user => {
+  if (!user) { window.location.href = 'login.html'; return; }
+  currentUser = user;
+  // Check if already has an org
+  const existingOrg = localStorage.getItem('ft_orgId');
+  if (existingOrg) {
+    window.location.href = 'index.html';
+  }
+});
+
+// ── STEP NAVIGATION ──
+window.goStep = function(n) {
+  [1,2,3,4].forEach(i => {
+    document.getElementById('view-'+i).style.display = i===n ? '' : 'none';
+    const num = document.getElementById('sn-'+i);
+    const lbl = document.getElementById('sl-'+i);
+    num.classList.remove('active','done');
+    lbl.classList.remove('active');
+    if (i < n) { num.classList.add('done'); num.textContent = '✓'; }
+    else if (i === n) { num.classList.add('active'); lbl.classList.add('active'); }
+    const line = document.getElementById('sl-'+i+'-'+(i+1));
+    if (line) line.classList.toggle('done', i < n);
+  });
+  currentStep = n;
+};
+
+window.goStep2 = function() {
+  const name = document.getElementById('org-name')?.value?.trim();
+  if (!name) { showError('Please enter your organization name.'); return; }
+  showError('');
+  goStep(2);
+};
+
+window.goStep3 = function() {
+  if (!selectedTemplate) { showError('Please select an organization type.'); return; }
+  showError('');
+  goStep(3);
+};
+
+// ── TEMPLATE SELECTION ──
+window.selectTemplate = function(tpl, card) {
+  document.querySelectorAll('.tpl-card').forEach(c => c.classList.remove('selected'));
+  card.classList.add('selected');
+  selectedTemplate = tpl;
+  document.getElementById('step2-next').disabled = false;
+  showTemplatePreview(tpl);
+};
+
+function showTemplatePreview(tpl) {
+  const settings = getTemplateSettings(tpl);
+  const terms = settings.terms;
+  const preview = document.getElementById('template-preview');
+  const rows = document.getElementById('preview-rows');
+  const previewData = [
+    ['Contacts called', terms.students],
+    ['Payers called', terms.parents],
+    ['Invoices section', terms.tuition],
+    ['Donations', settings.modules.donations ? 'Enabled' : 'Disabled'],
+    ['Charge types', (settings.chargeTypes || []).map(c => c.name).join(', ') || 'None preset'],
+  ];
+  rows.innerHTML = previewData.map(([k, v]) =>
+    `<div class="prev-row"><span class="prev-key">${k}</span><span class="prev-val">${v}</span></div>`
+  ).join('');
+  preview.style.display = '';
+}
+
+// ── INVITE ROWS ──
+window.addInviteRow = function() {
+  const wrap = document.getElementById('invite-rows');
+  const div = document.createElement('div');
+  div.className = 'invite-row';
+  div.innerHTML = `
+    <input class="input" type="email" placeholder="colleague@organization.com">
+    <select class="role-sel">
+      <option value="admin">Admin</option>
+      <option value="accountant" selected>Accountant</option>
+      <option value="viewer">Viewer</option>
+    </select>`;
+  wrap.appendChild(div);
+  div.querySelector('input').focus();
+};
+
+window.skipInvites = function() { finishSetup(true); };
+
+// ── FINISH SETUP ──
+window.finishSetup = async function(skipInvites = false) {
+  if (!currentUser) return;
+  const btn = document.getElementById('finish-btn');
+  const lbl = document.getElementById('finish-lbl');
+  btn.disabled = true;
+  lbl.innerHTML = '<div class="spinner"></div> Creating…';
+  showError('');
+
+  try {
+    const orgName = document.getElementById('org-name')?.value?.trim();
+
+    // Create org in Firestore
+    const orgId = await createOrg({
+      name: orgName,
+      template: selectedTemplate,
+      uid: currentUser.uid,
+      displayName: currentUser.displayName,
+      email: currentUser.email,
+    });
+
+    // Add user → org mirror for fast lookups
+    await addUserOrgMirror(currentUser.uid, orgId, orgName, 'owner');
+
+    // Also save settings to localStorage for instant access
+    const tplSettings = getTemplateSettings(selectedTemplate);
+    tplSettings.orgName = orgName;
+    localStorage.setItem('ft_settings', JSON.stringify(tplSettings));
+
+    // Set as current org
+    setCurrentOrgId(orgId);
+
+    // Send invites
+    if (!skipInvites) {
+      const rows = document.querySelectorAll('#invite-rows .invite-row');
+      const invitePromises = [];
+      rows.forEach(row => {
+        const email = row.querySelector('input[type=email]')?.value?.trim();
+        const role = row.querySelector('select')?.value;
+        if (email) {
+          invitePromises.push(inviteMember(orgId, email, role, currentUser.uid));
+        }
+      });
+      await Promise.all(invitePromises);
+    }
+
+    // Show success
+    goStep(4);
+    document.getElementById('success-title').textContent = `${orgName} is ready!`;
+    document.getElementById('success-org-id').textContent = 'Org ID: ' + orgId;
+
+  } catch (err) {
+    showError('Failed to create organization: ' + err.message);
+    btn.disabled = false;
+    lbl.textContent = 'Create Organization →';
+  }
+};
+
+function showError(msg) {
+  const box = document.getElementById('error-box');
+  box.textContent = msg;
+  box.classList.toggle('show', !!msg);
+}
+</script>
+</body>
+</html>
