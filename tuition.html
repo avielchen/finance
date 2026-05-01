@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en" data-page="tuition">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FinTrack — Tuition</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f7f7f3;--surface:#fff;--s2:#f0f0eb;--s3:#e6e6e0;
+  --border:#e0e0d8;--border2:#ccccc4;
+  --text:#1c1c1a;--muted:#686860;--muted2:#a0a098;
+  --accent:#1a6b4a;--al:#e6f4ee;--am:#2d9068;
+  --red:#b83232;--rl:#fdf0f0;--rb:#e8b8b8;
+  --yellow:#a07000;--yl:#fdf8e6;--yb:#e8d890;
+  --blue:#1a4a8a;--bl:#eef3fc;--bb:#b0c8f0;
+  --purple:#5b2d8e;--pl:#f3eeff;
+  --sans:'IBM Plex Sans',sans-serif;--mono:'IBM Plex Mono',monospace;
+  --sc:56px;--se:210px;--tb:52px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;min-height:100vh;}
+.shell{display:flex;min-height:100vh;}
+.sidebar{width:var(--sc);background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100;transition:width .22s ease;overflow:hidden;}
+.sidebar.open{width:var(--se);}
+.sidebar-top{height:var(--tb);display:flex;align-items:center;padding:0 14px;border-bottom:1px solid var(--border);flex-shrink:0;gap:12px;}
+.hbg{width:28px;height:28px;border:none;background:none;cursor:pointer;display:flex;flex-direction:column;justify-content:center;gap:5px;flex-shrink:0;padding:0;}
+.hbg span{display:block;height:1.5px;background:var(--muted);border-radius:2px;}
+.hbg:hover span{background:var(--text);}
+.s-logo{font-size:13px;font-weight:700;color:var(--accent);white-space:nowrap;opacity:0;transition:opacity .15s;}
+.sidebar.open .s-logo{opacity:1;}
+.nav-sec{padding:16px 0 8px;border-bottom:1px solid var(--border);}
+.nav-sec:last-of-type{border-bottom:none;}
+.ni{display:flex;align-items:center;gap:12px;padding:9px 14px;cursor:pointer;color:var(--muted);font-size:13px;font-weight:500;white-space:nowrap;transition:all .15s;border-left:2px solid transparent;text-decoration:none;}
+.ni:hover{background:var(--s2);color:var(--text);}
+.ni.active{color:var(--accent);border-left-color:var(--accent);background:var(--al);}
+.nic{width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
+.nl{opacity:0;transition:opacity .15s;}
+.sidebar.open .nl{opacity:1;}
+.main{margin-left:var(--sc);flex:1;display:flex;flex-direction:column;min-height:100vh;transition:margin-left .22s ease;}
+.sidebar.open~.main{margin-left:var(--se);}
+.topbar{height:var(--tb);background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 24px;position:sticky;top:0;z-index:50;}
+.pt{font-size:15px;font-weight:600;}
+.bc{font-family:var(--mono);font-size:11px;color:var(--muted2);margin-top:1px;}
+.btn{display:inline-flex;align-items:center;gap:5px;padding:6px 13px;border-radius:6px;font-family:var(--sans);font-size:12.5px;font-weight:500;cursor:pointer;border:none;transition:all .15s;white-space:nowrap;text-decoration:none;}
+.btn-p{background:var(--accent);color:#fff;}.btn-p:hover{background:var(--am);}
+.btn-g{background:var(--surface);color:var(--muted);border:1px solid var(--border2);}.btn-g:hover{background:var(--s2);color:var(--text);}
+.btn-sm{padding:4px 9px;font-size:12px;}
+.content{padding:20px 24px;flex:1;}
+
+/* KPI */
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;}
+.kpi{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px;}
+.kpi-l{font-size:10.5px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;}
+.kpi-v{font-family:var(--mono);font-size:20px;font-weight:700;letter-spacing:-.3px;}
+.kpi-d{font-size:11.5px;color:var(--muted);margin-top:3px;}
+.kpi-d.up{color:var(--accent);} .kpi-d.dn{color:var(--red);}
+
+/* FILTER BAR */
+.filter-bar{display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;}
+.search-wrap{display:flex;align-items:center;gap:8px;flex:1;min-width:200px;background:var(--surface);border:1px solid var(--border2);border-radius:7px;padding:0 12px;height:34px;}
+.search-wrap input{flex:1;border:none;background:none;font-family:var(--sans);font-size:13px;color:var(--text);outline:none;}
+.search-wrap input::placeholder{color:var(--muted2);}
+.filter-sel{height:34px;padding:0 10px;background:var(--surface);border:1px solid var(--border2);border-radius:7px;font-family:var(--sans);font-size:12.5px;color:var(--text);outline:none;cursor:pointer;}
+.tog-btn{display:flex;align-items:center;gap:6px;padding:5px 11px;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;border:1px solid var(--border2);background:var(--surface);color:var(--muted);height:34px;}
+.tog-btn.on{background:var(--al);color:var(--accent);border-color:#b0d8c0;}
+.tog-btn:hover{border-color:var(--accent);}
+
+/* TABLE */
+.table-wrap{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;}
+.tbl{width:100%;border-collapse:collapse;}
+.tbl th{font-size:10.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;padding:10px 14px;text-align:left;border-bottom:2px solid var(--border);background:var(--s2);cursor:pointer;white-space:nowrap;user-select:none;}
+.tbl th:hover{color:var(--text);}
+.tbl th .sort-arrow{color:var(--muted2);font-size:10px;margin-left:3px;}
+.tbl td{padding:11px 14px;border-bottom:1px solid var(--border);vertical-align:middle;}
+.tbl tr:last-child td{border-bottom:none;}
+.tbl tr:hover td{background:var(--s2);cursor:pointer;}
+.mono{font-family:var(--mono);}
+
+/* Student cell */
+.stu-cell{display:flex;align-items:center;gap:9px;}
+.stu-av{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0;background:var(--accent);}
+.stu-name{font-size:13px;font-weight:600;}
+.stu-meta{font-size:11px;color:var(--muted);margin-top:1px;}
+
+/* Status */
+.badge{display:inline-flex;align-items:center;padding:2px 7px;border-radius:4px;font-family:var(--mono);font-size:10.5px;font-weight:500;}
+.b-g{background:var(--al);color:var(--accent);}
+.b-y{background:var(--yl);color:var(--yellow);}
+.b-r{background:var(--rl);color:var(--red);}
+.b-gr{background:var(--s3);color:var(--muted);}
+.b-b{background:var(--bl);color:var(--blue);}
+
+/* Progress bar in cell */
+.mini-prog{height:4px;background:var(--s3);border-radius:2px;overflow:hidden;margin-top:4px;width:80px;}
+.mini-prog-fill{height:100%;border-radius:2px;}
+
+/* Pagination */
+.pagination{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-top:1px solid var(--border);}
+.pag-info{font-size:12.5px;color:var(--muted);}
+.pag-btns{display:flex;gap:4px;}
+.pag-btn{width:30px;height:30px;border:1px solid var(--border2);border-radius:6px;background:var(--surface);cursor:pointer;font-size:12px;color:var(--muted);display:flex;align-items:center;justify-content:center;transition:all .15s;}
+.pag-btn:hover{border-color:var(--accent);color:var(--accent);}
+.pag-btn.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+.pag-btn:disabled{opacity:.35;cursor:not-allowed;}
+
+/* Empty state */
+.empty-state{padding:48px 24px;text-align:center;color:var(--muted2);}
+.empty-icon{font-size:40px;margin-bottom:12px;}
+.empty-title{font-size:15px;font-weight:600;color:var(--text);margin-bottom:6px;}
+.empty-sub{font-size:13px;line-height:1.6;margin-bottom:20px;}
+
+@keyframes fu{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+.fi{animation:fu .2s ease both;}
+</style>
+</head>
+<body data-page="tuition">
+<div class="shell">
+
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-top">
+    <button class="hbg" onclick="window._ftToggleSidebar()"><span></span><span></span><span></span></button>
+    <div class="s-logo">FinTrack</div>
+  </div>
+  <div class="nav-sec"><a class="ni" href="index.html"><span class="nic">⊞</span><span class="nl">Dashboard</span></a></div>
+  <div class="nav-sec">
+    <a class="ni active" href="tuition.html"><span class="nic">📄</span><span class="nl">Tuition</span></a>
+    <a class="ni" href="donations.html"><span class="nic">🤝</span><span class="nl">Donations</span></a>
+    <a class="ni" href="payments.html"><span class="nic">💳</span><span class="nl">Payments</span></a>
+    <a class="ni" href="vendors.html"><span class="nic">🏢</span><span class="nl">Vendors</span></a>
+  </div>
+  <div class="nav-sec">
+    <a class="ni" href="students.html"><span class="nic">🎓</span><span class="nl">Students</span></a>
+    <a class="ni" href="parents.html"><span class="nic">👨‍👩‍👧</span><span class="nl">Parents</span></a>
+  </div>
+  <div class="nav-sec">
+    <a class="ni" href="reports.html"><span class="nic">↗</span><span class="nl">Reports</span></a>
+    <a class="ni" href="settings.html"><span class="nic">⚙</span><span class="nl">Settings</span></a>
+  </div>
+</aside>
+
+<main class="main">
+<div class="topbar">
+  <div>
+    <div class="pt" id="page-title">Tuition</div>
+    <div class="bc" id="page-sub">All invoices</div>
+  </div>
+  <div style="display:flex;gap:8px;align-items:center;">
+    <div id="topbar-user-chip"></div>
+    <a href="invoice.html" class="btn btn-p">＋ New Invoice</a>
+  </div>
+</div>
+
+<div class="content">
+
+  <!-- KPIs -->
+  <div class="kpi-row fi">
+    <div class="kpi"><div class="kpi-l">Total Invoiced</div><div class="kpi-v" id="kpi-total">—</div><div class="kpi-d" id="kpi-total-d">Loading…</div></div>
+    <div class="kpi"><div class="kpi-l">Collected</div><div class="kpi-v" id="kpi-collected" style="color:var(--accent);">—</div><div class="kpi-d" id="kpi-collected-d"></div></div>
+    <div class="kpi"><div class="kpi-l">Outstanding</div><div class="kpi-v" id="kpi-outstanding" style="color:var(--yellow);">—</div><div class="kpi-d" id="kpi-outstanding-d"></div></div>
+    <div class="kpi"><div class="kpi-l">Overdue</div><div class="kpi-v" id="kpi-overdue" style="color:var(--red);">—</div><div class="kpi-d kpi-d dn" id="kpi-overdue-d"></div></div>
+  </div>
+
+  <!-- FILTERS -->
+  <div class="filter-bar fi">
+    <div class="search-wrap">
+      <span style="color:var(--muted2);font-size:15px;">⌕</span>
+      <input type="text" placeholder="Search student, invoice #, family…" id="srch" oninput="applyFilters()">
+    </div>
+    <select class="filter-sel" id="yr-sel" onchange="applyFilters()">
+      <option value="all">All Years</option>
+    </select>
+    <select class="filter-sel" id="st-sel" onchange="applyFilters()">
+      <option value="all">All Status</option>
+      <option value="unpaid">Unpaid</option>
+      <option value="partial">Partial</option>
+      <option value="paid">Paid</option>
+      <option value="overdue">Overdue</option>
+    </select>
+    <button class="tog-btn" id="show-paid-btn" onclick="togglePaid()">👁 Show Paid</button>
+    <button class="btn btn-g btn-sm" onclick="exportCSV()">⬇ Export</button>
+  </div>
+
+  <!-- TABLE -->
+  <div class="table-wrap fi">
+    <table class="tbl" id="inv-table">
+      <thead>
+        <tr>
+          <th onclick="sortBy('contact')">Student / Contact <span class="sort-arrow">↕</span></th>
+          <th onclick="sortBy('invoiceNumber')">Invoice # <span class="sort-arrow">↕</span></th>
+          <th onclick="sortBy('schoolYear')">Year <span class="sort-arrow">↕</span></th>
+          <th onclick="sortBy('totalAmount')">Total <span class="sort-arrow">↕</span></th>
+          <th onclick="sortBy('totalPaid')">Paid <span class="sort-arrow">↕</span></th>
+          <th onclick="sortBy('balance')">Balance <span class="sort-arrow">↕</span></th>
+          <th onclick="sortBy('dueDate')">Due Date <span class="sort-arrow">↕</span></th>
+          <th onclick="sortBy('status')">Status <span class="sort-arrow">↕</span></th>
+          <th style="width:60px;"></th>
+        </tr>
+      </thead>
+      <tbody id="inv-tbody">
+        <tr><td colspan="9" class="empty-state">
+          <div class="empty-icon">📄</div>
+          <div class="empty-title">Loading invoices…</div>
+        </td></tr>
+      </tbody>
+    </table>
+    <div class="pagination" id="pagination" style="display:none;">
+      <div class="pag-info" id="pag-info"></div>
+      <div class="pag-btns" id="pag-btns"></div>
+    </div>
+  </div>
+
+</div>
+</main>
+</div>
+
+<script type="module">
+import { initNav, loadSettings } from './nav.js';
+import { getCurrentOrgId, getInvoices, getContacts, deleteInvoice, fmt } from './db.js';
+
+await initNav({ currentPage: 'tuition' });
+const orgId = getCurrentOrgId();
+const settings = loadSettings();
+const terms = settings.terms || {};
+
+// Apply terminology
+const title = document.getElementById('page-title');
+if (title && terms.tuition) title.textContent = terms.tuition;
+
+// ── STATE ──
+let allInvoices = [];
+let allContacts = {};
+let filteredInvoices = [];
+let sortCol = 'dueDate';
+let sortDir = 1; // 1=asc -1=desc
+let showPaid = false;
+let currentPage = 1;
+const PAGE_SIZE = 25;
+
+// ── LOAD ──
+async function load() {
+  try {
+    const [invoices, contacts] = await Promise.all([
+      getInvoices(orgId),
+      getContacts(orgId),
+    ]);
+    allContacts = {};
+    contacts.forEach(c => { allContacts[c.id] = c; });
+    allInvoices = invoices;
+
+    // Populate year filter
+    const years = [...new Set(invoices.map(i => i.schoolYear).filter(Boolean))].sort().reverse();
+    const yrSel = document.getElementById('yr-sel');
+    years.forEach(y => {
+      const opt = document.createElement('option');
+      opt.value = y; opt.textContent = y;
+      yrSel.appendChild(opt);
+    });
+
+    // Compute balance on each invoice
+    allInvoices.forEach(inv => {
+      inv._balance = Math.max((inv.totalAmount||0) - (inv.totalPaid||0), 0);
+      inv._pct = inv.totalAmount > 0 ? (inv.totalPaid||0)/inv.totalAmount*100 : 0;
+      const now = new Date();
+      const isOverdue = inv._balance > 0 && inv.dueDate && new Date(inv.dueDate) < now;
+      inv._status = inv._pct >= 100 ? 'paid' : isOverdue ? 'overdue' : inv._pct > 0 ? 'partial' : 'unpaid';
+      const contact = allContacts[inv.contactId] || {};
+      inv._contactName = inv.contactName || `${contact.firstName||''} ${contact.lastName||''}`.trim() || '—';
+      inv._contactGrade = contact.grade || '';
+      inv._avatarColor = contact.avatarColor || '#1a6b4a';
+    });
+
+    updateKPIs();
+    applyFilters();
+  } catch(e) {
+    document.getElementById('inv-tbody').innerHTML =
+      `<tr><td colspan="9" style="padding:32px;text-align:center;color:var(--red);">Error: ${e.message}</td></tr>`;
+  }
+}
+
+// ── KPIs ──
+function updateKPIs() {
+  let total=0, paid=0, outstanding=0, overdue=0, overdueCount=0;
+  const now = new Date();
+  allInvoices.forEach(inv => {
+    total += inv.totalAmount||0;
+    paid += inv.totalPaid||0;
+    outstanding += inv._balance;
+    if (inv._status === 'overdue') { overdue += inv._balance; overdueCount++; }
+  });
+  const el = id => document.getElementById(id);
+  el('kpi-total').textContent = '$'+fmtK(total);
+  el('kpi-total-d').textContent = allInvoices.length + ' invoices';
+  el('kpi-collected').textContent = '$'+fmtK(paid);
+  el('kpi-collected-d').textContent = total>0 ? Math.round(paid/total*100)+'% of total' : '';
+  el('kpi-outstanding').textContent = '$'+fmtK(outstanding);
+  el('kpi-outstanding-d').textContent = allInvoices.filter(i=>i._balance>0).length + ' with balance';
+  el('kpi-overdue').textContent = '$'+fmtK(overdue);
+  el('kpi-overdue-d').textContent = overdueCount + ' past due';
+}
+
+// ── FILTERS ──
+window.applyFilters = function() {
+  const q = (document.getElementById('srch')?.value||'').toLowerCase();
+  const yr = document.getElementById('yr-sel')?.value||'all';
+  const st = document.getElementById('st-sel')?.value||'all';
+
+  filteredInvoices = allInvoices.filter(inv => {
+    if (!showPaid && inv._status === 'paid') return false;
+    if (yr !== 'all' && inv.schoolYear !== yr) return false;
+    if (st !== 'all' && inv._status !== st) return false;
+    if (q) {
+      const match = inv._contactName.toLowerCase().includes(q) ||
+        (inv.invoiceNumber||'').toLowerCase().includes(q) ||
+        (inv.schoolYear||'').toLowerCase().includes(q) ||
+        (allContacts[inv.contactId]?.familyName||'').toLowerCase().includes(q);
+      if (!match) return false;
+    }
+    return true;
+  });
+
+  // Sort
+  filteredInvoices.sort((a,b) => {
+    let av = a[sortCol] ?? a['_'+sortCol] ?? '';
+    let bv = b[sortCol] ?? b['_'+sortCol] ?? '';
+    if (sortCol === 'contact') { av = a._contactName; bv = b._contactName; }
+    if (typeof av === 'number') return (av-bv)*sortDir;
+    return String(av).localeCompare(String(bv)) * sortDir;
+  });
+
+  currentPage = 1;
+  renderTable();
+};
+
+window.togglePaid = function() {
+  showPaid = !showPaid;
+  const btn = document.getElementById('show-paid-btn');
+  btn.classList.toggle('on', showPaid);
+  btn.textContent = showPaid ? '👁 Hide Paid' : '👁 Show Paid';
+  applyFilters();
+};
+
+// ── SORT ──
+window.sortBy = function(col) {
+  if (sortCol === col) sortDir *= -1;
+  else { sortCol = col; sortDir = 1; }
+  applyFilters();
+};
+
+// ── RENDER TABLE ──
+function renderTable() {
+  const tbody = document.getElementById('inv-tbody');
+  const total = filteredInvoices.length;
+  const start = (currentPage-1)*PAGE_SIZE;
+  const page = filteredInvoices.slice(start, start+PAGE_SIZE);
+  const now = new Date();
+
+  if (!page.length) {
+    tbody.innerHTML = `<tr><td colspan="9">
+      <div class="empty-state">
+        <div class="empty-icon">📄</div>
+        <div class="empty-title">No invoices found</div>
+        <div class="empty-sub">Try adjusting your filters, or create a new invoice.</div>
+        <a href="invoice.html" class="btn btn-p">＋ Create Invoice</a>
+      </div>
+    </td></tr>`;
+    document.getElementById('pagination').style.display = 'none';
+    return;
+  }
+
+  const statusBadge = s => ({
+    paid: '<span class="badge b-g">● Paid</span>',
+    partial: '<span class="badge b-y">◑ Partial</span>',
+    overdue: '<span class="badge b-r">⚠ Overdue</span>',
+    unpaid: '<span class="badge b-gr">○ Unpaid</span>',
+  }[s] || '');
+
+  tbody.innerHTML = page.map(inv => {
+    const initials = inv._contactName.split(' ').map(p=>p[0]).join('').slice(0,2).toUpperCase()||'?';
+    const dueStr = inv.dueDate
+      ? new Date(inv.dueDate+'T12:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})
+      : '—';
+    const dueColor = inv._status==='overdue' ? 'color:var(--red);font-weight:600;' : '';
+    const pct = Math.round(inv._pct);
+
+    return `<tr onclick="location='invoice.html?id=${inv.id}&edit=1'">
+      <td>
+        <div class="stu-cell">
+          <div class="stu-av" style="background:${inv._avatarColor};">${initials}</div>
+          <div>
+            <div class="stu-name">${inv._contactName}</div>
+            <div class="stu-meta">${inv._contactGrade || '—'}</div>
+          </div>
+        </div>
+      </td>
+      <td class="mono" style="font-size:12px;">${inv.invoiceNumber||inv.id.slice(0,8)}</td>
+      <td style="color:var(--muted);font-size:12.5px;">${inv.schoolYear||'—'}</td>
+      <td class="mono" style="font-size:13px;font-weight:600;">$${fmtK(inv.totalAmount||0)}</td>
+      <td class="mono" style="font-size:13px;color:var(--accent);">$${fmtK(inv.totalPaid||0)}</td>
+      <td>
+        <div class="mono" style="font-size:13px;font-weight:600;${inv._balance>0?'color:var(--yellow)':''}">${inv._balance>0?'$'+fmtK(inv._balance):'—'}</div>
+        <div class="mini-prog"><div class="mini-prog-fill" style="width:${Math.min(pct,100)}%;background:${inv._status==='overdue'?'var(--red)':'var(--accent)'};"></div></div>
+      </td>
+      <td style="font-size:12.5px;${dueColor}">${dueStr}</td>
+      <td>${statusBadge(inv._status)}</td>
+      <td>
+        <div style="display:flex;gap:4px;">
+          <button class="btn btn-g" style="padding:3px 8px;font-size:11px;" onclick="event.stopPropagation();location='invoice.html?id=${inv.id}&edit=1'">Edit</button>
+          <button class="btn" style="padding:3px 8px;font-size:11px;background:var(--rl);color:var(--red);border:1px solid var(--rb);" onclick="event.stopPropagation();deleteInv('${inv.id}')">🗑</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+
+  // Pagination
+  const pages = Math.ceil(total/PAGE_SIZE);
+  const pag = document.getElementById('pagination');
+  const pagInfo = document.getElementById('pag-info');
+  const pagBtns = document.getElementById('pag-btns');
+  pag.style.display = pages > 1 ? '' : 'none';
+  pagInfo.textContent = `Showing ${start+1}–${Math.min(start+PAGE_SIZE,total)} of ${total}`;
+  pagBtns.innerHTML = [
+    `<button class="pag-btn" onclick="goPage(${currentPage-1})" ${currentPage===1?'disabled':''}>‹</button>`,
+    ...Array.from({length:Math.min(pages,7)},(_,i)=>{
+      const p = i+1;
+      return `<button class="pag-btn${p===currentPage?' active':''}" onclick="goPage(${p})">${p}</button>`;
+    }),
+    `<button class="pag-btn" onclick="goPage(${currentPage+1})" ${currentPage===pages?'disabled':''}>›</button>`,
+  ].join('');
+}
+
+window.goPage = function(p) {
+  const pages = Math.ceil(filteredInvoices.length/PAGE_SIZE);
+  if (p < 1 || p > pages) return;
+  currentPage = p;
+  renderTable();
+  window.scrollTo({top:0,behavior:'smooth'});
+};
+
+// ── DELETE ──
+window.deleteInv = async function(id) {
+  const inv = allInvoices.find(i=>i.id===id);
+  const name = inv?._contactName || 'this invoice';
+  if (!confirm(`Delete invoice for ${name}? This cannot be undone.`)) return;
+  try {
+    await deleteInvoice(orgId, id);
+    allInvoices = allInvoices.filter(i=>i.id!==id);
+    updateKPIs();
+    applyFilters();
+  } catch(e) { alert('Failed to delete: '+e.message); }
+};
+
+// ── EXPORT CSV ──
+window.exportCSV = function() {
+  const rows = [['Student','Invoice #','Year','Total','Paid','Balance','Due Date','Status']];
+  filteredInvoices.forEach(inv => {
+    rows.push([
+      inv._contactName, inv.invoiceNumber||'', inv.schoolYear||'',
+      inv.totalAmount||0, inv.totalPaid||0, inv._balance,
+      inv.dueDate||'', inv._status,
+    ]);
+  });
+  const csv = rows.map(r=>r.map(v=>`"${v}"`).join(',')).join('\n');
+  const blob = new Blob([csv],{type:'text/csv'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `invoices_${new Date().toISOString().split('T')[0]}.csv`;
+  a.click();
+};
+
+function fmtK(n) {
+  const v = parseFloat(n)||0;
+  return v%1===0 ? v.toLocaleString('en-US') : v.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+
+await load();
+</script>
+</body>
+</html>

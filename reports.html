@@ -6,7 +6,7 @@
 <title>FinTrack — Reports</title>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#f5f5f0;--surface:#fff;--surface2:#f0f0eb;--border:#e2e2da;--border2:#d0d0c8;--text:#1a1a18;--muted:#6b6b65;--muted2:#9b9b95;--accent:#1a6b4a;--accent-light:#e8f4ee;--accent-mid:#2d9068;--red:#c0392b;--red-light:#fdf0ef;--yellow:#b07d00;--yellow-light:#fdf8e8;--blue:#1a4a8a;--blue-light:#eef3fb;--purple:#5b2d8e;--purple-light:#f3eeff;--sans:'IBM Plex Sans',sans-serif;--mono:'IBM Plex Mono',monospace;--sc:56px;--se:210px;--tb:52px;}
+:root{--bg:#f7f7f3;--surface:#fff;--s2:#f0f0eb;--s3:#e6e6e0;--border:#e0e0d8;--border2:#ccccc4;--text:#1c1c1a;--muted:#686860;--muted2:#a0a098;--accent:#1a6b4a;--al:#e6f4ee;--am:#2d9068;--red:#b83232;--rl:#fdf0f0;--yellow:#a07000;--yl:#fdf8e6;--blue:#1a4a8a;--bl:#eef3fc;--purple:#5b2d8e;--sans:'IBM Plex Sans',sans-serif;--mono:'IBM Plex Mono',monospace;--sc:56px;--se:210px;--tb:52px;}
 *{margin:0;padding:0;box-sizing:border-box;}
 body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;min-height:100vh;}
 .shell{display:flex;min-height:100vh;}
@@ -15,69 +15,62 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
 .sidebar-top{height:var(--tb);display:flex;align-items:center;padding:0 14px;border-bottom:1px solid var(--border);flex-shrink:0;gap:12px;}
 .hbg{width:28px;height:28px;border:none;background:none;cursor:pointer;display:flex;flex-direction:column;justify-content:center;gap:5px;flex-shrink:0;padding:0;}
 .hbg span{display:block;height:1.5px;background:var(--muted);border-radius:2px;}
-.hbg:hover span{background:var(--text);}
+.ni{display:flex;align-items:center;gap:12px;padding:9px 14px;cursor:pointer;color:var(--muted);font-size:13px;font-weight:500;white-space:nowrap;transition:all .15s;border-left:2px solid transparent;text-decoration:none;}
+.ni:hover{background:var(--s2);color:var(--text);}
+.ni.active{color:var(--accent);border-left-color:var(--accent);background:var(--al);}
+.nic{width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
+.nl{opacity:0;transition:opacity .15s;}
+.sidebar.open .nl{opacity:1;}
 .s-logo{font-size:13px;font-weight:700;color:var(--accent);white-space:nowrap;opacity:0;transition:opacity .15s;}
 .sidebar.open .s-logo{opacity:1;}
 .nav-sec{padding:16px 0 8px;border-bottom:1px solid var(--border);}
 .nav-sec:last-of-type{border-bottom:none;}
-.ni{display:flex;align-items:center;gap:12px;padding:9px 14px;cursor:pointer;color:var(--muted);font-size:13px;font-weight:500;white-space:nowrap;transition:all .15s;border-left:2px solid transparent;text-decoration:none;}
-.ni:hover{background:var(--surface2);color:var(--text);}
-.ni.active{color:var(--accent);border-left-color:var(--accent);background:var(--accent-light);}
-.nic{width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
-.nl{opacity:0;transition:opacity .15s;}
-.sidebar.open .nl{opacity:1;}
-.main{margin-left:var(--sc);flex:1;display:flex;flex-direction:column;transition:margin-left .22s ease;}
+.main{margin-left:var(--sc);flex:1;display:flex;flex-direction:column;min-height:100vh;transition:margin-left .22s ease;}
 .sidebar.open~.main{margin-left:var(--se);}
-.topbar{height:var(--tb);background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 28px;position:sticky;top:0;z-index:50;}
+.topbar{height:var(--tb);background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 24px;position:sticky;top:0;z-index:50;}
 .pt{font-size:15px;font-weight:600;}
 .bc{font-family:var(--mono);font-size:11px;color:var(--muted2);margin-top:1px;}
-.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:6px;font-family:var(--sans);font-size:13px;font-weight:500;cursor:pointer;border:none;transition:all .15s;white-space:nowrap;}
-.btn-p{background:var(--accent);color:#fff;}.btn-p:hover{background:var(--accent-mid);}
-.btn-g{background:transparent;color:var(--muted);border:1px solid var(--border2);}.btn-g:hover{background:var(--surface2);color:var(--text);}
-.btn-sm{padding:5px 10px;font-size:12px;}
-.content{padding:24px 28px;flex:1;}
-.report-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px;}
-.report-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:22px;cursor:pointer;transition:all .2s;}
-.report-card:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:0 4px 16px rgba(0,0,0,.06);}
-.rc-icon{font-size:28px;margin-bottom:12px;}
-.rc-title{font-size:14px;font-weight:700;margin-bottom:6px;}
-.rc-desc{font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:14px;}
-.rc-footer{display:flex;align-items:center;justify-content:space-between;}
-.badge{display:inline-flex;align-items:center;padding:2px 7px;border-radius:4px;font-family:var(--mono);font-size:10.5px;font-weight:500;}
-.b-g{background:var(--accent-light);color:var(--accent);}
-.b-b{background:var(--blue-light);color:var(--blue);}
-.b-p{background:var(--purple-light);color:var(--purple);}
-.b-y{background:var(--yellow-light);color:var(--yellow);}
-.b-r{background:var(--red-light);color:var(--red);}
-.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;}
-.card-hd{padding:14px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
-.card-t{font-size:13px;font-weight:600;}
-.card-body{padding:20px;}
-.field{display:flex;flex-direction:column;gap:5px;}
-.field label{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;}
-.input{height:36px;padding:0 10px;background:var(--bg);border:1px solid var(--border2);border-radius:6px;font-family:var(--sans);font-size:13px;color:var(--text);outline:none;transition:border-color .15s;width:100%;}
+.btn{display:inline-flex;align-items:center;gap:5px;padding:6px 13px;border-radius:6px;font-family:var(--sans);font-size:12.5px;font-weight:500;cursor:pointer;border:none;transition:all .15s;white-space:nowrap;}
+.btn-p{background:var(--accent);color:#fff;}.btn-p:hover{background:var(--am);}
+.btn-g{background:var(--surface);color:var(--muted);border:1px solid var(--border2);}.btn-g:hover{background:var(--s2);color:var(--text);}
+.btn-sm{padding:4px 9px;font-size:12px;}
+.content{padding:20px 24px;flex:1;}
+.section{background:var(--surface);border:1px solid var(--border);border-radius:10px;margin-bottom:14px;overflow:hidden;}
+.sec-hd{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.sec-title{font-size:13px;font-weight:700;}
+.sec-body{padding:16px;}
+.report-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;}
+.report-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;cursor:pointer;transition:all .15s;}
+.report-card:hover{border-color:var(--accent);background:var(--al);}
+.report-card.active{border-color:var(--accent);background:var(--al);}
+.rc-icon{font-size:24px;margin-bottom:8px;}
+.rc-title{font-size:13px;font-weight:700;margin-bottom:3px;}
+.rc-desc{font-size:11.5px;color:var(--muted);line-height:1.5;}
+.filter-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;}
+.input{height:34px;padding:0 10px;background:var(--bg);border:1px solid var(--border2);border-radius:6px;font-family:var(--sans);font-size:13px;color:var(--text);outline:none;transition:border-color .15s;}
 .input:focus{border-color:var(--accent);background:#fff;}
-.form-row4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;}
+select.input{cursor:pointer;}
 .tbl{width:100%;border-collapse:collapse;font-size:12.5px;}
-.tbl th{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;padding:7px 12px;text-align:left;border-bottom:1px solid var(--border);}
+.tbl th{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;padding:8px 12px;text-align:left;border-bottom:2px solid var(--border);background:var(--s2);}
 .tbl td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:middle;}
 .tbl tr:last-child td{border-bottom:none;}
-.tbl tr:hover td{background:var(--surface2);}
 .mono{font-family:var(--mono);}
-@keyframes fi{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
-.fi{animation:fi .2s ease both;}
+.badge{display:inline-flex;align-items:center;padding:2px 7px;border-radius:4px;font-family:var(--mono);font-size:10.5px;font-weight:500;}
+.b-g{background:var(--al);color:var(--accent);}
+.b-y{background:var(--yl);color:var(--yellow);}
+.b-r{background:var(--rl);color:var(--red);}
+.b-gr{background:var(--s3);color:var(--muted);}
+@keyframes fu{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+.fi{animation:fu .2s ease both;}
 </style>
 </head>
-<body>
+<body data-page="reports">
 <div class="shell">
 <aside class="sidebar" id="sidebar">
-  <div class="sidebar-top">
-    <button class="hbg" onclick="document.getElementById('sidebar').classList.toggle('open')"><span></span><span></span><span></span></button>
-    <div class="s-logo">FinTrack</div>
-  </div>
+  <div class="sidebar-top"><button class="hbg" onclick="window._ftToggleSidebar()"><span></span><span></span><span></span></button><div class="s-logo">FinTrack</div></div>
   <div class="nav-sec"><a class="ni" href="index.html"><span class="nic">⊞</span><span class="nl">Dashboard</span></a></div>
   <div class="nav-sec">
-    <a class="ni" href="invoice.html"><span class="nic">📄</span><span class="nl">Tuition</span></a>
+    <a class="ni" href="tuition.html"><span class="nic">📄</span><span class="nl">Tuition</span></a>
     <a class="ni" href="donations.html"><span class="nic">🤝</span><span class="nl">Donations</span></a>
     <a class="ni" href="payments.html"><span class="nic">💳</span><span class="nl">Payments</span></a>
     <a class="ni" href="vendors.html"><span class="nic">🏢</span><span class="nl">Vendors</span></a>
@@ -92,166 +85,227 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
   </div>
 </aside>
 <main class="main">
-  <div class="topbar">
-    <div><div class="pt">Reports</div><div class="bc">Reports / Overview</div></div>
-    <div style="display:flex;gap:8px;">
-      <button class="btn btn-g">⬇ Export All</button>
+<div class="topbar">
+  <div><div class="pt">Reports</div><div class="bc">Financial summaries & exports</div></div>
+  <div style="display:flex;gap:8px;align-items:center;">
+    <div id="topbar-user-chip"></div>
+    <button class="btn btn-g btn-sm" onclick="printReport()">🖨 Print</button>
+    <button class="btn btn-p btn-sm" onclick="exportReport()">⬇ Export CSV</button>
+  </div>
+</div>
+<div class="content">
+
+  <!-- REPORT TYPE SELECTOR -->
+  <div class="report-grid fi">
+    <div class="report-card active" id="rc-outstanding" onclick="selectReport('outstanding',this)">
+      <div class="rc-icon">📊</div>
+      <div class="rc-title">Outstanding Balances</div>
+      <div class="rc-desc">All unpaid and partially paid invoices with balances due.</div>
+    </div>
+    <div class="report-card" id="rc-collected" onclick="selectReport('collected',this)">
+      <div class="rc-icon">💳</div>
+      <div class="rc-title">Payments Collected</div>
+      <div class="rc-desc">All payments received in a given period.</div>
+    </div>
+    <div class="report-card" id="rc-invoices" onclick="selectReport('invoices',this)">
+      <div class="rc-icon">📄</div>
+      <div class="rc-title">Invoice Summary</div>
+      <div class="rc-desc">Full list of all invoices with status and amounts.</div>
+    </div>
+    <div class="report-card" id="rc-overdue" onclick="selectReport('overdue',this)">
+      <div class="rc-icon">⚠️</div>
+      <div class="rc-title">Overdue Invoices</div>
+      <div class="rc-desc">Invoices past their due date with outstanding balances.</div>
+    </div>
+    <div class="report-card" id="rc-donations" onclick="selectReport('donations',this)">
+      <div class="rc-icon">🤝</div>
+      <div class="rc-title">Donation Summary</div>
+      <div class="rc-desc">All donations by fund, donor, and date range.</div>
+    </div>
+    <div class="report-card" id="rc-contacts" onclick="selectReport('contacts',this)">
+      <div class="rc-icon">👥</div>
+      <div class="rc-title">Contact List</div>
+      <div class="rc-desc">All students, parents, and contacts with key details.</div>
     </div>
   </div>
-  <div class="content">
 
-    <div class="report-grid fi">
-      <div class="report-card" onclick="showReport('tuition')">
-        <div class="rc-icon">📄</div>
-        <div class="rc-title">Tuition Aging Report</div>
-        <div class="rc-desc">Outstanding balances by student, sorted by days overdue. Includes installment breakdown.</div>
-        <div class="rc-footer"><span class="badge b-r">3 overdue</span><span style="font-size:12px;color:var(--accent);font-weight:600;">Generate →</span></div>
+  <!-- FILTERS -->
+  <div class="section fi">
+    <div class="sec-hd">
+      <div class="sec-title" id="report-title">Outstanding Balances</div>
+      <div style="font-size:12px;color:var(--muted);" id="report-count"></div>
+    </div>
+    <div class="sec-body" style="padding-bottom:8px;">
+      <div class="filter-row">
+        <select class="input" id="rep-year" onchange="runReport()" style="width:150px;">
+          <option value="all">All Years</option>
+        </select>
+        <select class="input" id="rep-status" onchange="runReport()" style="width:130px;">
+          <option value="all">All Status</option>
+          <option value="unpaid">Unpaid</option>
+          <option value="partial">Partial</option>
+          <option value="paid">Paid</option>
+          <option value="overdue">Overdue</option>
+        </select>
+        <input type="date" class="input mono" id="rep-from" onchange="runReport()" placeholder="From" style="width:140px;">
+        <input type="date" class="input mono" id="rep-to" onchange="runReport()" placeholder="To" style="width:140px;">
       </div>
-      <div class="report-card" onclick="showReport('payments')">
-        <div class="rc-icon">💳</div>
-        <div class="rc-title">Payment History</div>
-        <div class="rc-desc">All payments by date range, method, and student. Includes surcharges and credits.</div>
-        <div class="rc-footer"><span class="badge b-g">Up to date</span><span style="font-size:12px;color:var(--accent);font-weight:600;">Generate →</span></div>
-      </div>
-      <div class="report-card" onclick="showReport('donations')">
-        <div class="rc-icon">🤝</div>
-        <div class="rc-title">Donation Report</div>
-        <div class="rc-desc">Donations by fund and donor. Includes pledges, receipts, and credit conversions.</div>
-        <div class="rc-footer"><span class="badge b-b">6 open pledges</span><span style="font-size:12px;color:var(--accent);font-weight:600;">Generate →</span></div>
-      </div>
-      <div class="report-card" onclick="showReport('scholarships')">
-        <div class="rc-icon">🎓</div>
-        <div class="rc-title">Scholarship Summary</div>
-        <div class="rc-desc">All scholarships and credits given this year by type, amount, and student.</div>
-        <div class="rc-footer"><span class="badge b-p">$6,200 given</span><span style="font-size:12px;color:var(--accent);font-weight:600;">Generate →</span></div>
-      </div>
-      <div class="report-card" onclick="showReport('monthly')">
-        <div class="rc-icon">📊</div>
-        <div class="rc-title">Monthly Summary</div>
-        <div class="rc-desc">Income vs expenses by month. Net balance, collection rate, and trends.</div>
-        <div class="rc-footer"><span class="badge b-g">Ready</span><span style="font-size:12px;color:var(--accent);font-weight:600;">Generate →</span></div>
-      </div>
-      <div class="report-card" onclick="showReport('custom')">
-        <div class="rc-icon">🔧</div>
-        <div class="rc-title">Custom Report</div>
-        <div class="rc-desc">Pick your date range, modules, filters, and columns. Export as PDF or CSV.</div>
-        <div class="rc-footer"><span class="badge b-y">Builder</span><span style="font-size:12px;color:var(--accent);font-weight:600;">Build →</span></div>
+
+      <!-- REPORT TABLE -->
+      <div style="overflow-x:auto;">
+        <table class="tbl" id="report-tbl">
+          <thead id="report-thead"></thead>
+          <tbody id="report-tbody">
+            <tr><td colspan="8" style="padding:24px;text-align:center;color:var(--muted2);">Select a report type above</td></tr>
+          </tbody>
+        </table>
       </div>
     </div>
-
-    <!-- Report Preview Area -->
-    <div class="card fi" id="report-preview" style="display:none;">
-      <div class="card-hd">
-        <div><div class="card-t" id="rp-title">Report Preview</div><div style="font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:2px;" id="rp-sub">Generated Apr 28, 2026</div></div>
-        <div style="display:flex;gap:8px;">
-          <button class="btn btn-g btn-sm">📄 Export PDF</button>
-          <button class="btn btn-g btn-sm">📊 Export CSV</button>
-          <button class="btn btn-g btn-sm" onclick="document.getElementById('report-preview').style.display='none'">✕ Close</button>
-        </div>
-      </div>
-
-      <!-- Filters -->
-      <div style="padding:14px 20px;border-bottom:1px solid var(--border);background:var(--surface2);">
-        <div class="form-row4">
-          <div class="field"><label>Date From</label><input type="date" class="input" value="2025-09-01"></div>
-          <div class="field"><label>Date To</label><input type="date" class="input" value="2026-04-28"></div>
-          <div class="field"><label>Grade</label><select class="input"><option>All Grades</option><option>Grade 8</option><option>Grade 5</option><option>Grade 11</option></select></div>
-          <div class="field"><label>Status</label><select class="input"><option>All</option><option>Paid</option><option>Overdue</option><option>Partial</option></select></div>
-        </div>
-      </div>
-
-      <div class="card-body" style="padding:0;" id="rp-content">
-        <!-- Populated by JS -->
-      </div>
-    </div>
-
   </div>
+
+</div>
 </main>
 </div>
 
-<script>
-const reports = {
-  tuition: {
-    title: 'Tuition Aging Report',
-    sub: 'Outstanding balances as of Apr 28, 2026',
-    html: `<table class="tbl">
-      <thead><tr><th>Student</th><th>Invoice</th><th>Total</th><th>Paid</th><th>Balance</th><th>Days Overdue</th><th>Status</th></tr></thead>
-      <tbody>
-        <tr><td><b>Yossi Katz</b><div style="font-size:10px;color:var(--muted);">Grade 11</div></td><td class="mono">#INV-1044</td><td class="mono">$18,500</td><td class="mono" style="color:var(--accent);">$0</td><td class="mono" style="color:var(--red);font-weight:700;">$18,500</td><td class="mono" style="color:var(--red);">28 days</td><td><span class="badge b-r">⚠ Overdue</span></td></tr>
-        <tr><td><b>David Cohen</b><div style="font-size:10px;color:var(--muted);">Grade 8</div></td><td class="mono">#INV-1042</td><td class="mono">$18,948</td><td class="mono" style="color:var(--accent);">$9,474</td><td class="mono" style="color:var(--yellow);font-weight:700;">$9,474</td><td class="mono" style="color:var(--muted2);">—</td><td><span class="badge b-y">◑ Partial</span></td></tr>
-        <tr><td><b>Rivka Shapiro</b><div style="font-size:10px;color:var(--muted);">Grade 3</div></td><td class="mono">#INV-1045</td><td class="mono">$14,500</td><td class="mono" style="color:var(--accent);">$4,350</td><td class="mono" style="color:var(--yellow);font-weight:700;">$10,150</td><td class="mono" style="color:var(--muted2);">—</td><td><span class="badge b-y">◑ Partial</span></td></tr>
-        <tr><td><b>Sara Goldstein</b><div style="font-size:10px;color:var(--muted);">Grade 5</div></td><td class="mono">#INV-1043</td><td class="mono">$16,000</td><td class="mono" style="color:var(--accent);">$16,000</td><td class="mono" style="color:var(--muted2);">$0</td><td class="mono" style="color:var(--muted2);">—</td><td><span class="badge b-g">● Paid</span></td></tr>
-      </tbody>
-    </table>`
-  },
-  payments: {
-    title: 'Payment History',
-    sub: 'All payments · Sep 2025 – Apr 2026',
-    html: `<table class="tbl">
-      <thead><tr><th>Date</th><th>Student</th><th>Amount</th><th>Method</th><th>Applied To</th><th>Recorded By</th></tr></thead>
-      <tbody>
-        <tr><td class="mono" style="color:var(--muted2);">Apr 12</td><td><b>David Cohen</b></td><td class="mono" style="color:var(--accent);">$5,482</td><td style="color:var(--muted);">Credit Card</td><td style="font-size:12px;">Deposit installment</td><td style="font-size:11px;color:var(--muted2);">Admin</td></tr>
-        <tr><td class="mono" style="color:var(--muted2);">Mar 1</td><td><b>Rachel Cohen</b></td><td class="mono" style="color:var(--accent);">$15,552</td><td style="color:var(--muted);">Bank Transfer</td><td style="font-size:12px;">Full payment</td><td style="font-size:11px;color:var(--muted2);">Admin</td></tr>
-        <tr><td class="mono" style="color:var(--muted2);">Feb 15</td><td><b>David Cohen</b></td><td class="mono" style="color:var(--accent);">$3,991</td><td style="color:var(--muted);">Bank Transfer</td><td style="font-size:12px;">Installment 2 partial</td><td style="font-size:11px;color:var(--muted2);">Admin</td></tr>
-        <tr><td class="mono" style="color:var(--muted2);">Jan 10</td><td><b>Sara Goldstein</b></td><td class="mono" style="color:var(--accent);">$16,000</td><td style="color:var(--muted);">Check</td><td style="font-size:12px;">Full payment</td><td style="font-size:11px;color:var(--muted2);">Admin</td></tr>
-      </tbody>
-    </table>`
-  },
-  donations: {
-    title: 'Donation Report',
-    sub: 'All donations & pledges · 2025–26',
-    html: `<table class="tbl">
-      <thead><tr><th>Date</th><th>Donor</th><th>Fund</th><th>Amount</th><th>Type</th><th>Receipt</th></tr></thead>
-      <tbody>
-        <tr><td class="mono" style="color:var(--muted2);">Apr 12</td><td><b>Miriam Levy</b></td><td style="color:var(--muted);">General</td><td class="mono" style="color:var(--accent);">$2,000</td><td><span class="badge b-g">Gift</span></td><td style="font-size:11px;color:var(--accent);">Sent ✓</td></tr>
-        <tr><td class="mono" style="color:var(--muted2);">Apr 12</td><td><b>Cohen Family</b></td><td style="color:var(--muted);">Scholarship</td><td class="mono" style="color:var(--purple);">$340</td><td><span class="badge b-p">Credit→Gift</span></td><td style="font-size:11px;color:var(--accent);">Sent ✓</td></tr>
-        <tr><td class="mono" style="color:var(--muted2);">Apr 9</td><td><b>Reuven Marcus</b></td><td style="color:var(--muted);">Scholarship</td><td class="mono" style="color:var(--yellow);">$500</td><td><span class="badge b-y">Pledge</span></td><td style="font-size:11px;color:var(--muted2);">Pending</td></tr>
-        <tr><td class="mono" style="color:var(--muted2);">Apr 7</td><td><b>Anonymous</b></td><td style="color:var(--muted);">Building</td><td class="mono" style="color:var(--accent);">$1,000</td><td><span class="badge b-g">Gift</span></td><td style="font-size:11px;color:var(--muted2);">N/A</td></tr>
-      </tbody>
-    </table>`
-  },
-  scholarships: {
-    title: 'Scholarship Summary',
-    sub: 'Credits applied to invoices · 2025–26',
-    html: `<table class="tbl">
-      <thead><tr><th>Student</th><th>Type</th><th>Amount</th><th>Method</th><th>Applied To</th><th>Date</th></tr></thead>
-      <tbody>
-        <tr><td><b>David Cohen</b></td><td style="color:var(--muted);">Merit Scholarship</td><td class="mono" style="color:var(--red);">−$2,500</td><td style="font-size:12px;">Fixed $</td><td class="mono">#INV-1042</td><td class="mono" style="color:var(--muted2);">Mar 15</td></tr>
-        <tr><td><b>Rivka Shapiro</b></td><td style="color:var(--muted);">Financial Aid</td><td class="mono" style="color:var(--red);">−$1,800</td><td style="font-size:12px;">Fixed $</td><td class="mono">#INV-1045</td><td class="mono" style="color:var(--muted2);">Mar 15</td></tr>
-        <tr><td><b>Chana Weiss</b></td><td style="color:var(--muted);">Sibling Discount</td><td class="mono" style="color:var(--red);">−$900</td><td style="font-size:12px;">10%</td><td class="mono">#INV-1047</td><td class="mono" style="color:var(--muted2);">Mar 15</td></tr>
-        <tr><td><b>Moshe Friedman</b></td><td style="color:var(--muted);">Merit Scholarship</td><td class="mono" style="color:var(--red);">−$1,000</td><td style="font-size:12px;">Fixed $</td><td class="mono">#INV-1046</td><td class="mono" style="color:var(--muted2);">Mar 15</td></tr>
-      </tbody>
-    </table>`
-  },
-  monthly: {
-    title: 'Monthly Summary',
-    sub: 'Sep 2025 – Apr 2026',
-    html: `<table class="tbl">
-      <thead><tr><th>Month</th><th>Income</th><th>Expenses</th><th>Net</th><th>Collection Rate</th></tr></thead>
-      <tbody>
-        <tr><td style="font-weight:600;">September 2025</td><td class="mono" style="color:var(--accent);">$42,000</td><td class="mono" style="color:var(--red);">$18,200</td><td class="mono" style="color:var(--blue);font-weight:700;">$23,800</td><td class="mono">78%</td></tr>
-        <tr><td style="font-weight:600;">October 2025</td><td class="mono" style="color:var(--accent);">$38,500</td><td class="mono" style="color:var(--red);">$17,400</td><td class="mono" style="color:var(--blue);font-weight:700;">$21,100</td><td class="mono">81%</td></tr>
-        <tr><td style="font-weight:600;">November 2025</td><td class="mono" style="color:var(--accent);">$36,200</td><td class="mono" style="color:var(--red);">$16,800</td><td class="mono" style="color:var(--blue);font-weight:700;">$19,400</td><td class="mono">79%</td></tr>
-        <tr><td style="font-weight:600;">April 2026</td><td class="mono" style="color:var(--accent);">$48,320</td><td class="mono" style="color:var(--red);">$19,840</td><td class="mono" style="color:var(--blue);font-weight:700;">$28,480</td><td class="mono">82%</td></tr>
-      </tbody>
-    </table>`
-  },
-  custom: {
-    title: 'Custom Report Builder',
-    sub: 'Configure your filters and generate',
-    html: `<div style="padding:20px;color:var(--muted);font-size:13px;">Configure the filters above and click Export PDF or Export CSV to generate your custom report.</div>`
+<script type="module">
+import { initNav, loadSettings } from './nav.js';
+import { getCurrentOrgId, getInvoices, getContacts, getPayments, getDonations, getFunds, fmt } from './db.js';
+
+await initNav({ currentPage: 'reports' });
+const orgId = getCurrentOrgId();
+let currentReport = 'outstanding';
+let reportData = [];
+let allInvoices=[], allContacts={}, allPayments=[], allDonations=[], allFunds=[];
+
+async function load() {
+  const [invoices,contacts,payments,donations,funds] = await Promise.all([
+    getInvoices(orgId), getContacts(orgId), getPayments(orgId),
+    getDonations(orgId), getFunds(orgId),
+  ]);
+  allInvoices = invoices;
+  contacts.forEach(c=>{ allContacts[c.id]=c; });
+  allPayments = payments;
+  allDonations = donations;
+  allFunds = funds;
+
+  // Compute derived fields on invoices
+  const now = new Date();
+  allInvoices.forEach(inv => {
+    inv._bal = Math.max((inv.totalAmount||0)-(inv.totalPaid||0),0);
+    inv._pct = inv.totalAmount>0?(inv.totalPaid||0)/inv.totalAmount*100:0;
+    const od = inv._bal>0&&inv.dueDate&&new Date(inv.dueDate)<now;
+    inv._status = inv._pct>=100?'paid':od?'overdue':inv._pct>0?'partial':'unpaid';
+    const c = allContacts[inv.contactId]||{};
+    inv._name = inv.contactName||`${c.firstName||''} ${c.lastName||''}`.trim()||'—';
+  });
+
+  // Populate year filter
+  const years=[...new Set(allInvoices.map(i=>i.schoolYear).filter(Boolean))].sort().reverse();
+  const yrSel=document.getElementById('rep-year');
+  years.forEach(y=>{const o=document.createElement('option');o.value=y;o.textContent=y;yrSel.appendChild(o);});
+
+  runReport();
+}
+
+window.selectReport = function(type, el) {
+  document.querySelectorAll('.report-card').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  currentReport = type;
+  runReport();
+};
+
+window.runReport = function() {
+  const yr = document.getElementById('rep-year')?.value||'all';
+  const st = document.getElementById('rep-status')?.value||'all';
+  const from = document.getElementById('rep-from')?.value||'';
+  const to = document.getElementById('rep-to')?.value||'';
+
+  const titles = {outstanding:'Outstanding Balances',collected:'Payments Collected',invoices:'Invoice Summary',overdue:'Overdue Invoices',donations:'Donation Summary',contacts:'Contact List'};
+  document.getElementById('report-title').textContent = titles[currentReport]||'Report';
+
+  const thead = document.getElementById('report-thead');
+  const tbody = document.getElementById('report-tbody');
+
+  if (currentReport==='outstanding'||currentReport==='overdue'||currentReport==='invoices') {
+    let data = allInvoices.filter(inv=>{
+      if(yr!=='all'&&inv.schoolYear!==yr) return false;
+      if(currentReport==='overdue'&&inv._status!=='overdue') return false;
+      if(currentReport==='outstanding'&&inv._bal<=0) return false;
+      if(st!=='all'&&inv._status!==st) return false;
+      if(from&&inv.dueDate&&inv.dueDate<from) return false;
+      if(to&&inv.dueDate&&inv.dueDate>to) return false;
+      return true;
+    });
+    reportData = data;
+    document.getElementById('report-count').textContent = data.length+' records';
+    thead.innerHTML='<tr><th>Student</th><th>Invoice #</th><th>Year</th><th>Total</th><th>Paid</th><th>Balance</th><th>Due Date</th><th>Status</th></tr>';
+    const now=new Date();
+    tbody.innerHTML = data.length ? data.map(inv=>{
+      const dStr=inv.dueDate?new Date(inv.dueDate+'T12:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'—';
+      const sb={paid:'b-g',partial:'b-y',overdue:'b-r',unpaid:'b-gr'}[inv._status]||'b-gr';
+      return `<tr><td style="font-weight:600;">${inv._name}</td><td class="mono" style="font-size:12px;">${inv.invoiceNumber||''}</td><td style="color:var(--muted);">${inv.schoolYear||'—'}</td><td class="mono">$${fmt(inv.totalAmount||0)}</td><td class="mono" style="color:var(--accent);">$${fmt(inv.totalPaid||0)}</td><td class="mono" style="font-weight:600;${inv._bal>0?'color:var(--yellow)':''}">$${fmt(inv._bal)}</td><td style="font-size:12.5px;">${dStr}</td><td><span class="badge ${sb}">${inv._status}</span></td></tr>`;
+    }).join('') : '<tr><td colspan="8" style="padding:20px;text-align:center;color:var(--muted2);">No records found.</td></tr>';
+
+  } else if (currentReport==='collected') {
+    let data = allPayments.filter(p=>{
+      if(from&&p.date&&p.date<from) return false;
+      if(to&&p.date&&p.date>to) return false;
+      return true;
+    });
+    reportData = data;
+    document.getElementById('report-count').textContent = data.length+' payments · $'+fmt(data.reduce((s,p)=>s+(p.amount||0),0))+' total';
+    thead.innerHTML='<tr><th>Date</th><th>Payment #</th><th>Student</th><th>Method</th><th>Amount</th><th>Fees</th><th>Total</th></tr>';
+    const invMap={};allInvoices.forEach(i=>{invMap[i.id]=i._name;});
+    tbody.innerHTML = data.length ? data.map(p=>{
+      const dStr=p.date?new Date(p.date+'T12:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'—';
+      const name=invMap[p.invoiceId]||p.contactName||'—';
+      return `<tr><td style="font-size:12.5px;">${dStr}</td><td class="mono" style="font-size:12px;">${p.paymentNumber||''}</td><td style="font-weight:600;">${name}</td><td style="color:var(--muted);">${p.method||'—'}</td><td class="mono">$${fmt(p.amount||0)}</td><td class="mono" style="color:var(--muted);">$${fmt(p.surcharge||0)}</td><td class="mono" style="font-weight:600;color:var(--accent);">$${fmt(p.totalWithFees||p.amount||0)}</td></tr>`;
+    }).join('') : '<tr><td colspan="7" style="padding:20px;text-align:center;color:var(--muted2);">No payments found.</td></tr>';
+
+  } else if (currentReport==='donations') {
+    const fundMap={};allFunds.forEach(f=>{fundMap[f.id]=f.name;});
+    let data = allDonations.filter(d=>{
+      if(from&&d.date&&d.date<from) return false;
+      if(to&&d.date&&d.date>to) return false;
+      return true;
+    });
+    reportData = data;
+    document.getElementById('report-count').textContent = data.length+' donations · $'+fmt(data.reduce((s,d)=>s+(d.amount||0),0))+' total';
+    thead.innerHTML='<tr><th>Date</th><th>Donor</th><th>Fund</th><th>Amount</th><th>Type</th><th>Notes</th></tr>';
+    tbody.innerHTML = data.length ? data.map(d=>{
+      const dStr=d.date?new Date(d.date+'T12:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'—';
+      return `<tr><td style="font-size:12.5px;">${dStr}</td><td style="font-weight:600;">${d.donorName||'Anonymous'}</td><td style="color:var(--muted);">${fundMap[d.fundId]||'—'}</td><td class="mono" style="color:var(--accent);font-weight:600;">$${fmt(d.amount||0)}</td><td><span class="badge b-gr" style="font-size:10px;">${d.type||'Gift'}</span></td><td style="color:var(--muted);font-size:12px;">${d.notes||''}</td></tr>`;
+    }).join('') : '<tr><td colspan="6" style="padding:20px;text-align:center;color:var(--muted2);">No donations found.</td></tr>';
+
+  } else if (currentReport==='contacts') {
+    const contacts = Object.values(allContacts);
+    reportData = contacts;
+    document.getElementById('report-count').textContent = contacts.length+' contacts';
+    thead.innerHTML='<tr><th>Name</th><th>Type</th><th>Email</th><th>Phone</th><th>Grade / Role</th><th>Family</th><th>External ID</th></tr>';
+    tbody.innerHTML = contacts.length ? contacts.map(c=>{
+      const name=`${c.firstName||''} ${c.lastName||''}`.trim()||'—';
+      return `<tr><td style="font-weight:600;">${name}</td><td><span class="badge b-gr" style="font-size:10px;">${c.type||'contact'}</span></td><td style="font-size:12px;color:var(--muted);">${c.email||'—'}</td><td style="font-size:12px;color:var(--muted);">${c.phone||'—'}</td><td style="font-size:12.5px;">${c.grade||c.role||'—'}</td><td style="font-size:12.5px;">${c.familyName||'—'}</td><td class="mono" style="font-size:11px;color:var(--muted2);">${c.externalId||'—'}</td></tr>`;
+    }).join('') : '<tr><td colspan="7" style="padding:20px;text-align:center;color:var(--muted2);">No contacts found.</td></tr>';
   }
 };
 
-function showReport(type) {
-  const r = reports[type];
-  document.getElementById('rp-title').textContent = r.title;
-  document.getElementById('rp-sub').textContent = r.sub;
-  document.getElementById('rp-content').innerHTML = r.html;
-  const preview = document.getElementById('report-preview');
-  preview.style.display = '';
-  preview.scrollIntoView({ behavior:'smooth', block:'start' });
-}
+window.exportReport = function() {
+  const thead = document.getElementById('report-thead');
+  const tbody = document.getElementById('report-tbody');
+  const headers = [...thead.querySelectorAll('th')].map(th=>th.textContent);
+  const rows = [...tbody.querySelectorAll('tr')].map(tr=>
+    [...tr.querySelectorAll('td')].map(td=>td.textContent.trim())
+  );
+  const csv = [headers,...rows].map(r=>r.map(v=>`"${v}"`).join(',')).join('\n');
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+  a.download=`report_${currentReport}_${new Date().toISOString().split('T')[0]}.csv`;
+  a.click();
+};
+
+window.printReport = function() { window.print(); };
+
+await load();
 </script>
 </body>
 </html>

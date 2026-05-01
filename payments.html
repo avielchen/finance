@@ -525,8 +525,9 @@ function fmtK(n) { const v = parseFloat(n) || 0; return v % 1 === 0 ? v.toLocale
 import { initNav, loadSettings, getNextPaymentNumber, bumpPaymentNumber, getDefaultDateValue } from './nav.js';
 import {
   getCurrentOrgId, getInvoices, getContacts, savePayment,
-  saveInvoice, getPayments, fmt as dbFmt
+  saveInvoice, getPayments, fmt as dbFmt, getDB
 } from './db.js';
+import { doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 // ── INIT ──
 await initNav({ currentPage: 'payments' });
@@ -535,183 +536,122 @@ const settings = loadSettings();
 const terms = settings.terms || {};
 
 // ── STATE ──
-let allInvoices = [];   // flat list of invoices from Firestore
-let allContacts = {};   // contactId → contact object (for names)
-let liveState = {};     // invoiceId → { total, paid, subs[] } (mirrors Firestore, updated on payment save)
+let allInvoices = [];
+let allContacts = {};
+let liveState = {};
 
-// ── LOAD ALL OUTSTANDING INVOICES ──
+// ── LOAD ──
 async function loadAllInvoices() {
   showCardsLoading();
   try {
-    // Load all invoices and all contacts in parallel
-    const [invoices, contacts] = await Promise.all([
-      getInvoices(orgId),
-      getContacts(orgId),
-    ]);
-
-    // Build contact lookup
+    const [invoices, contacts] = await Promise.all([getInvoices(orgId), getContacts(orgId)]);
     allContacts = {};
     contacts.forEach(c => { allContacts[c.id] = c; });
-
-    // Sort invoices: overdue first, then by due date
     const now = new Date();
     allInvoices = invoices.sort((a, b) => {
-      const aBal = (a.totalAmount||0) - (a.totalPaid||0);
-      const bBal = (b.totalAmount||0) - (b.totalPaid||0);
-      const aOD = aBal > 0 && a.dueDate && new Date(a.dueDate) < now;
-      const bOD = bBal > 0 && b.dueDate && new Date(b.dueDate) < now;
-      if (aOD && !bOD) return -1;
-      if (!aOD && bOD) return 1;
+      const aB = (a.totalAmount||0)-(a.totalPaid||0), bB = (b.totalAmount||0)-(b.totalPaid||0);
+      const aOD = aB>0&&a.dueDate&&new Date(a.dueDate)<now;
+      const bOD = bB>0&&b.dueDate&&new Date(b.dueDate)<now;
+      if (aOD&&!bOD) return -1; if (!aOD&&bOD) return 1;
       return (a.dueDate||'').localeCompare(b.dueDate||'');
     });
-
-    // Build live state
     liveState = {};
     allInvoices.forEach(inv => {
-      const subs = buildSubsFromInvoice(inv);
-      liveState[inv.id] = {
-        total: inv.totalAmount || 0,
-        paid: inv.totalPaid || 0,
-        subs,
-        invoiceNumber: inv.invoiceNumber || inv.id.slice(0,8),
-      };
+      liveState[inv.id] = { total: inv.totalAmount||0, paid: inv.totalPaid||0, subs: buildSubsFromInvoice(inv), invoiceNumber: inv.invoiceNumber||inv.id.slice(0,8) };
     });
-
     renderCards(allInvoices);
     updateKPIs();
-  } catch (e) {
-    document.getElementById('cards').innerHTML =
-      `<div style="padding:32px;text-align:center;color:var(--red);font-size:13px;">Error loading invoices: ${e.message}</div>`;
+  } catch(e) {
+    document.getElementById('cards').innerHTML = `<div style="padding:32px;text-align:center;color:var(--red);font-size:13px;">Error loading invoices: ${e.message}</div>`;
   }
 }
 
 function buildSubsFromInvoice(inv) {
   const now = new Date();
   const subs = [];
-  // If invoice has installments, use them as sub-items
   if (inv.installments && inv.installments.length > 0) {
     inv.installments.forEach((inst, i) => {
-      const isOverdue = inst.date && new Date(inst.date) < now && (inst.amount - (inst.paid||0)) > 0;
-      subs.push({
-        id: 's' + i,
-        name: `${inst.type || 'Installment'} ${i+1}`,
-        inv: inv.invoiceNumber || inv.id.slice(0,8),
-        due: inst.date ? new Date(inst.date+'T12:00').toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '—',
-        bal: inst.amount - (inst.paid||0),
-        origBal: inst.amount,
-        order: i + 1,
-        overdue: isOverdue,
-        itemId: 'inst_' + i,
-      });
+      const bal = inst.amount-(inst.paid||0);
+      subs.push({ id:'s'+i, name:`${inst.type||'Installment'} ${i+1}`, inv:inv.invoiceNumber||inv.id.slice(0,8), due:inst.date?new Date(inst.date+'T12:00').toLocaleDateString('en-US',{month:'short',day:'numeric'}):'-', bal:Math.max(bal,0), origBal:inst.amount, order:i+1, overdue:inst.date&&new Date(inst.date)<now&&bal>0, itemId:'inst_'+i });
     });
   } else if (inv.lineItems && inv.lineItems.length > 0) {
-    // Use line items as sub-items (fees only, not credits)
     let order = 0;
-    inv.lineItems.filter(li => li.type !== 'credit').forEach((li, i) => {
+    inv.lineItems.filter(li=>li.type!=='credit').forEach((li,i) => {
       order++;
-      const isOverdue = li.dueDate && new Date(li.dueDate) < now && (li.amount - (li.paid||0)) > 0;
-      subs.push({
-        id: 'li' + i,
-        name: li.description || li.itemType || 'Fee',
-        inv: inv.invoiceNumber || inv.id.slice(0,8),
-        due: li.dueDate ? new Date(li.dueDate+'T12:00').toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '—',
-        bal: li.amount - (li.paid||0),
-        origBal: li.amount,
-        order,
-        overdue: isOverdue,
-        itemId: 'li_' + i,
-      });
+      const bal = li.amount-(li.paid||0);
+      subs.push({ id:'li'+i, name:li.description||li.itemType||'Fee', inv:inv.invoiceNumber||inv.id.slice(0,8), due:li.dueDate?new Date(li.dueDate+'T12:00').toLocaleDateString('en-US',{month:'short',day:'numeric'}):'-', bal:Math.max(bal,0), origBal:li.amount, order, overdue:li.dueDate&&new Date(li.dueDate)<now&&bal>0, itemId:'li_'+i });
     });
   }
-  // If no subs, treat whole invoice as one sub
   if (subs.length === 0) {
-    const bal = (inv.totalAmount||0) - (inv.totalPaid||0);
-    const isOverdue = inv.dueDate && new Date(inv.dueDate) < now && bal > 0;
-    subs.push({
-      id: 's0', name: 'Full Invoice',
-      inv: inv.invoiceNumber || inv.id.slice(0,8),
-      due: inv.dueDate ? new Date(inv.dueDate+'T12:00').toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '—',
-      bal, origBal: inv.totalAmount||0, order: 1, overdue: isOverdue, itemId: 'full',
-    });
+    const bal = (inv.totalAmount||0)-(inv.totalPaid||0);
+    subs.push({ id:'s0', name:'Full Invoice', inv:inv.invoiceNumber||inv.id.slice(0,8), due:inv.dueDate?new Date(inv.dueDate+'T12:00').toLocaleDateString('en-US',{month:'short',day:'numeric'}):'-', bal:Math.max(bal,0), origBal:inv.totalAmount||0, order:1, overdue:inv.dueDate&&new Date(inv.dueDate)<now&&bal>0, itemId:'full' });
   }
   return subs;
 }
 
 function showCardsLoading() {
-  document.getElementById('cards').innerHTML =
-    `<div style="padding:32px;text-align:center;color:var(--muted2);font-size:13px;">Loading invoices…</div>`;
+  document.getElementById('cards').innerHTML = `<div style="padding:32px;text-align:center;color:var(--muted2);font-size:13px;">Loading invoices…</div>`;
 }
 
 // ── RENDER CARDS ──
 function renderCards(invoices) {
   const now = new Date();
   const wrap = document.getElementById('cards');
-  const yr = document.getElementById('yr-sel')?.value || 'all';
-  const st = document.getElementById('st-sel')?.value || 'all';
-  const q = document.getElementById('srch')?.value?.toLowerCase() || '';
-  const showPaid = window._showPaid || false;
+  const yr = document.getElementById('yr-sel')?.value||'all';
+  const st = document.getElementById('st-sel')?.value||'all';
+  const q = (document.getElementById('srch')?.value||'').toLowerCase();
 
   const filtered = invoices.filter(inv => {
-    const contact = allContacts[inv.contactId] || {};
-    const name = inv.contactName || `${contact.firstName||''} ${contact.lastName||''}`.trim();
-    const yrMatch = yr === 'all' || (inv.schoolYear||'').replace(/\s/g,'').includes(yr.replace(/\s/g,''));
-    const bal = (inv.totalAmount||0) - (inv.totalPaid||0);
-    const pct = inv.totalAmount > 0 ? (inv.totalPaid||0)/inv.totalAmount*100 : 0;
-    const status = pct >= 100 ? 'paid' : (bal > 0 && inv.dueDate && new Date(inv.dueDate) < now) ? 'overdue' : pct > 0 ? 'partial' : 'unpaid';
-    const stMatch = st === 'all' || status === st;
-    const qMatch = !q || name.toLowerCase().includes(q) || (inv.invoiceNumber||'').toLowerCase().includes(q);
-    const paidMatch = showPaid || status !== 'paid';
-    return yrMatch && stMatch && qMatch && paidMatch;
+    const contact = allContacts[inv.contactId]||{};
+    const name = inv.contactName||`${contact.firstName||''} ${contact.lastName||''}`.trim();
+    const state = liveState[inv.id]||{};
+    const bal = Math.max((state.total||0)-(state.paid||0),0);
+    const pct = (state.total||0)>0?(state.paid||0)/(state.total||0)*100:0;
+    const isOD = bal>0&&inv.dueDate&&new Date(inv.dueDate)<now;
+    const status = pct>=100?'paid':isOD?'overdue':pct>0?'partial':'unpaid';
+    if (!(window._showPaid||false) && status==='paid') return false;
+    if (yr!=='all'&&(inv.schoolYear||'').replace(/\s/g,''').indexOf(yr.replace(/\s/g,''))<0) return false;
+    if (st!=='all'&&status!==st) return false;
+    if (q&&!name.toLowerCase().includes(q)&&!(inv.invoiceNumber||'').toLowerCase().includes(q)) return false;
+    return true;
   });
 
   if (!filtered.length) {
-    wrap.innerHTML = `<div style="padding:32px;text-align:center;color:var(--muted2);font-size:13px;">
-      No invoices match your filters. ${!showPaid ? '<br><button onclick="window._togglePaid()" style="margin-top:8px;padding:5px 12px;border:1px solid var(--border2);border-radius:6px;background:var(--surface);cursor:pointer;font-size:12.5px;">Show paid invoices</button>' : ''}
-    </div>`;
+    wrap.innerHTML = `<div style="padding:32px;text-align:center;color:var(--muted2);font-size:13px;">No invoices match your filters.</div>`;
     return;
   }
-
   wrap.innerHTML = filtered.map(inv => buildCardHTML(inv, now)).join('');
 }
 
 function buildCardHTML(inv, now) {
-  const contact = allContacts[inv.contactId] || {};
-  const name = inv.contactName || `${contact.firstName||''} ${contact.lastName||''}`.trim() || 'Unknown';
-  const grade = contact.grade || '';
-  const initials = name.split(' ').map(p=>p[0]).join('').slice(0,2).toUpperCase() || '?';
-  const avatarColor = contact.avatarColor || '#1a6b4a';
-  const state = liveState[inv.id] || { total: inv.totalAmount||0, paid: inv.totalPaid||0, subs: [] };
-  const bal = Math.max(state.total - state.paid, 0);
-  const pct = state.total > 0 ? Math.min(state.paid/state.total*100, 100) : 0;
-  const isOverdue = bal > 0 && inv.dueDate && new Date(inv.dueDate) < now;
-  const status = pct >= 100 ? 'paid' : isOverdue ? 'overdue' : pct > 0 ? 'partial' : 'unpaid';
-  const invNum = inv.invoiceNumber || inv.id.slice(0,8);
-  const meta = [grade, invNum, inv.schoolYear].filter(Boolean).join(' · ');
-  const badgeHtml = {
-    paid: '<span class="badge b-g">Paid</span>',
-    partial: '<span class="badge b-y">Partial</span>',
-    overdue: '<span class="badge b-r">Overdue</span>',
-    unpaid: '<span class="badge b-gr">Unpaid</span>',
-  }[status];
-  const progColor = status === 'overdue' ? 'var(--red)' : 'var(--accent)';
-  const hdBg = status === 'overdue' ? 'background:var(--rl);' : '';
-  const cardBorder = status === 'overdue' ? 'border-color:var(--rb);' : '';
-  const balDisplay = status === 'paid' ? 'Paid in full' : `$${fmt(bal)} balance`;
-  const balColor = status === 'paid' ? 'var(--accent)' : status === 'overdue' ? 'var(--red)' : 'var(--yellow)';
+  const contact = allContacts[inv.contactId]||{};
+  const name = inv.contactName||`${contact.firstName||''} ${contact.lastName||''}`.trim()||'Unknown';
+  const grade = contact.grade||''
+  const initials = name.split(' ').map(p=>p[0]).join('').slice(0,2).toUpperCase()||'?';
+  const avatarColor = contact.avatarColor||'#1a6b4a';
+  const state = liveState[inv.id]||{ total:inv.totalAmount||0, paid:inv.totalPaid||0, subs:[] };
+  const bal = Math.max(state.total-state.paid, 0);
+  const pct = state.total>0?Math.min(state.paid/state.total*100,100):0;
+  const isOD = bal>0&&inv.dueDate&&new Date(inv.dueDate)<now;
+  const status = pct>=100?'paid':isOD?'overdue':pct>0?'partial':'unpaid';
+  const invNum = inv.invoiceNumber||inv.id.slice(0,8);
+  const meta = [grade,invNum,inv.schoolYear].filter(Boolean).join(' · ');
+  const badgeHtml = {paid:'<span class="badge b-g">Paid</span>',partial:'<span class="badge b-y">Partial</span>',overdue:'<span class="badge b-r">Overdue</span>',unpaid:'<span class="badge b-gr">Unpaid</span>'}[status];
+  const progColor = status==='overdue'?'var(--red)':' var(--accent)';
+  const hdBg = status==='overdue'?'background:var(--rl);':''
+  const cardBorder = status==='overdue'?'border-color:var(--rb);':''
+  const balDisplay = status==='paid'?'Paid in full':'$'+fmt(bal)+' balance';
+  const balColor = status==='paid'?'var(--accent)':status==='overdue'?'var(--red)':' var(--yellow)';
 
-  // Build sub-invoice checklist rows
-  const subsOpen = [...state.subs].filter(s => s.bal > 0);
-  const siRows = subsOpen.sort((a,b) => a.order - b.order).map(s =>
+  const subsOpen = state.subs.filter(s=>s.bal>0).sort((a,b)=>a.order-b.order);
+  const siRows = subsOpen.map(s =>
     `<div class="si-row" data-inv="${inv.id}" data-sub="${s.id}" data-bal="${s.bal}">
       <div class="si-chk" onclick="togSI('${inv.id}','${s.id}')" id="chk-${inv.id}-${s.id}"></div>
-      <div>
-        <div class="si-name">${s.name}</div>
-        <div class="si-sub${s.overdue?' style=color:var(--red);':''}">${s.inv} · Due ${s.due}${s.overdue?' — Overdue':''}</div>
-      </div>
-      <div class="si-bal${s.overdue?' style=color:var(--red);':''}">${s.overdue?'⚠ ':''}$${fmt(s.bal)}</div>
+      <div><div class="si-name">${s.name}</div><div class="si-sub${s.overdue?' style=color:var(--red);':'' }">${s.inv} · Due ${s.due}${s.overdue?' — Overdue':''}</div></div>
+      <div class="si-bal${s.overdue?' style=color:var(--red);':'' }">${s.overdue?'⚠ ':''} $${fmt(s.bal)}</div>
       <div class="si-inp-wrap">
         <span class="si-inp-pfx">$</span>
-        <input type="number" class="si-inp" id="sia-${inv.id}-${s.id}" value="0" step="0.01" disabled oninput="onSIOv('${inv.id}','${s.id}')">
+        <input type="number" class="si-inp" id="sia-${inv.id}-${s.id}" value="" placeholder="0.00" step="0.01" disabled oninput="onSIOv('${inv.id}','${s.id}')">
       </div>
       <div class="si-new" id="sin-${inv.id}-${s.id}" style="color:var(--muted2);">$${fmt(s.bal)}</div>
     </div>`
@@ -719,14 +659,12 @@ function buildCardHTML(inv, now) {
 
   const defaultDate = getDefaultDateValue('');
   const defaultPayNo = getNextPaymentNumber();
+  const feeInfo = getMethodFee('Credit Card');
 
   return `<div class="inv-card fi" id="card-${inv.id}" data-status="${status}" data-yr="${(inv.schoolYear||'').replace(/\s/g,'')}" data-sname="${name.toLowerCase()}" style="${cardBorder}">
     <div class="inv-card-hd" onclick="toggleCard('${inv.id}')" id="hd-${inv.id}" style="${hdBg}">
       <div class="inv-av" style="background:${avatarColor};">${initials}</div>
-      <div style="flex:1;min-width:0;">
-        <div class="inv-name">${name}</div>
-        <div class="inv-meta">${meta}</div>
-      </div>
+      <div style="flex:1;min-width:0;"><div class="inv-name">${name}</div><div class="inv-meta">${meta}</div></div>
       <div class="inv-prog-wrap">
         <div class="inv-prog-lbl"><span id="pct-${inv.id}">${Math.round(pct)}% paid</span><span style="font-family:var(--mono);" id="prog-nums-${inv.id}">$${fmt(state.paid)} / $${fmt(state.total)}</span></div>
         <div class="inv-prog"><div class="inv-prog-fill" id="prog-fill-${inv.id}" style="width:${pct}%;background:${progColor};"></div></div>
@@ -736,17 +674,13 @@ function buildCardHTML(inv, now) {
         <div class="inv-bal-val" id="bal-${inv.id}" style="color:${balColor};">${balDisplay}</div>
       </div>
       ${badgeHtml}
-      <span class="caret ${status==='overdue'||pct===0?'':'open'}" id="caret-${inv.id}">▾</span>
+      <span class="caret" id="caret-${inv.id}">▾</span>
     </div>
     <div class="inv-stripe"><div class="inv-stripe-fill" id="stripe-${inv.id}" style="width:${pct}%;background:${progColor};"></div></div>
 
-    <div class="inv-body ${pct===0&&status!=='overdue'?'hidden':''}" id="body-${inv.id}">
-
+    <div class="inv-body hidden" id="body-${inv.id}">
       <div class="hist-lbl">Payment History</div>
-      <div id="hist-${inv.id}">
-        <div style="padding:6px 0;font-size:12px;color:var(--muted2);">Loading payment history…</div>
-      </div>
-
+      <div id="hist-${inv.id}"><div style="padding:6px 0;font-size:12px;color:var(--muted2);">Loading…</div></div>
       <button class="btn btn-g btn-sm" id="addbtn-${inv.id}" onclick="showNPF('${inv.id}')">＋ Record Payment</button>
 
       <div class="npf" id="npf-${inv.id}" style="display:none;">
@@ -754,70 +688,70 @@ function buildCardHTML(inv, now) {
         <div class="npf-hd">
           <div class="field"><label>Date</label><input type="date" class="input mono" id="date-${inv.id}" value="${defaultDate}" style="height:32px;font-size:12px;" oninput="autoAdvanceDate(this)"></div>
           <div class="field"><label>Payment No.</label><input class="input mono" id="payno-${inv.id}" value="${defaultPayNo}" style="height:32px;font-size:12px;"></div>
-          <div class="field"><label>Method</label>
-            <select class="input" style="height:32px;font-size:12px;" onchange="onMeth(this,'${inv.id}')" id="meth-${inv.id}">
-              <option>Bank Transfer</option><option selected>Credit Card</option><option>Check</option><option>Cash</option><option>Zelle / Venmo</option>
-            </select>
+          <div class="field"><label>Method</label><select class="input" style="height:32px;font-size:12px;" onchange="onMeth(this,'${inv.id}')" id="meth-${inv.id}"><option>Bank Transfer</option><option selected>Credit Card</option><option>Check</option><option>Cash</option><option>Zelle / Venmo</option></select></div>
+          <div class="field"><label>Payment Amount</label><div class="ipfx"><span class="pfx">$</span><input class="input mono" type="number" value="" placeholder="0.00" step="0.01" style="height:32px;font-size:13px;" id="amt-${inv.id}" oninput="onAmt('${inv.id}')"></div></div>
+          <div class="field"><label>Flat Fee</label><div class="ipfx"><span class="pfx">$</span><input class="input mono" type="number" value="${feeInfo.flat}" step="0.01" style="height:32px;font-size:12px;" id="flat-${inv.id}" oninput="onAmt('${inv.id}')"></div></div>
+          <div class="field"><label>Surcharge %</label><div style="display:flex;align-items:center;gap:2px;"><input class="input mono" type="number" value="${feeInfo.pct}" step="0.1" style="height:32px;font-size:12px;" id="rate-${inv.id}" oninput="onAmt('${inv.id}')"><span style="font-size:10px;color:var(--muted);flex-shrink:0;">%</span></div></div>
+          <div class="field">
+            <label>Total Charged to Payer</label>
+            <div style="height:32px;display:flex;align-items:center;font-family:var(--mono);font-size:13px;font-weight:700;color:var(--text);" id="twf-${inv.id}">—</div>
           </div>
-          <div class="field"><label>Amount</label><div class="ipfx"><span class="pfx">$</span><input class="input mono" type="number" value="0" step="0.01" style="height:32px;font-size:13px;" id="amt-${inv.id}" oninput="onAmt('${inv.id}')"></div></div>
-          <div class="field"><label>Flat Fee</label><div class="ipfx"><span class="pfx">$</span><input class="input mono" type="number" value="0" step="0.01" style="height:32px;font-size:12px;" id="flat-${inv.id}" oninput="onAmt('${inv.id}')"></div></div>
-          <div class="field"><label>Surcharge %</label><div style="display:flex;align-items:center;gap:2px;"><input class="input mono" type="number" value="${getMethodFee('Credit Card').pct}" step="0.1" style="height:32px;font-size:12px;" id="rate-${inv.id}" oninput="onAmt('${inv.id}')"><span style="font-size:10px;color:var(--muted);flex-shrink:0;">%</span></div></div>
-          <div class="field"><label>Total incl. fees</label><div style="height:32px;display:flex;align-items:center;font-family:var(--mono);font-size:13px;font-weight:700;color:var(--accent);" id="twf-${inv.id}">$0.00</div></div>
         </div>
-        <div class="surcharge-note" id="fee-note-${inv.id}">Enter amount to see fee breakdown</div>
-        <div class="asb">
-          <div class="asb-i"><div class="asb-lbl">Payment In</div><div class="asb-val" style="color:var(--accent);" id="asb-in-${inv.id}">$0.00</div></div>
+        <!-- Surcharge breakdown note -->
+        <div style="display:flex;align-items:center;gap:12px;padding:8px 12px;background:var(--s2);border-radius:7px;margin-bottom:10px;font-size:12px;" id="fee-breakdown-${inv.id}" style="display:none;">
+          <div style="flex:1;">
+            <span style="color:var(--muted);">Payment applied to invoice:</span>
+            <strong id="asb-in-${inv.id}" style="font-family:var(--mono);margin-left:6px;">$0.00</strong>
+          </div>
+          <div style="width:1px;height:20px;background:var(--border2);"></div>
+          <div style="flex:1;">
+            <span style="color:var(--muted);">Surcharge (separate income):</span>
+            <strong id="surcharge-display-${inv.id}" style="font-family:var(--mono);margin-left:6px;color:var(--blue);">$0.00</strong>
+          </div>
+          <div style="width:1px;height:20px;background:var(--border2);"></div>
+          <div style="flex:1;">
+            <span style="color:var(--muted);">Total from payer:</span>
+            <strong id="total-from-payer-${inv.id}" style="font-family:var(--mono);margin-left:6px;">$0.00</strong>
+          </div>
+        </div>
+
+        <!-- Allocation summary -->
+        <div class="asb" id="asb-${inv.id}">
+          <div class="asb-i"><div class="asb-lbl">Applied to Invoice</div><div class="asb-val" style="color:var(--accent);" id="asb-applied-${inv.id}">$0.00</div></div>
           <div class="asb-d"></div>
           <div class="asb-i"><div class="asb-lbl">Allocated</div><div class="asb-val" style="color:var(--blue);" id="asb-al-${inv.id}">$0.00</div></div>
           <div class="asb-d"></div>
           <div class="asb-i"><div class="asb-lbl">Unallocated</div><div class="asb-val" style="color:var(--yellow);" id="asb-rem-${inv.id}">$0.00</div></div>
         </div>
+
         ${subsOpen.length > 0 ? `
           <div class="si-col-hd"><span></span><span>Fee / Installment</span><span style="text-align:right;">Balance</span><span style="text-align:right;">Apply ($)</span><span style="text-align:right;">After</span></div>
           <div id="silist-${inv.id}">${siRows}</div>` :
-          `<div style="padding:8px;font-size:12.5px;color:var(--muted2);">All items in this invoice are paid.</div>`
-        }
+          `<div style="padding:8px;font-size:12.5px;color:var(--muted2);">All items in this invoice are paid.</div>`}
+
+        <!-- Overpayment notice (shown when payment > balance) -->
+        <div id="overpay-${inv.id}" style="display:none;padding:10px 14px;background:var(--pl);border:1px solid rgba(91,45,142,.2);border-radius:8px;margin-top:8px;">
+          <div style="font-size:12.5px;font-weight:700;color:var(--purple);margin-bottom:6px;">⚡ Overpayment detected</div>
+          <div style="font-size:12px;color:var(--purple);margin-bottom:10px;">The payment amount exceeds the invoice balance of <strong id="overpay-invbal-${inv.id}">$0</strong>. Choose how to handle the excess <strong id="overpay-excess-${inv.id}">$0</strong>:</div>
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            <label style="display:flex;align-items:flex-start;gap:8px;padding:8px 10px;border:1.5px solid rgba(91,45,142,.3);border-radius:7px;cursor:pointer;background:#fff;font-size:12.5px;">
+              <input type="radio" name="overpay-action-${inv.id}" value="credit" checked style="margin-top:2px;accent-color:var(--purple);">
+              <div><strong>Leave as account credit</strong><div style="color:var(--muted);font-size:11.5px;margin-top:2px;">The excess amount stays on the account and can be applied to future invoices.</div></div>
+            </label>
+            <label style="display:flex;align-items:flex-start;gap:8px;padding:8px 10px;border:1.5px solid rgba(91,45,142,.3);border-radius:7px;cursor:pointer;background:#fff;font-size:12.5px;">
+              <input type="radio" name="overpay-action-${inv.id}" value="refund" style="margin-top:2px;accent-color:var(--purple);">
+              <div><strong>Mark as pending refund</strong><div style="color:var(--muted);font-size:11.5px;margin-top:2px;">Record that a refund needs to be issued for the overpaid amount.</div></div>
+            </label>
+          </div>
+        </div>
+
         <div class="npf-footer">
           <button class="btn btn-g btn-sm" onclick="cancelNPF('${inv.id}')">Cancel</button>
-          <button class="btn btn-p btn-sm" onclick="saveNPF('${inv.id}')">Save Payment</button>
+          <button class="btn btn-p btn-sm" onclick="saveNPF('${inv.id}')" id="save-npf-${inv.id}">Save Payment</button>
         </div>
       </div>
-
     </div>
   </div>`;
-}
-
-// Load payment history for a card when it opens
-async function loadPaymentHistory(invId) {
-  const wrap = document.getElementById('hist-'+invId);
-  if (!wrap) return;
-  try {
-    const payments = await getPayments(orgId, { invoiceId: invId });
-    if (!payments.length) {
-      wrap.innerHTML = `<div style="font-size:12px;color:var(--muted2);padding:4px 0 10px;">No payments recorded yet.</div>`;
-      return;
-    }
-    const paymentsHtml = payments.map(p => {
-      const allocHtml = (p.allocations||[]).map(a =>
-        `<div class="al-row"><span class="al-name">${a.name}</span><span class="al-inv">${a.inv||''}</span><span class="al-orig">$${fmt(a.origBal||0)}</span><span class="al-arr">→</span><span class="al-new">$${fmt(a.newBal||0)} remaining</span></div>`
-      ).join('') || `<div class="al-noalloc">No items allocated</div>`;
-      const dFmt = p.date ? new Date(p.date+'T12:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : 'Unknown date';
-      return `<div class="pay-block">
-        <div class="pay-block-hd" onclick="toggleAllocList(this)">
-          <span class="pbh-date">${dFmt}</span>
-          <span class="pbh-no">${p.paymentNumber||''}</span>
-          <span class="pbh-method">${p.method||'Payment'}</span>
-          <span class="badge b-gr">${p.pct||0}% + $${fmt(p.flat||0)}</span>
-          <span class="pbh-amt">$${fmt(p.totalWithFees||p.amount||0)}</span>
-          <span style="color:var(--muted2);font-size:11px;margin-left:4px;">▾</span>
-        </div>
-        <div class="alloc-list">${allocHtml}</div>
-      </div>`;
-    }).join('');
-    wrap.innerHTML = paymentsHtml;
-  } catch(e) {
-    wrap.innerHTML = `<div style="font-size:12px;color:var(--red);">Could not load history: ${e.message}</div>`;
-  }
 }
 
 // ── TOGGLE CARD ──
@@ -828,303 +762,487 @@ window.toggleCard = function(invId) {
   const hidden = b.classList.contains('hidden');
   b.classList.toggle('hidden', !hidden);
   if (c) c.classList.toggle('open', hidden);
-  // Load payment history when opening
   if (hidden) loadPaymentHistory(invId);
 };
 
 window.toggleAllocList = function(hd) {
   const list = hd.closest('.pay-block')?.querySelector('.alloc-list');
-  if (list) list.style.display = list.style.display === 'none' ? '' : 'none';
+  if (list) list.style.display = list.style.display==='none'?'':'none';
 };
+
+// ── LOAD PAYMENT HISTORY ──
+async function loadPaymentHistory(invId) {
+  const wrap = document.getElementById('hist-'+invId);
+  if (!wrap) return;
+  try {
+    const payments = await getPayments(orgId, { invoiceId: invId });
+    if (!payments.length) {
+      wrap.innerHTML = `<div style="padding:4px 0 10px;font-size:12px;color:var(--muted2);">No payments recorded yet.</div>`;
+      return;
+    }
+    wrap.innerHTML = payments.map(p => {
+      const dFmt = p.date ? new Date(p.date+'T12:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : 'Unknown date';
+      const allocHtml = (p.allocations||[]).map(a =>
+        `<div class="al-row"><span class="al-name">${a.name}</span><span class="al-inv">${a.inv||''}</span><span class="al-orig">$${fmt(a.origBal||0)}</span><span class="al-arr">→</span><span class="al-new">$${fmt(a.newBal||0)} remaining</span></div>`
+      ).join('') || '<div style="font-size:11.5px;color:var(--muted2);">No items allocated</div>';
+      const surchargeNote = (p.surcharge||0)>0 ? `<span class="badge b-b" style="font-size:10px;">+$${fmt(p.surcharge)} surcharge</span>` : '';
+      const creditNote = p.overpayAction==='credit' ? `<span class="badge b-gr" style="font-size:10px;">$${fmt(p.creditAmount||0)} credit</span>` : '';
+      const refundNote = p.overpayAction==='refund' ? `<span class="badge b-y" style="font-size:10px;">$${fmt(p.creditAmount||0)} refund pending</span>` : '';
+      return `<div class="pay-block" id="payblock-${p.id}">
+        <div class="pay-block-hd" onclick="toggleAllocList(this)">
+          <span class="pbh-date">${dFmt}</span>
+          <span class="pbh-no">${p.paymentNumber||''}</span>
+          <span class="pbh-method">${p.method||'Payment'}</span>
+          <span class="pbh-amt">$${fmt(p.amount||0)}</span>
+          ${surchargeNote}${creditNote}${refundNote}
+          <div style="margin-left:auto;display:flex;gap:4px;align-items:center;">
+            <button class="btn btn-g btn-xs" onclick="event.stopPropagation();openEditPayment('${p.id}','${invId}')" title="Edit">✏</button>
+            <button class="btn btn-xs" style="background:var(--rl);color:var(--red);border:1px solid var(--rb);" onclick="event.stopPropagation();deletePaymentConfirm('${p.id}','${invId}',${p.amount||0})" title="Delete">🗑</button>
+          </div>
+          <span style="color:var(--muted2);font-size:11px;">▾</span>
+        </div>
+        <div class="alloc-list">${allocHtml}</div>
+      </div>`;
+    }).join('');
+  } catch(e) {
+    if(wrap) wrap.innerHTML = `<div style="font-size:12px;color:var(--red);">Could not load history: ${e.message}</div>`;
+  }
+}
 
 // ── SHOW/CANCEL NPF ──
 window.showNPF = function(invId) {
   const f = document.getElementById('npf-'+invId);
   const b = document.getElementById('addbtn-'+invId);
-  if (f) { f.style.display = ''; f.scrollIntoView({behavior:'smooth',block:'nearest'}); }
-  if (b) b.style.display = 'none';
+  if (f) { f.style.display=''; f.scrollIntoView({behavior:'smooth',block:'nearest'}); }
+  if (b) b.style.display='none';
 };
 window.cancelNPF = function(invId) {
-  document.getElementById('npf-'+invId).style.display = 'none';
-  document.getElementById('addbtn-'+invId).style.display = '';
+  document.getElementById('npf-'+invId).style.display='none';
+  document.getElementById('addbtn-'+invId).style.display='';
   resetSubs(invId);
+  const amtEl = document.getElementById('amt-'+invId); if(amtEl) amtEl.value='';
+  document.getElementById('overpay-'+invId)?.style && (document.getElementById('overpay-'+invId).style.display='none');
 };
 
 function resetSubs(invId) {
-  const state = liveState[invId];
-  if (!state) return;
+  const state = liveState[invId]; if(!state) return;
   state.subs.forEach(s => {
     const chk = document.getElementById('chk-'+invId+'-'+s.id);
     const inp = document.getElementById('sia-'+invId+'-'+s.id);
     const newEl = document.getElementById('sin-'+invId+'-'+s.id);
-    const row = document.getElementById('sir-'+invId+'-'+s.id) || document.querySelector(`[data-inv="${invId}"][data-sub="${s.id}"]`);
-    chk?.classList.remove('on');
-    row?.classList.remove('si-checked');
-    if (inp) { inp.disabled = true; inp.value = 0; inp.classList.remove('ov'); }
-    if (newEl) { newEl.textContent = '$'+fmt(s.bal); newEl.style.color = 'var(--muted2)'; }
+    const row = document.querySelector(`[data-inv="${invId}"][data-sub="${s.id}"]`);
+    chk?.classList.remove('on'); row?.classList.remove('si-checked');
+    if(inp){inp.disabled=true;inp.value='';inp.classList.remove('ov');}
+    if(newEl){newEl.textContent='$'+fmt(s.bal);newEl.style.color='var(--muted2)';}
   });
-  const amtEl = document.getElementById('amt-'+invId);
-  if (amtEl) amtEl.value = 0;
   updateASB(invId, 0);
 }
 
 // ── METHOD FEES ──
 function getMethodFee(method) {
-  const fees = settings.paymentFees || [
-    { method:'Credit Card', flat:0, pct:2.5 },
-    { method:'Bank Transfer', flat:0, pct:0 },
-    { method:'Check', flat:0, pct:0 },
-    { method:'Cash', flat:0, pct:0 },
-    { method:'Zelle / Venmo', flat:1, pct:2 },
-  ];
-  return fees.find(f => f.method === method) || { flat:0, pct:0 };
+  const fees = settings.paymentFees || [{method:'Credit Card',flat:0,pct:2.5},{method:'Bank Transfer',flat:0,pct:0},{method:'Check',flat:0,pct:0},{method:'Cash',flat:0,pct:0},{method:'Zelle / Venmo',flat:1,pct:2}];
+  return fees.find(f=>f.method===method)||{flat:0,pct:0};
 }
 
 window.onMeth = function(sel, invId) {
   const fee = getMethodFee(sel.value);
-  const r = document.getElementById('rate-'+invId);
-  const f = document.getElementById('flat-'+invId);
-  if (r) r.value = fee.pct;
-  if (f) f.value = fee.flat;
+  const r=document.getElementById('rate-'+invId), fl=document.getElementById('flat-'+invId);
+  if(r) r.value=fee.pct; if(fl) fl.value=fee.flat;
   onAmt(invId);
 };
 
-// ── AMOUNT CHANGE ──
+// ── AMOUNT CHANGE — CORE FIX ──
+// "Payment In" = the payment amount applied to invoices (not including surcharge)
+// Surcharge = separate income line, shown separately, NOT part of invoice allocation
 window.onAmt = function(invId) {
-  const amt = parseFloat(document.getElementById('amt-'+invId)?.value) || 0;
-  const flat = parseFloat(document.getElementById('flat-'+invId)?.value) || 0;
-  const pct = parseFloat(document.getElementById('rate-'+invId)?.value) || 0;
-  const surcharge = flat + amt * (pct / 100);
-  const total = amt + surcharge;
+  const amt   = parseFloat(document.getElementById('amt-'+invId)?.value)||0;
+  const flat  = parseFloat(document.getElementById('flat-'+invId)?.value)||0;
+  const pct   = parseFloat(document.getElementById('rate-'+invId)?.value)||0;
+  const surcharge = flat + amt*(pct/100);
+  const totalCharged = amt + surcharge;  // what payer actually pays
+
+  // Display total charged to payer
   const twfEl = document.getElementById('twf-'+invId);
-  const noteEl = document.getElementById('fee-note-'+invId);
-  const inEl = document.getElementById('asb-in-'+invId);
-  if (twfEl) twfEl.textContent = '$'+fmt(total);
-  if (noteEl) noteEl.textContent = `Flat fee $${fmt(flat)} + ${pct}% surcharge = $${fmt(surcharge)} added`;
-  if (inEl) inEl.textContent = '$'+fmt(amt);
+  if(twfEl) twfEl.textContent = amt>0 ? '$'+fmt(totalCharged) : '—';
+
+  // Fee breakdown row
+  const bd = document.getElementById('fee-breakdown-'+invId);
+  const scDisp = document.getElementById('surcharge-display-'+invId);
+  const tDisp  = document.getElementById('total-from-payer-'+invId);
+  const asbIn  = document.getElementById('asb-in-'+invId);
+  const asbApplied = document.getElementById('asb-applied-'+invId);
+  if(bd)  bd.style.display = amt>0 ? '' : 'none';
+  if(scDisp) scDisp.textContent = '$'+fmt(surcharge)+(surcharge>0?' (processing fee)':''  );
+  if(tDisp)  tDisp.textContent  = '$'+fmt(totalCharged);
+  if(asbIn)  asbIn.textContent  = '$'+fmt(amt);
+  if(asbApplied) asbApplied.textContent = '$'+fmt(amt);
+
+  // Overpayment check
+  const state = liveState[invId];
+  const invBal = state ? Math.max(state.total-state.paid,0) : 0;
+  const overpayDiv = document.getElementById('overpay-'+invId);
+  if(overpayDiv) {
+    if(amt>0 && invBal>0 && amt>invBal+0.005) {
+      const excess = amt - invBal;
+      overpayDiv.style.display='';
+      const ibEl=document.getElementById('overpay-invbal-'+invId);
+      const exEl=document.getElementById('overpay-excess-'+invId);
+      if(ibEl) ibEl.textContent='$'+fmt(invBal);
+      if(exEl) exEl.textContent='$'+fmt(excess);
+    } else {
+      overpayDiv.style.display='none';
+    }
+  }
+
+  // Auto-allocate amt (not surcharge) across sub-items
   autoAllocate(invId, amt);
 };
 
 function autoAllocate(invId, total) {
-  const state = liveState[invId];
-  if (!state) return;
-  const sorted = [...state.subs].filter(s => s.bal > 0).sort((a,b) => a.order - b.order);
+  const state = liveState[invId]; if(!state) return;
+  const sorted = [...state.subs].filter(s=>s.bal>0).sort((a,b)=>a.order-b.order);
   let rem = total;
   sorted.forEach(s => {
-    const chk = document.getElementById('chk-'+invId+'-'+s.id);
-    const inp = document.getElementById('sia-'+invId+'-'+s.id);
-    const newEl = document.getElementById('sin-'+invId+'-'+s.id);
-    const row = document.querySelector(`[data-inv="${invId}"][data-sub="${s.id}"]`);
-    if (rem > 0) {
-      chk?.classList.add('on');
-      row?.classList.add('si-checked');
-      if (inp) inp.disabled = false;
+    const chk=document.getElementById('chk-'+invId+'-'+s.id);
+    const inp=document.getElementById('sia-'+invId+'-'+s.id);
+    const newEl=document.getElementById('sin-'+invId+'-'+s.id);
+    const row=document.querySelector(`[data-inv="${invId}"][data-sub="${s.id}"]`);
+    if(rem>0) {
+      chk?.classList.add('on'); row?.classList.add('si-checked');
+      if(inp) inp.disabled=false;
       const apply = Math.min(rem, s.bal);
-      if (inp && !inp.classList.contains('ov')) inp.value = fmt(apply);
-      rem = Math.max(rem - apply, 0);
-      if (newEl) { const after = Math.max(s.bal-apply,0); newEl.textContent='$'+fmt(after); newEl.style.color=after===0?'var(--accent)':'var(--yellow)'; }
+      // KEY FIX: always set the value, even on auto-allocate
+      if(inp) { inp.value=fmt(apply); inp.classList.remove('ov'); }
+      rem = Math.max(rem-apply,0);
+      if(newEl) { const after=Math.max(s.bal-apply,0); newEl.textContent='$'+fmt(after); newEl.style.color=after===0?'var(--accent)':' var(--yellow)'; }
+    } else {
+      chk?.classList.remove('on'); row?.classList.remove('si-checked');
+      if(inp){inp.disabled=true;inp.value='';inp.classList.remove('ov');}
+      if(newEl){newEl.textContent='$'+fmt(s.bal);newEl.style.color='var(--muted2)';}
     }
   });
   updateASB(invId, total);
 }
 
 window.togSI = function(invId, siId) {
-  const chk = document.getElementById('chk-'+invId+'-'+siId);
-  const inp = document.getElementById('sia-'+invId+'-'+siId);
-  const row = document.querySelector(`[data-inv="${invId}"][data-sub="${siId}"]`);
-  const state = liveState[invId];
-  const sub = state?.subs.find(s => s.id === siId);
-  const on = chk?.classList.contains('on');
-  if (on) {
+  const chk=document.getElementById('chk-'+invId+'-'+siId);
+  const inp=document.getElementById('sia-'+invId+'-'+siId);
+  const row=document.querySelector(`[data-inv="${invId}"][data-sub="${siId}"]`);
+  const state=liveState[invId]; const sub=state?.subs.find(s=>s.id===siId);
+  const on=chk?.classList.contains('on');
+  if(on) {
     chk?.classList.remove('on'); row?.classList.remove('si-checked');
-    if (inp) { inp.disabled=true; inp.value=0; inp.classList.remove('ov'); }
-    const newEl = document.getElementById('sin-'+invId+'-'+siId);
-    if (newEl && sub) { newEl.textContent='$'+fmt(sub.bal); newEl.style.color='var(--muted2)'; }
+    if(inp){inp.disabled=true;inp.value='';inp.classList.remove('ov');}
+    const newEl=document.getElementById('sin-'+invId+'-'+siId);
+    if(newEl&&sub){newEl.textContent='$'+fmt(sub.bal);newEl.style.color='var(--muted2)';}
   } else {
     chk?.classList.add('on'); row?.classList.add('si-checked');
-    if (inp) inp.disabled = false;
+    if(inp) {
+      inp.disabled=false;
+      // KEY FIX: pre-fill with the remaining balance when manually checking
+      if(!inp.value||parseFloat(inp.value)===0) {
+        inp.value = fmt(sub?.bal||0);
+        // Trigger the after-calc
+        if(sub) {
+          const newEl=document.getElementById('sin-'+invId+'-'+siId);
+          if(newEl){newEl.textContent='$0.00';newEl.style.color='var(--accent)';}
+        }
+      }
+    }
   }
-  const total = parseFloat(document.getElementById('amt-'+invId)?.value)||0;
+  const total=parseFloat(document.getElementById('amt-'+invId)?.value)||0;
   updateASB(invId, total);
 };
 
 window.onSIOv = function(invId, siId) {
-  const inp = document.getElementById('sia-'+invId+'-'+siId);
+  const inp=document.getElementById('sia-'+invId+'-'+siId);
   inp?.classList.add('ov');
-  const state = liveState[invId];
-  const sub = state?.subs.find(s => s.id === siId);
-  if (!sub) return;
-  const applied = parseFloat(inp?.value)||0;
-  const newEl = document.getElementById('sin-'+invId+'-'+siId);
-  if (newEl) { const after = Math.max(sub.bal-applied,0); newEl.textContent='$'+fmt(after); newEl.style.color=after===0?'var(--accent)':'var(--yellow)'; }
-  const total = parseFloat(document.getElementById('amt-'+invId)?.value)||0;
+  const state=liveState[invId]; const sub=state?.subs.find(s=>s.id===siId);
+  if(!sub) return;
+  const applied=parseFloat(inp?.value)||0;
+  const newEl=document.getElementById('sin-'+invId+'-'+siId);
+  if(newEl){const after=Math.max(sub.bal-applied,0);newEl.textContent='$'+fmt(after);newEl.style.color=after===0?'var(--accent)':' var(--yellow)';}
+  const total=parseFloat(document.getElementById('amt-'+invId)?.value)||0;
   updateASB(invId, total);
 };
 
 function updateASB(invId, total) {
-  let alloc = 0;
-  const state = liveState[invId];
-  state?.subs.forEach(s => {
-    const chk = document.getElementById('chk-'+invId+'-'+s.id);
-    if (chk?.classList.contains('on')) alloc += parseFloat(document.getElementById('sia-'+invId+'-'+s.id)?.value)||0;
+  let alloc=0;
+  const state=liveState[invId];
+  state?.subs.forEach(s=>{
+    const chk=document.getElementById('chk-'+invId+'-'+s.id);
+    if(chk?.classList.contains('on')) alloc+=parseFloat(document.getElementById('sia-'+invId+'-'+s.id)?.value)||0;
   });
-  const rem = Math.max(total-alloc,0);
-  const alEl = document.getElementById('asb-al-'+invId);
-  const remEl = document.getElementById('asb-rem-'+invId);
-  if (alEl) alEl.textContent = '$'+fmt(alloc);
-  if (remEl) { remEl.textContent='$'+fmt(rem); remEl.style.color=rem<0.01?'var(--accent)':'var(--yellow)'; }
+  const rem=Math.max(total-alloc,0);
+  const alEl=document.getElementById('asb-al-'+invId);
+  const remEl=document.getElementById('asb-rem-'+invId);
+  if(alEl) alEl.textContent='$'+fmt(alloc);
+  if(remEl){remEl.textContent='$'+fmt(rem);remEl.style.color=rem<0.01?'var(--accent)':' var(--yellow)';}
 }
 
 // ── SAVE PAYMENT ──
 window.saveNPF = async function(invId) {
-  const amt = parseFloat(document.getElementById('amt-'+invId)?.value)||0;
-  const flat = parseFloat(document.getElementById('flat-'+invId)?.value)||0;
-  const pct = parseFloat(document.getElementById('rate-'+invId)?.value)||0;
-  const surcharge = flat + amt * (pct/100);
-  const totalWithFees = amt + surcharge;
-  const method = document.getElementById('meth-'+invId)?.value||'Payment';
-  const payNo = document.getElementById('payno-'+invId)?.value||'';
-  const date = document.getElementById('date-'+invId)?.value||new Date().toISOString().split('T')[0];
+  const amt=parseFloat(document.getElementById('amt-'+invId)?.value)||0;
+  const flat=parseFloat(document.getElementById('flat-'+invId)?.value)||0;
+  const pct=parseFloat(document.getElementById('rate-'+invId)?.value)||0;
+  const surcharge=flat+amt*(pct/100);
+  const totalCharged=amt+surcharge;
+  const method=document.getElementById('meth-'+invId)?.value||'Payment';
+  const payNo=document.getElementById('payno-'+invId)?.value||'';
+  const date=document.getElementById('date-'+invId)?.value||new Date().toISOString().split('T')[0];
+  if(amt<=0){alert('Please enter a payment amount.');return;}
 
-  if (amt <= 0) { alert('Please enter a payment amount.'); return; }
-
-  const btn = document.querySelector(`#npf-${invId} .btn-p`);
-  if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
+  const btn=document.getElementById('save-npf-'+invId);
+  if(btn){btn.disabled=true;btn.textContent='Saving…';}
 
   try {
-    const state = liveState[invId];
-    if (!state) throw new Error('Invoice state not found');
+    const state=liveState[invId]; if(!state) throw new Error('Invoice state not found');
+    const invBal=Math.max(state.total-state.paid,0);
 
     // Collect allocations
-    const allocations = [];
-    let totalApplied = 0;
-    state.subs.forEach(sub => {
-      const chk = document.getElementById('chk-'+invId+'-'+sub.id);
-      if (chk?.classList.contains('on')) {
-        const a = parseFloat(document.getElementById('sia-'+invId+'-'+sub.id)?.value)||0;
-        const newBal = Math.max(sub.bal-a, 0);
-        if (a > 0) {
-          allocations.push({ name:sub.name, inv:sub.inv, itemId:sub.itemId, origBal:sub.bal, applied:a, newBal });
-          totalApplied += a;
-          sub.bal = newBal; // update live state
-        }
+    const allocations=[];
+    let totalApplied=0;
+    state.subs.forEach(sub=>{
+      const chk=document.getElementById('chk-'+invId+'-'+sub.id);
+      if(chk?.classList.contains('on')){
+        const a=parseFloat(document.getElementById('sia-'+invId+'-'+sub.id)?.value)||0;
+        const newBal=Math.max(sub.bal-a,0);
+        if(a>0){allocations.push({name:sub.name,inv:sub.inv,itemId:sub.itemId,origBal:sub.bal,applied:a,newBal});totalApplied+=a;sub.bal=newBal;}
       }
     });
 
-    // Update liveState paid total
-    state.paid = Math.min(state.paid + totalApplied, state.total);
+    // Overpayment handling
+    let overpayAction=null, creditAmount=0;
+    const overpayDiv=document.getElementById('overpay-'+invId);
+    if(overpayDiv&&overpayDiv.style.display!=='none'&&amt>invBal+0.005) {
+      const chosen=document.querySelector(`input[name="overpay-action-${invId}"]:checked`)?.value||'credit';
+      overpayAction=chosen;
+      creditAmount=amt-invBal;
+    }
 
-    // Save payment record to Firestore
-    await savePayment(orgId, {
-      invoiceId: invId,
-      contactId: allInvoices.find(i=>i.id===invId)?.contactId || '',
-      paymentNumber: payNo,
-      date,
-      method,
-      flat,
-      pct,
-      amount: amt,
+    // Build payment record
+    const paymentData={
+      invoiceId:invId,
+      contactId:allInvoices.find(i=>i.id===invId)?.contactId||'',
+      paymentNumber:payNo,
+      date,method,flat,pct,
+      amount:amt,
       surcharge,
-      totalWithFees,
+      totalCharged,    // what payer actually paid
       allocations,
-    });
+      ...(overpayAction?{overpayAction,creditAmount}:{}),
+    };
 
-    // Update invoice totalPaid in Firestore
+    const savedPayId=await savePayment(orgId, paymentData);
+
+    // Update invoice totalPaid — only applied amount counts toward invoice
+    state.paid=Math.min(state.paid+totalApplied, state.total);
     await saveInvoice(orgId, invId, {
-      totalPaid: state.paid,
-      status: state.paid >= state.total ? 'paid' : state.paid > 0 ? 'partial' : 'unpaid',
+      totalPaid:state.paid,
+      status:state.paid>=state.total?'paid':state.paid>0?'partial':'unpaid',
+      ...(overpayAction==='credit'?{accountCredit:(allInvoices.find(i=>i.id===invId)?.accountCredit||0)+creditAmount}:{}),
     });
 
-    // Bump payment number
     bumpPaymentNumber();
-
-    // Update card header
     updateCardHeader(invId);
-
-    // Reload payment history
     await loadPaymentHistory(invId);
-
     cancelNPF(invId);
 
-  } catch (e) {
-    alert('Failed to save payment: ' + e.message);
-    if (btn) { btn.disabled = false; btn.textContent = 'Save Payment'; }
+  } catch(e) {
+    alert('Failed to save payment: '+e.message);
+    if(btn){btn.disabled=false;btn.textContent='Save Payment';}
   }
 };
 
-// ── UPDATE CARD HEADER AFTER PAYMENT ──
 function updateCardHeader(invId) {
-  const state = liveState[invId];
-  if (!state) return;
-  const pct = state.total > 0 ? Math.min(state.paid/state.total*100,100) : 0;
-  const bal = Math.max(state.total-state.paid,0);
-  const fill = document.getElementById('prog-fill-'+invId);
-  const stripe = document.getElementById('stripe-'+invId);
-  const pctEl = document.getElementById('pct-'+invId);
-  const numsEl = document.getElementById('prog-nums-'+invId);
-  const balEl = document.getElementById('bal-'+invId);
-  const badgeEl = document.querySelector(`#card-${invId} .badge`);
-  const color = pct >= 100 ? 'var(--accent)' : 'var(--accent)';
-  if (fill) { fill.style.width = pct+'%'; fill.style.background = color; }
-  if (stripe) { const sf = stripe.querySelector('.inv-stripe-fill')||stripe; sf.style.width = pct+'%'; }
-  if (pctEl) pctEl.textContent = Math.round(pct)+'% paid';
-  if (numsEl) numsEl.textContent = '$'+fmt(state.paid)+' / $'+fmt(state.total);
-  if (balEl) { balEl.textContent = bal<=0?'Paid in full':'$'+fmt(bal)+' balance'; balEl.style.color = bal<=0?'var(--accent)':pct>0?'var(--yellow)':'var(--red)'; }
-  if (badgeEl) {
-    if (pct>=100) { badgeEl.textContent='Paid'; badgeEl.className='badge b-g'; }
-    else if (pct>0) { badgeEl.textContent='Partial'; badgeEl.className='badge b-y'; }
-    else { badgeEl.textContent='Unpaid'; badgeEl.className='badge b-gr'; }
+  const state=liveState[invId]; if(!state) return;
+  const pct=state.total>0?Math.min(state.paid/state.total*100,100):0;
+  const bal=Math.max(state.total-state.paid,0);
+  const fill=document.getElementById('prog-fill-'+invId);
+  const stripe=document.getElementById('stripe-'+invId)?.querySelector('.inv-stripe-fill')||document.getElementById('stripe-'+invId);
+  const pctEl=document.getElementById('pct-'+invId);
+  const numsEl=document.getElementById('prog-nums-'+invId);
+  const balEl=document.getElementById('bal-'+invId);
+  const badgeEl=document.querySelector(`#card-${invId} .badge`);
+  const color = pct>=100?'var(--accent)':'var(--accent)';
+  if(fill){fill.style.width=pct+'%';}
+  if(stripe){stripe.style.width=pct+'%';}
+  if(pctEl) pctEl.textContent=Math.round(pct)+'% paid';
+  if(numsEl) numsEl.textContent='$'+fmt(state.paid)+' / $'+fmt(state.total);
+  if(balEl){balEl.textContent=bal<=0?'Paid in full':'$'+fmt(bal)+' balance';balEl.style.color=bal<=0?'var(--accent)':pct>0?'var(--yellow)':'var(--red)';}
+  if(badgeEl){if(pct>=100){badgeEl.textContent='Paid';badgeEl.className='badge b-g';}else if(pct>0){badgeEl.textContent='Partial';badgeEl.className='badge b-y';}else{badgeEl.textContent='Unpaid';badgeEl.className='badge b-gr';}}
+  const card=document.getElementById('card-'+invId);
+  if(card) card.dataset.status=pct>=100?'paid':pct>0?'partial':'unpaid';
+}
+
+// ── EDIT PAYMENT ──
+window.openEditPayment = async function(payId, invId) {
+  // Load the payment from Firestore, populate the NPF form
+  try {
+    const payments = await getPayments(orgId, { invoiceId: invId });
+    const p = payments.find(p=>p.id===payId);
+    if (!p) { alert('Payment not found.'); return; }
+
+    // Show NPF form in edit mode
+    showNPF(invId);
+    const dateEl=document.getElementById('date-'+invId);
+    const payNoEl=document.getElementById('payno-'+invId);
+    const methEl=document.getElementById('meth-'+invId);
+    const amtEl=document.getElementById('amt-'+invId);
+    const flatEl=document.getElementById('flat-'+invId);
+    const rateEl=document.getElementById('rate-'+invId);
+    if(dateEl) dateEl.value=p.date||'';
+    if(payNoEl) payNoEl.value=p.paymentNumber||'';
+    if(methEl) methEl.value=p.method||'Credit Card';
+    if(amtEl) { amtEl.value=p.amount||0; onAmt(invId); }
+    if(flatEl) flatEl.value=p.flat||0;
+    if(rateEl) rateEl.value=p.pct||0;
+
+    // Update save button to patch mode
+    const saveBtn=document.getElementById('save-npf-'+invId);
+    if(saveBtn) {
+      saveBtn.textContent='Update Payment';
+      saveBtn.onclick=async()=>{ await patchPayment(payId, invId, p); };
+    }
+  } catch(e) { alert('Could not load payment: '+e.message); }
+};
+
+async function patchPayment(payId, invId, originalPayment) {
+  const btn=document.getElementById('save-npf-'+invId);
+  if(btn){btn.disabled=true;btn.textContent='Updating…';}
+  try {
+    const amt=parseFloat(document.getElementById('amt-'+invId)?.value)||0;
+    const flat=parseFloat(document.getElementById('flat-'+invId)?.value)||0;
+    const pct=parseFloat(document.getElementById('rate-'+invId)?.value)||0;
+    const surcharge=flat+amt*(pct/100);
+    const date=document.getElementById('date-'+invId)?.value||'';
+    const method=document.getElementById('meth-'+invId)?.value||'';
+    const payNo=document.getElementById('payno-'+invId)?.value||'';
+
+    // Reverse original applied amount, apply new amount
+    const state=liveState[invId]; if(!state) throw new Error('State not found');
+    const originalApplied=(originalPayment.allocations||[]).reduce((s,a)=>s+(a.applied||0),0);
+
+    // Collect new allocations
+    const allocations=[];
+    let totalApplied=0;
+    state.subs.forEach(sub=>{
+      // Restore original sub balance first
+      const origAlloc=(originalPayment.allocations||[]).find(a=>a.itemId===sub.itemId);
+      if(origAlloc) sub.bal=Math.min(sub.bal+origAlloc.applied, sub.origBal);
+      const chk=document.getElementById('chk-'+invId+'-'+sub.id);
+      if(chk?.classList.contains('on')){
+        const a=parseFloat(document.getElementById('sia-'+invId+'-'+sub.id)?.value)||0;
+        const newBal=Math.max(sub.bal-a,0);
+        if(a>0){allocations.push({name:sub.name,inv:sub.inv,itemId:sub.itemId,origBal:sub.bal,applied:a,newBal});totalApplied+=a;sub.bal=newBal;}
+      }
+    });
+
+    // Update Firestore payment doc
+    const db=getDB();
+    await updateDoc(doc(db,'orgs',orgId,'payments',payId),{
+      date,method,flat,pct,amount:amt,surcharge,totalCharged:amt+surcharge,paymentNumber:payNo,allocations,
+    });
+
+    // Update invoice totalPaid
+    const newPaid=Math.max((state.paid-originalApplied)+totalApplied,0);
+    state.paid=Math.min(newPaid,state.total);
+    await saveInvoice(orgId,invId,{totalPaid:state.paid,status:state.paid>=state.total?'paid':state.paid>0?'partial':'unpaid'});
+
+    updateCardHeader(invId);
+    await loadPaymentHistory(invId);
+    cancelNPF(invId);
+
+    // Reset save button
+    const saveBtn=document.getElementById('save-npf-'+invId);
+    if(saveBtn){saveBtn.textContent='Save Payment';saveBtn.onclick=()=>saveNPF(invId);}
+  } catch(e){
+    alert('Failed to update: '+e.message);
+    if(btn){btn.disabled=false;btn.textContent='Update Payment';}
   }
-  // Update card data-status for filtering
-  const card = document.getElementById('card-'+invId);
-  if (card) card.dataset.status = pct>=100?'paid':pct>0?'partial':'unpaid';
+}
+
+// ── DELETE PAYMENT ──
+window.deletePaymentConfirm = async function(payId, invId, amount) {
+  if(!confirm(`Delete this payment of $${fmt(amount)}?\n\nThis will reverse the payment from the invoice balance. This cannot be undone.`)) return;
+  try {
+    // Load the payment first to get allocations
+    const payments=await getPayments(orgId,{invoiceId:invId});
+    const p=payments.find(p=>p.id===payId);
+    const appliedAmount=p?(p.allocations||[]).reduce((s,a)=>s+(a.applied||0),0):amount;
+
+    // Delete from Firestore
+    const db=getDB();
+    await deleteDoc(doc(db,'orgs',orgId,'payments',payId));
+
+    // Reverse the applied amount from invoice
+    const state=liveState[invId];
+    if(state) {
+      state.paid=Math.max(state.paid-appliedAmount,0);
+      await saveInvoice(orgId,invId,{totalPaid:state.paid,status:state.paid>=state.total?'paid':state.paid>0?'partial':'unpaid'});
+    }
+
+    // Also restore sub-item balances in live state
+    if(p&&state) {
+      (p.allocations||[]).forEach(a=>{
+        const sub=state.subs.find(s=>s.itemId===a.itemId);
+        if(sub) sub.bal=Math.min(sub.bal+(a.applied||0),sub.origBal);
+      });
+    }
+
+    updateCardHeader(invId);
+    await loadPaymentHistory(invId);
+
+    // Show undo-style toast
+    showToast(`Payment of $${fmt(amount)} deleted`);
+  } catch(e) { alert('Failed to delete: '+e.message); }
+};
+
+function showToast(msg) {
+  let t=document.getElementById('pay-toast');
+  if(!t){t=document.createElement('div');t.id='pay-toast';t.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1c1c1a;color:#fff;padding:9px 18px;border-radius:8px;font-size:12.5px;z-index:500;opacity:0;transition:opacity .2s;white-space:nowrap;';document.body.appendChild(t);}
+  t.textContent=msg; t.style.opacity='1';
+  clearTimeout(t._t); t._t=setTimeout(()=>{t.style.opacity='0';},3000);
 }
 
 // ── KPIs ──
 function updateKPIs() {
-  const now = new Date();
-  let outstanding = 0, overdue = 0, thisMonth = 0, openCount = 0, overdueCount = 0;
-  allInvoices.forEach(inv => {
-    const bal = (inv.totalAmount||0) - (inv.totalPaid||0);
-    if (bal > 0) {
-      outstanding += bal; openCount++;
-      if (inv.dueDate && new Date(inv.dueDate) < now) { overdue += bal; overdueCount++; }
-    }
+  const now=new Date();
+  let outstanding=0,overdue=0,openCount=0,overdueCount=0;
+  allInvoices.forEach(inv=>{
+    const bal=(inv.totalAmount||0)-(inv.totalPaid||0);
+    if(bal>0){outstanding+=bal;openCount++;if(inv.dueDate&&new Date(inv.dueDate)<now){overdue+=bal;overdueCount++;}}
   });
-  // Collected this month (approximate from totalPaid changes — real version uses payments collection)
-  const mon = new Date(); mon.setDate(1);
-  const contactLabel = (terms.students||'contacts').toLowerCase();
-  const el = id => document.getElementById(id);
-  if (el('kpi-outstanding')) { el('kpi-outstanding').textContent = '$'+fmt(outstanding); el('kpi-outstanding').style.color=''; }
-  if (el('kpi-outstanding-d')) el('kpi-outstanding-d').textContent = openCount+' open invoices';
-  if (el('kpi-overdue')) { el('kpi-overdue').textContent = '$'+fmt(overdue); el('kpi-overdue').style.color = overdue>0?'var(--red)':''; }
-  if (el('kpi-overdue-d')) el('kpi-overdue-d').textContent = overdueCount+' '+contactLabel+' past due';
+  const contactLabel=(terms.students||'contacts').toLowerCase();
+  const el=id=>document.getElementById(id);
+  if(el('kpi-outstanding')){el('kpi-outstanding').textContent='$'+fmt(outstanding);el('kpi-outstanding').style.color='';}
+  if(el('kpi-outstanding-d')) el('kpi-outstanding-d').textContent=openCount+' open invoices';
+  if(el('kpi-overdue')){el('kpi-overdue').textContent='$'+fmt(overdue);el('kpi-overdue').style.color=overdue>0?'var(--red)':''; }
+  if(el('kpi-overdue-d')) el('kpi-overdue-d').textContent=overdueCount+' '+contactLabel+' past due';
 }
 
 // ── FILTER ──
-window._showPaid = false;
-window._togglePaid = function() {
-  window._showPaid = !window._showPaid;
-  const btn = document.getElementById('show-paid-btn');
-  btn?.classList.toggle('on', window._showPaid);
-  if (btn) btn.textContent = window._showPaid ? '👁 Hide Paid' : '👁 Show Paid';
+window._showPaid=false;
+window._togglePaid=function(){
+  window._showPaid=!window._showPaid;
+  const btn=document.getElementById('show-paid-btn');
+  btn?.classList.toggle('on',window._showPaid);
+  if(btn) btn.textContent=window._showPaid?'👁 Hide Paid':'👁 Show Paid';
   renderCards(allInvoices);
 };
-window.toggleShowPaid = window._togglePaid;
-window.filterCards = function() { renderCards(allInvoices); };
+window.toggleShowPaid=window._togglePaid;
+window.filterCards=function(){renderCards(allInvoices);};
 
-// ── DATE AUTO-ADVANCE ──
-window.autoAdvanceDate = function(inp) {
-  if (inp.value && inp.value.length === 10) {
-    const all = [...document.querySelectorAll('input,select')].filter(e => !e.disabled && e.offsetParent);
-    const idx = all.indexOf(inp);
-    if (idx >= 0 && idx < all.length-1) setTimeout(() => all[idx+1].focus(), 50);
+window.autoAdvanceDate=function(inp){
+  if(inp.value&&inp.value.length===10){
+    const all=[...document.querySelectorAll('input,select')].filter(e=>!e.disabled&&e.offsetParent);
+    const idx=all.indexOf(inp);
+    if(idx>=0&&idx<all.length-1) setTimeout(()=>all[idx+1].focus(),50);
   }
 };
 
-function fmt(n) { return (parseFloat(n)||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function fmt(n){return (parseFloat(n)||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});}
 
-// ── START ──
 await loadAllInvoices();
 </script>
 </body>

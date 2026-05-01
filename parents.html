@@ -170,7 +170,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
 .fi{animation:fadeIn .2s ease both;}
 </style>
 </head>
-<body>
+<body data-page="parents">
 <div class="shell">
 
 <!-- SIDEBAR -->
@@ -182,7 +182,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
     <div class="s-logo">FinTrack</div>
   </div>
   <div class="nav-sec">
-    <a class="ni" href="dashboard.html"><span class="nic">⊞</span><span class="nl">Dashboard</span></a>
+    <a class="ni" href="index.html"><span class="nic">⊞</span><span class="nl">Dashboard</span></a>
   </div>
   <div class="nav-sec">
     <a class="ni" href="invoice.html"><span class="nic">📄</span><span class="nl">Tuition</span></a>
@@ -229,7 +229,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
           <input type="text" placeholder="Search parents...">
         </div>
 
-        <div class="parent-item active" onclick="select('jonathan',this)">
+        <div class="parent-item active" onclick="window._selectParentById('jonathan',this)">
           <div class="av" style="background:var(--blue);">JC</div>
           <div>
             <div class="pi-name">Jonathan Cohen</div>
@@ -240,7 +240,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
           </div>
         </div>
 
-        <div class="parent-item" onclick="select('miriam_cohen',this)">
+        <div class="parent-item" onclick="window._selectParentById('miriam_cohen',this)">
           <div class="av" style="background:#8e44ad;">MC</div>
           <div>
             <div class="pi-name">Miriam Cohen</div>
@@ -251,7 +251,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
           </div>
         </div>
 
-        <div class="parent-item" onclick="select('reuven',this)">
+        <div class="parent-item" onclick="window._selectParentById('reuven',this)">
           <div class="av" style="background:#c0622b;">RK</div>
           <div>
             <div class="pi-name">Reuven Katz</div>
@@ -262,7 +262,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
           </div>
         </div>
 
-        <div class="parent-item" onclick="select('devorah',this)">
+        <div class="parent-item" onclick="window._selectParentById('devorah',this)">
           <div class="av" style="background:#16a085;">DK</div>
           <div>
             <div class="pi-name">Devorah Katz</div>
@@ -273,7 +273,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
           </div>
         </div>
 
-        <div class="parent-item" onclick="select('avraham',this)">
+        <div class="parent-item" onclick="window._selectParentById('avraham',this)">
           <div class="av" style="background:#7b52ab;">AS</div>
           <div>
             <div class="pi-name">Avraham Shapiro</div>
@@ -284,7 +284,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
           </div>
         </div>
 
-        <div class="parent-item" onclick="select('miriam_levy',this)">
+        <div class="parent-item" onclick="window._selectParentById('miriam_levy',this)">
           <div class="av" style="background:var(--accent);">ML</div>
           <div>
             <div class="pi-name">Miriam Levy</div>
@@ -312,8 +312,9 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
             </div>
           </div>
           <div class="prof-actions">
-            <button class="btn btn-g btn-sm" onclick="window.location='invoice.html'">+ Invoice</button>
+            <button class="btn btn-g btn-sm" onclick="openEditParentModal()">✏ Edit</button>
             <button class="btn btn-g btn-sm" onclick="window.location='payments.html'">💳 Pay</button>
+            <button class="btn btn-g btn-sm" style="color:var(--red);" onclick="deleteCurrentParent()">🗑</button>
           </div>
         </div>
 
@@ -371,7 +372,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
               </div>
               <div class="spouse-right">
                 <span class="badge b-b">Spouse</span>
-                <button class="btn btn-g btn-sm" onclick="select('miriam_cohen', null)">View →</button>
+                <button class="btn btn-g btn-sm" onclick="window._selectParentById('miriam_cohen', null)">View →</button>
               </div>
             </div>
 
@@ -429,69 +430,25 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
             <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:20px;">
               <div style="padding:12px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;">
                 <div class="il" style="margin-bottom:5px;">Total Invoiced</div>
-                <div style="font-family:var(--mono);font-size:18px;font-weight:700;">$34,500</div>
-                <div style="font-size:11px;color:var(--muted);margin-top:2px;">Both children</div>
+                <div style="font-family:var(--mono);font-size:18px;font-weight:700;" id="p-bal-total">—</div>
               </div>
               <div style="padding:12px 14px;background:var(--accent-light);border:1px solid #b8dece;border-radius:8px;">
                 <div class="il" style="margin-bottom:5px;">Paid</div>
-                <div style="font-family:var(--mono);font-size:18px;font-weight:700;color:var(--accent);">$25,366</div>
+                <div style="font-family:var(--mono);font-size:18px;font-weight:700;color:var(--accent);" id="p-bal-paid">—</div>
               </div>
               <div style="padding:12px 14px;background:var(--yellow-light);border:1px solid #f0d88a;border-radius:8px;">
                 <div class="il" style="margin-bottom:5px;">Balance</div>
-                <div style="font-family:var(--mono);font-size:18px;font-weight:700;color:var(--yellow);">$9,134</div>
+                <div style="font-family:var(--mono);font-size:18px;font-weight:700;color:var(--yellow);" id="p-bal-remaining">—</div>
               </div>
             </div>
 
-            <div class="sec-lbl">Open Invoices</div>
-            <table class="tbl" style="margin-bottom:18px;">
-              <thead><tr><th>Student</th><th>Invoice</th><th>Total</th><th>Balance</th><th>Status</th></tr></thead>
-              <tbody>
-                <tr>
-                  <td><b>David Cohen</b></td>
-                  <td class="mono">#INV-1042</td>
-                  <td class="mono">$18,948</td>
-                  <td class="mono" style="color:var(--yellow);">$9,474</td>
-                  <td><span class="badge b-y">◑ Partial</span></td>
-                </tr>
-                <tr>
-                  <td><b>Rachel Cohen</b></td>
-                  <td class="mono">#INV-1043</td>
-                  <td class="mono">$15,552</td>
-                  <td class="mono" style="color:var(--accent);">$0</td>
-                  <td><span class="badge b-g">● Paid</span></td>
-                </tr>
-              </tbody>
-            </table>
-
-            <div class="sec-lbl">Recent Payments</div>
-            <div class="pay-row">
-              <div class="pay-icon">💳</div>
-              <div>
-                <div class="pay-name">Payment — David Cohen invoice</div>
-                <div class="pay-meta">Apr 12 · Credit card · Deposit installment</div>
-              </div>
-              <div class="pay-amt">$5,482</div>
-            </div>
-            <div class="pay-row">
-              <div class="pay-icon" style="background:var(--blue-light);">🏦</div>
-              <div>
-                <div class="pay-name">Payment — Rachel Cohen invoice</div>
-                <div class="pay-meta">Mar 1 · Bank transfer · Full payment</div>
-              </div>
-              <div class="pay-amt">$15,552</div>
-            </div>
-            <div class="pay-row">
-              <div class="pay-icon">💳</div>
-              <div>
-                <div class="pay-name">Payment — David Cohen invoice</div>
-                <div class="pay-meta">Jan 15 · Bank transfer · Partial</div>
-              </div>
-              <div class="pay-amt">$3,991</div>
+            <div class="sec-lbl">Invoices</div>
+            <div id="parent-billing-invoices">
+              <div style="padding:16px;text-align:center;color:var(--muted2);font-size:12.5px;">Loading…</div>
             </div>
 
             <div style="margin-top:16px;display:flex;gap:8px;">
               <button class="btn btn-p" onclick="window.location='payments.html'">💳 Record Payment</button>
-              <button class="btn btn-g">📄 View All Invoices</button>
             </div>
           </div>
 
@@ -527,25 +484,25 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
 <div class="modal-overlay" id="add-modal" onclick="if(event.target===this)closeModal('add-modal')">
   <div class="modal">
     <div class="modal-hd">
-      <div class="modal-title">Add New Parent / Contact</div>
+      <div class="modal-title" id="add-parent-title">Add New Parent / Contact</div>
       <button class="modal-close" onclick="closeModal('add-modal')">✕</button>
     </div>
     <div class="form-row2">
-      <div class="field"><label>First Name</label><input class="input" placeholder="First name"></div>
-      <div class="field"><label>Last Name</label><input class="input" placeholder="Last name"></div>
+      <div class="field"><label>First Name</label><input class="input" id="add-p-firstname" placeholder="First name"></div>
+      <div class="field"><label>Last Name</label><input class="input" id="add-p-lastname" placeholder="Last name"></div>
     </div>
     <div class="form-row2">
       <div class="field"><label>Role</label>
-        <select class="input"><option>Father</option><option>Mother</option><option>Guardian</option><option>Donor</option><option>Other</option></select>
+        <select class="input" id="add-p-role"><option>Father</option><option>Mother</option><option>Guardian</option><option>Donor</option><option>Other</option></select>
       </div>
-      <div class="field"><label>Phone</label><input class="input" placeholder="+1 (___) ___-____"></div>
+      <div class="field"><label>Phone</label><input class="input" id="add-p-phone" placeholder="+1 (___) ___-____"></div>
     </div>
-    <div class="field"><label>Email</label><input class="input" placeholder="email@example.com"></div>
-    <div class="field"><label>Link to Family</label>
-      <select class="input"><option>— Create new family —</option><option>Cohen Family</option><option>Katz Family</option><option>Goldstein Family</option></select>
+    <div class="field"><label>Email</label><input class="input" id="add-p-email" placeholder="email@example.com"></div>
+    <div class="field"><label>Family / Group Name</label>
+      <input class="input" id="add-p-family" placeholder="e.g. Cohen Family">
     </div>
-    <div class="field"><label>Link Spouse / Partner (optional)</label>
-      <select class="input"><option>— None —</option><option>Miriam Cohen</option><option>Devorah Katz</option></select>
+    <div class="field"><label>Notes</label>
+      <input class="input" id="add-p-notes" placeholder="Optional notes">
     </div>
     <div style="display:flex;align-items:center;gap:8px;margin-top:4px;">
       <input type="checkbox" id="is-payer" checked style="accent-color:var(--accent);width:15px;height:15px;">
@@ -553,7 +510,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
     </div>
     <div class="modal-footer">
       <button class="btn btn-g" onclick="closeModal('add-modal')">Cancel</button>
-      <button class="btn btn-p" onclick="closeModal('add-modal')">Add Contact</button>
+      <button class="btn btn-p" id="save-parent-btn" onclick="saveNewParent()">Add Contact</button>
     </div>
   </div>
 </div>
@@ -651,54 +608,353 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
   </div>
 </div>
 
-<script>
-const parents = {
-  jonathan:    { av:'JC', name:'Jonathan Cohen',  meta:'Father · Primary Payer · Cohen Family',   bal:'Balance: $9,134',  balClass:'b-y', bg:'background:var(--blue)' },
-  miriam_cohen:{ av:'MC', name:'Miriam Cohen',    meta:'Mother · Secondary Contact · Cohen Family', bal:'Secondary contact', balClass:'b-gr', bg:'background:#8e44ad' },
-  reuven:      { av:'RK', name:'Reuven Katz',     meta:'Father · Primary Payer · Katz Family',    bal:'Overdue: $20,300', balClass:'b-r', bg:'background:#c0622b' },
-  devorah:     { av:'DK', name:'Devorah Katz',    meta:'Mother · Secondary Contact · Katz Family', bal:'Secondary contact', balClass:'b-gr', bg:'background:#16a085' },
-  avraham:     { av:'AS', name:'Avraham Shapiro', meta:'Father · Primary Payer · Shapiro Family',  bal:'Balance: $10,150', balClass:'b-y', bg:'background:#7b52ab' },
-  miriam_levy: { av:'ML', name:'Miriam Levy',     meta:'Donor · No students enrolled',            bal:'Donor',            balClass:'b-b', bg:'background:var(--accent)' },
+<script type="module">
+import { initNav, loadSettings } from './nav.js';
+import {
+  getCurrentOrgId, getContacts, saveContact, deleteContact,
+  getInvoices, fmt
+} from './db.js';
+
+// ── INIT ──
+await initNav({ currentPage: 'parents' });
+
+// Global select by ID (used by static list items before Firestore loads)
+window._selectParentById = async function(id, el) {
+  document.querySelectorAll('.parent-item').forEach(i => i.classList.remove('active'));
+  el?.classList.add('active');
+  const parent = allParents.find(p => p.id === id);
+  if (parent) await selectParent(parent);
 };
 
-function select(id, el) {
-  const p = parents[id]; if (!p) return;
-  document.querySelectorAll('.parent-item').forEach(i => i.classList.remove('active'));
-  if (el) el.classList.add('active');
-  const av = document.getElementById('d-av');
-  av.textContent = p.av;
-  av.style.cssText = p.bg;
-  document.getElementById('d-name').textContent = p.name;
-  document.getElementById('d-meta').textContent = p.meta;
-  const bal = document.getElementById('d-bal');
-  bal.textContent = p.bal;
-  bal.className = 'badge ' + p.balClass;
+const orgId = getCurrentOrgId();
+const settings = loadSettings();
+const terms = settings.terms || {};
+
+// ── STATE ──
+let allParents = [];
+let allStudents_p = []; // students for billing lookup
+let currentParent = null;
+
+// ── LOAD ──
+async function loadParents() {
+  const wrap = document.getElementById('parent-list-items') || document.querySelector('.parent-list');
+  if (wrap) wrap.innerHTML = `<div style="padding:20px;text-align:center;color:var(--muted2);font-size:12.5px;">Loading…</div>`;
+  try {
+    const [parents, payers, students] = await Promise.all([
+      getContacts(orgId, { type: 'parent' }),
+      getContacts(orgId, { type: 'payer' }),
+      getContacts(orgId, { type: 'student' }),
+    ]);
+    allParents = [...parents, ...payers];
+    allStudents_p = students;
+    allParents.sort((a,b) => (a.lastName||'').localeCompare(b.lastName||''));
+    renderParentList(allParents);
+    if (allParents.length > 0) await selectParent(allParents[0]);
+  } catch (e) {
+    if (wrap) wrap.innerHTML = `<div style="padding:20px;text-align:center;color:var(--red);font-size:12.5px;">Error: ${e.message}</div>`;
+  }
 }
 
-function showTab(tab, el) {
+function renderParentList(parents) {
+  const wrap = document.getElementById('parent-list-items') || document.querySelector('.parent-list');
+  if (!wrap) return;
+  if (!parents.length) {
+    wrap.innerHTML = `<div style="padding:24px 16px;text-align:center;color:var(--muted2);font-size:13px;">
+      No ${(terms.parents||'parents').toLowerCase()} yet.<br><span style="font-size:12px;">Click "+ Add" to create one.</span>
+    </div>`;
+    return;
+  }
+  wrap.innerHTML = parents.map(p => {
+    const initials = ((p.firstName||'')[0]||'') + ((p.lastName||'')[0]||'');
+    const name = `${p.firstName||''} ${p.lastName||''}`.trim() || 'Unnamed';
+    const meta = [p.familyName, p.role || (p.type==='payer'?terms.parent||'Payer':'Parent')].filter(Boolean).join(' · ');
+    const isActive = currentParent?.id === p.id;
+    const balText = p.balance > 0 ? `$${fmt(p.balance)} balance` : 'No balance';
+    const balClass = p.balance > 0 ? (p.overdue ? 'b-r' : 'b-y') : 'b-gr';
+    return `<div class="parent-item${isActive?' active':''}" onclick="window._selectParentById('${p.id}',this)">
+      <div class="parent-av" style="${p.avatarColor?'background:'+p.avatarColor:''}">${initials.toUpperCase()||'?'}</div>
+      <div class="parent-info">
+        <div class="parent-name">${name}</div>
+        <div class="parent-meta">${meta||'—'}</div>
+      </div>
+      <span class="badge ${balClass}" style="font-size:10px;">${balText}</span>
+    </div>`;
+  }).join('');
+}
+
+window._selectParentById = async function(id, el) {
+  document.querySelectorAll('.parent-item').forEach(i => i.classList.remove('active'));
+  el?.classList.add('active');
+  const parent = allParents.find(p => p.id === id);
+  if (parent) await selectParent(parent);
+};
+
+async function selectParent(p) {
+  currentParent = p;
+  const name = `${p.firstName||''} ${p.lastName||''}`.trim() || 'Unnamed';
+  const initials = ((p.firstName||'')[0]||'') + ((p.lastName||'')[0]||'');
+
+  const av = document.getElementById('d-av');
+  if (av) { av.textContent = initials.toUpperCase()||'?'; if(p.avatarColor) av.style.background=p.avatarColor; }
+  setEl('d-name', name);
+  setEl('d-meta', [p.familyName, p.role||'Parent'].filter(Boolean).join(' · ') || '—');
+
+  const bal = document.getElementById('d-bal');
+  if (bal) {
+    if (!p.balance || p.balance===0) { bal.textContent='No balance'; bal.className='badge b-gr'; }
+    else if (p.overdue) { bal.textContent=`Overdue: $${fmt(p.balance)}`; bal.className='badge b-r'; }
+    else { bal.textContent=`Balance: $${fmt(p.balance)}`; bal.className='badge b-y'; }
+  }
+
+  setEl('pf-name', name);
+  setEl('pf-email', p.email||'—');
+  setEl('pf-phone', p.phone||'—');
+  setEl('pf-family', p.familyName||'—');
+  setEl('pf-role', p.role||(p.type==='payer'?terms.parent||'Payer':'Parent'));
+  setEl('pf-address', p.address||'—');
+  setEl('pf-notes', p.notes||'—');
+  setEl('pf-ext-id', p.externalId||'—');
+
+  await Promise.all([renderLinkedStudents(p), renderParentBilling(p)]);
+}
+
+async function renderParentBilling(p) {
+  const wrap = document.getElementById('parent-billing-invoices');
+  if (!wrap) return;
+  try {
+    // Find all students linked to this parent
+    const linkedStudents = allStudents_p.filter(s =>
+      (p.familyName && s.familyName === p.familyName) ||
+      (p.linkedStudentIds||[]).includes(s.id)
+    );
+
+    if (!linkedStudents.length) {
+      wrap.innerHTML = `<div style="padding:16px;text-align:center;color:var(--muted2);font-size:12.5px;">No linked students — no invoices to show.</div>`;
+      setEl('p-bal-total', '$0'); setEl('p-bal-paid', '$0'); setEl('p-bal-remaining', '$0');
+      return;
+    }
+
+    // Load all invoices for all linked students
+    const allInvoices = (await Promise.all(
+      linkedStudents.map(s => getInvoices(orgId, { contactId: s.id }))
+    )).flat();
+
+    let totalInv = 0, totalPaid = 0;
+    const now = new Date();
+    allInvoices.forEach(inv => { totalInv += inv.totalAmount||0; totalPaid += inv.totalPaid||0; });
+    setEl('p-bal-total', '$' + fmt(totalInv));
+    setEl('p-bal-paid', '$' + fmt(totalPaid));
+    setEl('p-bal-remaining', '$' + fmt(Math.max(totalInv - totalPaid, 0)));
+
+    if (!allInvoices.length) {
+      wrap.innerHTML = `<div style="padding:16px;text-align:center;color:var(--muted2);font-size:12.5px;">No invoices yet.</div>`;
+      return;
+    }
+
+    wrap.innerHTML = `<table style="width:100%;border-collapse:collapse;font-size:12.5px;">
+      <thead><tr>
+        <th style="text-align:left;padding:7px 10px;font-size:10.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--border);">Contact</th>
+        <th style="text-align:left;padding:7px 10px;font-size:10.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--border);">Invoice</th>
+        <th style="text-align:left;padding:7px 10px;font-size:10.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--border);">Total</th>
+        <th style="text-align:left;padding:7px 10px;font-size:10.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--border);">Balance</th>
+        <th style="text-align:left;padding:7px 10px;font-size:10.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--border);">Status</th>
+      </tr></thead>
+      <tbody>${allInvoices.map(inv => {
+        const bal = (inv.totalAmount||0) - (inv.totalPaid||0);
+        const pct = inv.totalAmount > 0 ? (inv.totalPaid||0)/inv.totalAmount*100 : 0;
+        const isOverdue = bal > 0 && inv.dueDate && new Date(inv.dueDate) < now;
+        const statusBadge = pct>=100 ? '<span class="badge b-g">Paid</span>'
+          : isOverdue ? '<span class="badge b-r">Overdue</span>'
+          : pct > 0 ? '<span class="badge b-y">Partial</span>'
+          : '<span class="badge b-gr">Unpaid</span>';
+        const student = linkedStudents.find(s => s.id === inv.contactId);
+        const sName = student ? `${student.firstName||''} ${student.lastName||''}`.trim() : '—';
+        return `<tr style="cursor:pointer;" onclick="location='invoice.html?id=${inv.id}&edit=1'">
+          <td style="padding:9px 10px;border-bottom:1px solid var(--border);font-weight:600;">${sName}</td>
+          <td style="padding:9px 10px;border-bottom:1px solid var(--border);font-family:var(--mono);">${inv.invoiceNumber||inv.id.slice(0,8)}</td>
+          <td style="padding:9px 10px;border-bottom:1px solid var(--border);font-family:var(--mono);">$${fmt(inv.totalAmount||0)}</td>
+          <td style="padding:9px 10px;border-bottom:1px solid var(--border);font-family:var(--mono);color:${bal>0?'var(--yellow)':'var(--muted2)'};">${bal>0?'$'+fmt(bal):'—'}</td>
+          <td style="padding:9px 10px;border-bottom:1px solid var(--border);">${statusBadge}</td>
+        </tr>`;
+      }).join('')}</tbody>
+    </table>`;
+  } catch (e) {
+    if (wrap) wrap.innerHTML = `<div style="padding:16px;color:var(--red);font-size:12.5px;">Could not load invoices: ${e.message}</div>`;
+  }
+}
+
+async function renderLinkedStudents(p) {
+  const wrap = document.getElementById('linked-students-list');
+  if (!wrap) return;
+  try {
+    // Find students in same family
+    const students = p.familyName
+      ? await getContacts(orgId, { type: 'student' })
+      : [];
+    const linked = students.filter(s =>
+      s.familyName === p.familyName || (p.linkedStudentIds||[]).includes(s.id)
+    );
+    if (!linked.length) {
+      wrap.innerHTML = `<div style="padding:10px 0;font-size:12.5px;color:var(--muted2);">No linked students.</div>`;
+      return;
+    }
+    wrap.innerHTML = linked.map(s => {
+      const sName = `${s.firstName||''} ${s.lastName||''}`.trim();
+      const sInitials = ((s.firstName||'')[0]||'') + ((s.lastName||'')[0]||'');
+      return `<div class="related-card" onclick="location='students.html?id=${s.id}'">
+        <div class="related-av">${sInitials.toUpperCase()}</div>
+        <div><div class="related-name">${sName}</div><div class="related-role">${s.grade||''}</div></div>
+        <div class="related-right"><span class="badge b-g" style="font-size:10px;">Student</span><span style="color:var(--muted2);font-size:14px;">›</span></div>
+      </div>`;
+    }).join('');
+  } catch (e) {
+    wrap.innerHTML = `<div style="font-size:12px;color:var(--muted2);">Could not load linked contacts.</div>`;
+  }
+}
+
+// ── SEARCH ──
+const searchInp = document.getElementById('parent-search') || document.querySelector('.search-input');
+if (searchInp) {
+  searchInp.addEventListener('input', () => {
+    const q = searchInp.value.toLowerCase();
+    const filtered = allParents.filter(p =>
+      (`${p.firstName} ${p.lastName}`).toLowerCase().includes(q) ||
+      (p.email||'').toLowerCase().includes(q) ||
+      (p.familyName||'').toLowerCase().includes(q)
+    );
+    renderParentList(filtered);
+  });
+}
+
+// ── TABS ──
+window.showTab = function(tab, el) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
   el.classList.add('active');
   document.getElementById('tab-' + tab).classList.add('active');
-}
+};
 
-function openAddModal()       { document.getElementById('add-modal').classList.add('open'); }
-function openSpouseModal()    { document.getElementById('spouse-modal').classList.add('open'); }
-function openLinkStudentModal(){ document.getElementById('link-modal').classList.add('open'); }
-function openRelatedModal()   { document.getElementById('related-modal').classList.add('open'); }
-function closeModal(id)       { document.getElementById(id).classList.remove('open'); }
+// ── ADD PARENT ──
+window.openAddModal = function() {
+  ['add-p-firstname','add-p-lastname','add-p-email','add-p-phone','add-p-family','add-p-role','add-p-notes'].forEach(id => {
+    const el = document.getElementById(id); if(el) el.value = '';
+  });
+  const title = document.getElementById('add-parent-title');
+  if (title) title.textContent = `Add ${terms.parent||'Parent'}`;
+  document.getElementById('add-modal').classList.add('open');
+};
+window.closeAddModal = function() { document.getElementById('add-modal').classList.remove('open'); };
+window.openSpouseModal = function() { document.getElementById('spouse-modal')?.classList.add('open'); };
+window.openLinkStudentModal = function() { document.getElementById('link-modal')?.classList.add('open'); };
+window.openRelatedModal = function() { document.getElementById('related-modal')?.classList.add('open'); };
+window.closeModal = function(id) { document.getElementById(id)?.classList.remove('open'); };
 
-function addNote() { document.getElementById('new-note').focus(); }
-function saveNote() {
-  const txt = document.getElementById('new-note').value.trim();
+window.saveNewParent = async function() {
+  const firstName = document.getElementById('add-p-firstname')?.value?.trim();
+  const lastName = document.getElementById('add-p-lastname')?.value?.trim();
+  if (!firstName && !lastName) { alert('Please enter a name.'); return; }
+  const btn = document.getElementById('save-parent-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
+  try {
+    await saveContact(orgId, null, {
+      type: 'parent',
+      firstName: firstName||'',
+      lastName: lastName||'',
+      email: document.getElementById('add-p-email')?.value?.trim()||'',
+      phone: document.getElementById('add-p-phone')?.value?.trim()||'',
+      familyName: document.getElementById('add-p-family')?.value?.trim()||'',
+      role: document.getElementById('add-p-role')?.value||'Parent',
+      notes: document.getElementById('add-p-notes')?.value?.trim()||'',
+      balance: 0,
+    });
+    closeAddModal();
+    await loadParents();
+  } catch (e) {
+    alert('Failed: ' + e.message);
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = `Add ${terms.parent||'Parent'}`; }
+  }
+};
+
+window.deleteCurrentParent = async function() {
+  if (!currentParent) return;
+  const name = `${currentParent.firstName||''} ${currentParent.lastName||''}`.trim();
+  if (!confirm(`Delete ${name}?`)) return;
+  await deleteContact(orgId, currentParent.id);
+  currentParent = null;
+  await loadParents();
+};
+
+// Notes
+window.addNote = function() { document.getElementById('new-note')?.focus(); };
+window.saveNote = function() {
+  const txt = document.getElementById('new-note')?.value?.trim();
   if (!txt) return;
   const list = document.getElementById('notes-list');
+  if (!list) return;
   const d = document.createElement('div');
   d.style.cssText = 'padding:12px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;margin-bottom:10px;';
   d.innerHTML = `<div style="font-size:11px;font-weight:600;color:var(--muted);margin-bottom:5px;">Now — Admin</div><div style="font-size:13px;line-height:1.6;">${txt}</div>`;
   list.prepend(d);
   document.getElementById('new-note').value = '';
+};
+
+// ── EDIT PARENT ──
+window.openEditParentModal = function() {
+  if (!currentParent) return;
+  const p = currentParent;
+  setValue('add-p-firstname', p.firstName||'');
+  setValue('add-p-lastname', p.lastName||'');
+  setValue('add-p-email', p.email||'');
+  setValue('add-p-phone', p.phone||'');
+  setValue('add-p-family', p.familyName||'');
+  setValue('add-p-role', p.role||'Parent');
+  setValue('add-p-notes', p.notes||'');
+  const title = document.getElementById('add-parent-title');
+  if (title) title.textContent = `Edit ${terms.parent||'Parent'}`;
+  const btn = document.getElementById('save-parent-btn');
+  if (btn) { btn.textContent = 'Save Changes'; btn.onclick = saveEditParent; }
+  document.getElementById('add-modal').classList.add('open');
+};
+
+async function saveEditParent() {
+  if (!currentParent) return;
+  const btn = document.getElementById('save-parent-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
+  try {
+    const firstName = document.getElementById('add-p-firstname')?.value?.trim()||'';
+    const lastName = document.getElementById('add-p-lastname')?.value?.trim()||'';
+    await saveContact(orgId, currentParent.id, {
+      firstName, lastName,
+      email: document.getElementById('add-p-email')?.value?.trim()||'',
+      phone: document.getElementById('add-p-phone')?.value?.trim()||'',
+      familyName: document.getElementById('add-p-family')?.value?.trim()||'',
+      role: document.getElementById('add-p-role')?.value||'Parent',
+      notes: document.getElementById('add-p-notes')?.value?.trim()||'',
+      avatarColor: avatarColor(`${firstName} ${lastName}`),
+    });
+    closeAddModal();
+    await loadParents();
+  } catch (e) {
+    alert('Failed: ' + e.message);
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = 'Save Changes'; }
+    const btn2 = document.getElementById('save-parent-btn');
+    if (btn2) btn2.onclick = saveNewParent;
+  }
 }
+
+function avatarColor(name) {
+  const colors = ['#1a4a8a','#5b2d8e','#b05000','#b83232','#1a6b4a','#a07000','#2d4a8a'];
+  let h = 0; for (const c of name) h = ((h<<5)-h)+c.charCodeAt(0);
+  return colors[Math.abs(h) % colors.length];
+}
+
+function setValue(id, val) { const e = document.getElementById(id); if (e) e.value = val; }
+
+function setEl(id, val) { const e = document.getElementById(id); if (e) e.textContent = val; }
+
+await loadParents();
 </script>
 </body>
 </html>

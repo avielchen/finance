@@ -199,6 +199,56 @@ input[type=date].input{min-width:128px;padding-right:4px;font-size:12.5px;}
 
 @keyframes fadeUp{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
 .fi{animation:fadeUp .2s ease both;}
+/* ── PRINT / PDF STYLES ── */
+@media print {
+  /* Hide everything except the invoice content */
+  .sidebar, .topbar, .action-bar, .add-btn-row, .sec-hd .btn,
+  .del-btn, .dh, .undo-toast, #options-menu,
+  button:not(.print-keep), .hbg, #topbar-user-chip { display: none !important; }
+
+  body { background: #fff !important; font-size: 12pt; }
+  .main { margin-left: 0 !important; }
+  .content { padding: 0 !important; max-width: 100% !important; }
+
+  /* Invoice letterhead at top */
+  .print-letterhead { display: block !important; }
+
+  /* Make fee rows readable on paper */
+  .fee-outer { break-inside: avoid; }
+  .fee-inner { grid-template-columns: 140px 1fr 44px 92px 110px 70px 76px !important; }
+  /* Hide the drag handle column and status bar on print */
+  .fee-inner > .dh,
+  .fee-inner > .sb { display: none !important; }
+
+  /* Remove colored backgrounds */
+  .fee-outer.type-fee .fee-inner { background: #f8f9ff !important; }
+  .fee-outer.type-credit .fee-inner { background: #fff5f8 !important; }
+
+  /* Remove border-radius for cleaner print */
+  .section { border-radius: 0 !important; border: 1px solid #ddd !important; }
+
+  /* Inputs look like plain text on print */
+  input, select { border: none !important; background: transparent !important;
+    padding: 0 !important; font-family: inherit !important; }
+
+  /* Summary tiles look clean */
+  [style*="grid-template-columns:220px"] { grid-template-columns: 180px 1fr !important; }
+
+  @page { margin: 18mm 18mm 20mm 18mm; size: A4; }
+}
+
+/* Letterhead (hidden on screen, shown on print) */
+.print-letterhead {
+  display: none;
+  padding-bottom: 18px;
+  margin-bottom: 18px;
+  border-bottom: 2px solid #1a6b4a;
+}
+.print-lh-org { font-size: 20pt; font-weight: 700; color: #1a6b4a; }
+.print-lh-meta { font-size: 10pt; color: #686860; margin-top: 4px; }
+.print-lh-row { display: flex; justify-content: space-between; align-items: flex-start; }
+.print-lh-to { font-size: 10pt; }
+.print-lh-to strong { font-size: 12pt; display: block; margin-bottom: 3px; }
 </style>
 </head>
 <body data-page="tuition">
@@ -244,13 +294,33 @@ input[type=date].input{min-width:128px;padding-right:4px;font-size:12.5px;}
         <div class="am-item"><input type="checkbox" checked style="accent-color:var(--accent);"><label style="cursor:pointer;">Auto-increment invoice #</label></div>
       </div>
     </div>
-    <button class="btn btn-g btn-sm">👁 Preview</button>
-    <button class="btn btn-g btn-sm">💾 Draft</button>
-    <button class="btn btn-p btn-sm" id="save-btn">✉ Send →</button>
+    <button class="btn btn-g btn-sm" onclick="previewPDF()">👁 Preview PDF</button>
+    <button class="btn btn-g btn-sm" onclick="window._saveInvoice(false)">💾 Draft</button>
+    <button class="btn btn-p btn-sm" id="save-btn" onclick="window._saveInvoice(false)">✉ Send →</button>
   </div>
 </div>
 
 <div class="content">
+
+  <!-- PRINT LETTERHEAD (hidden on screen, shown on print/PDF) -->
+  <div class="print-letterhead" id="print-letterhead">
+    <div class="print-lh-row">
+      <div style="display:flex;align-items:center;gap:14px;">
+        <img id="print-logo" style="display:none;height:52px;width:auto;object-fit:contain;" alt="Logo">
+        <div>
+          <div class="print-lh-org" id="print-org-name">Organization Name</div>
+          <div class="print-lh-meta" id="print-org-meta"></div>
+        </div>
+      </div>
+      <div style="text-align:right;">
+        <div class="print-lh-to">
+          <strong id="print-contact-name">—</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- PRINT FOOTER (shown at bottom of last page) -->
+  <div id="print-footer" style="display:none;font-size:9pt;color:#888;text-align:center;margin-top:30pt;padding-top:8pt;border-top:1px solid #ddd;"></div>
 
   <!-- COMBINED META + SUMMARY — 2 tiles side by side -->
   <div class="fi" style="display:grid;grid-template-columns:220px 1fr;gap:14px;margin-bottom:14px;">
@@ -1293,6 +1363,43 @@ window._addFeeRowWithTypes = function() {
       sel.innerHTML = types.map(t => `<option value="${t.name}" data-amount="${t.amount||0}">${t.name}</option>`).join('');
     }
   }
+};
+
+// ── PDF PREVIEW / PRINT ──
+window.previewPDF = function() {
+  const s = loadSettings();
+  const orgNameEl = document.getElementById('print-org-name');
+  const orgMetaEl = document.getElementById('print-org-meta');
+  const contactNameEl = document.getElementById('print-contact-name');
+  const orgLogoEl = document.getElementById('print-logo');
+
+  // Org name and logo
+  if (orgNameEl) orgNameEl.textContent = s.orgName || 'Organization';
+  if (orgLogoEl && s.orgLogo) {
+    orgLogoEl.src = s.orgLogo;
+    orgLogoEl.style.display = 'block';
+  }
+
+  // Invoice meta line
+  if (orgMetaEl) {
+    const invNum = document.getElementById('inv-number')?.value || '';
+    const invDate = document.getElementById('inv-date')?.value || '';
+    const yr = document.getElementById('inv-year')?.value || '';
+    const taxId = s.orgTaxId ? `Tax ID: ${s.orgTaxId}` : '';
+    orgMetaEl.textContent = [invNum, yr, invDate ? new Date(invDate+'T12:00').toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}) : '', taxId].filter(Boolean).join(' · ');
+  }
+
+  // Contact name
+  if (contactNameEl) contactNameEl.textContent = window._contactName || '—';
+
+  // Invoice footer from settings
+  const footer = document.getElementById('print-footer');
+  if (footer) {
+    footer.textContent = s.invoiceFooter || '';
+    footer.style.display = s.invoiceFooter ? 'block' : 'none';
+  }
+
+  window.print();
 };
 
 // ── RUN ──

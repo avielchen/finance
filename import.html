@@ -370,19 +370,26 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
 </div>
 
 <script type="module">
-import { requireAuth } from './auth.js';
-import { getFirebaseDB } from './auth.js';
-import { collection, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { initNav, loadSettings } from './nav.js';
+import { getCurrentOrgId, getDB, getFirebaseAuth } from './db.js';
+import { collection, doc, setDoc, getDoc, serverTimestamp }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-// Require login
-const currentUser = await requireAuth();
-const db = getFirebaseDB();
+// ── AUTH + ORG ──
+const user = await initNav({ currentPage: 'settings', requireLogin: true });
+const db = getDB();
+const orgId = getCurrentOrgId();
+
+if (!orgId) {
+  alert('No organization found. Please complete onboarding first.');
+  window.location.href = 'onboarding.html';
+}
 
 // ── STATE ──
-let rawData = [];        // array of row objects from file
-let columns = [];        // column names from file
-let mappings = {};       // { colName: targetField }
-let parsedRows = [];     // final mapped rows ready for import
+let rawData = [];
+let columns = [];
+let mappings = {};
+let parsedRows = [];
 
 // ── FIELD DEFINITIONS ──
 const FIELDS = [
@@ -400,6 +407,7 @@ const FIELDS = [
   { value:'notes',      label:'Notes' },
   { value:'familyName', label:'Family / Group Name' },
   { value:'studentId',  label:'Student ID' },
+  { value:'externalId', label:'External ID (SchoolEdTech or other system)' },
   { value:'dob',        label:'Date of Birth' },
   { value:'enrollYear', label:'Enrollment Year' },
 ];
@@ -420,6 +428,7 @@ const AUTO_MAP = {
   studentId:  ['id','studentid','student_id','enrollment'],
   dob:        ['dob','birthdate','birthday','birth'],
   enrollYear: ['year','enrollyear','enroll'],
+  externalId: ['externalid','external_id','extid','ext_id','schooledtech','sis_id','sisid','lms_id'],
 };
 
 function autoDetect(col) {
@@ -624,6 +633,14 @@ function buildPreview() {
   });
 }
 
+// ── AVATAR COLOR (deterministic from name) ──
+function avatarColor(name) {
+  const colors = ['#1a6b4a','#1a4a8a','#5b2d8e','#b05000','#b83232','#a07000','#2d7a6a'];
+  let h = 0;
+  for (const c of (name||'?')) h = ((h<<5)-h) + c.charCodeAt(0);
+  return colors[Math.abs(h) % colors.length];
+}
+
 // ── IMPORT ──
 window.runImport = async function() {
   goToStep(4);
@@ -641,12 +658,12 @@ window.runImport = async function() {
     document.getElementById('ip-status').textContent = `Importing row ${i+1} of ${total}…`;
 
     try {
-      const id = row.email
-        ? row.email.toLowerCase().replace(/[^a-z0-9]/g,'_')
+      // All contacts go to /orgs/{orgId}/contacts/ — type field distinguishes them
+      const contactId = row.email
+        ? row.email.toLowerCase().replace(/[^a-z0-9]/g, '_')
         : `contact_${Date.now()}_${i}`;
 
-      const colName = (['student','parent'].includes(row.type)?row.type+'s':'contacts');
-      const docRef = doc(db, colName, id);
+      const docRef = doc(db, 'orgs', orgId, 'contacts', contactId);
 
       if (dupMode === 'skip') {
         const existing = await getDoc(docRef);
@@ -655,10 +672,9 @@ window.runImport = async function() {
 
       const data = {
         ...row,
-        _issues: undefined,
-        _rowNum: undefined,
-        importedAt: new Date().toISOString(),
-        importedBy: currentUser.uid,
+        importedAt: serverTimestamp(),
+        importedBy: user?.uid || '',
+        avatarColor: avatarColor(`${row.firstName||''} ${row.lastName||''}`),
       };
       delete data._issues;
       delete data._rowNum;

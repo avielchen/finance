@@ -70,12 +70,12 @@ import {
 import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyCrCg11nB8I2f-3rQwN8NkwzSQrnQ9c8Rs",
-  authDomain: "kidtracker-3e5d9.firebaseapp.com",
-  projectId: "kidtracker-3e5d9",
-  storageBucket: "kidtracker-3e5d9.firebasestorage.app",
-  messagingSenderId: "206740291278",
-  appId: "1:206740291278:web:47f9a7f81aa47fb74b1a9f"
+  apiKey: "AIzaSyBEcPce9nVsnleQ2A76dJUiLm-vyD2jGaU",
+  authDomain: "financially-49172.firebaseapp.com",
+  projectId: "financially-49172",
+  storageBucket: "financially-49172.firebasestorage.app",
+  messagingSenderId: "673197823318",
+  appId: "1:673197823318:web:d03c5cc42e39d2fad332f7"
 };
 
 let _app, _db;

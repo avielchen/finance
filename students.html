@@ -184,7 +184,7 @@ body { background:var(--bg); color:var(--text); font-family:var(--sans); min-hei
 .fade-in { animation:fadeIn 0.2s ease both; }
 </style>
 </head>
-<body>
+<body data-page="students">
 <div class="shell">
 
 <!-- SIDEBAR -->
@@ -196,7 +196,7 @@ body { background:var(--bg); color:var(--text); font-family:var(--sans); min-hei
     <div class="sidebar-logo">FinTrack</div>
   </div>
   <div class="nav-section">
-    <a class="nav-item" href="dashboard.html"><span class="nav-icon">⊞</span><span class="nav-label">Dashboard</span></a>
+    <a class="nav-item" href="index.html"><span class="nav-icon">⊞</span><span class="nav-label">Dashboard</span></a>
   </div>
   <div class="nav-section">
     <a class="nav-item" href="invoice.html"><span class="nav-icon">📄</span><span class="nav-label">Tuition</span></a>
@@ -245,7 +245,7 @@ body { background:var(--bg); color:var(--text); font-family:var(--sans); min-hei
           <input type="text" placeholder="Search students...">
         </div>
         <div id="student-list-items">
-          <div class="student-item active" onclick="selectStudent('david', this)">
+          <div class="student-item active" onclick="window._selectStudentById('david', this)">
             <div class="avatar av-green">DC</div>
             <div>
               <div class="student-item-name">David Cohen</div>
@@ -256,7 +256,7 @@ body { background:var(--bg); color:var(--text); font-family:var(--sans); min-hei
               <div style="font-size:10.5px;color:var(--muted2);margin-top:1px;">balance</div>
             </div>
           </div>
-          <div class="student-item" onclick="selectStudent('sara', this)">
+          <div class="student-item" onclick="window._selectStudentById('sara', this)">
             <div class="avatar av-blue">SG</div>
             <div>
               <div class="student-item-name">Sara Goldstein</div>
@@ -266,7 +266,7 @@ body { background:var(--bg); color:var(--text); font-family:var(--sans); min-hei
               <div class="student-bal bal-ok">Paid</div>
             </div>
           </div>
-          <div class="student-item" onclick="selectStudent('yossi', this)">
+          <div class="student-item" onclick="window._selectStudentById('yossi', this)">
             <div class="avatar av-orange">YK</div>
             <div>
               <div class="student-item-name">Yossi Katz</div>
@@ -277,7 +277,7 @@ body { background:var(--bg); color:var(--text); font-family:var(--sans); min-hei
               <div style="font-size:10.5px;color:var(--red);margin-top:1px;">overdue</div>
             </div>
           </div>
-          <div class="student-item" onclick="selectStudent('rivka', this)">
+          <div class="student-item" onclick="window._selectStudentById('rivka', this)">
             <div class="avatar" style="background:#7b52ab;">RS</div>
             <div>
               <div class="student-item-name">Rivka Shapiro</div>
@@ -288,7 +288,7 @@ body { background:var(--bg); color:var(--text); font-family:var(--sans); min-hei
               <div style="font-size:10.5px;color:var(--muted2);margin-top:1px;">balance</div>
             </div>
           </div>
-          <div class="student-item" onclick="selectStudent('moshe', this)">
+          <div class="student-item" onclick="window._selectStudentById('moshe', this)">
             <div class="avatar" style="background:#2980b9;">MF</div>
             <div>
               <div class="student-item-name">Moshe Friedman</div>
@@ -298,7 +298,7 @@ body { background:var(--bg); color:var(--text); font-family:var(--sans); min-hei
               <div class="student-bal bal-ok">Paid</div>
             </div>
           </div>
-          <div class="student-item" onclick="selectStudent('chana', this)">
+          <div class="student-item" onclick="window._selectStudentById('chana', this)">
             <div class="avatar" style="background:#16a085;">CW</div>
             <div>
               <div class="student-item-name">Chana Weiss</div>
@@ -326,7 +326,7 @@ body { background:var(--bg); color:var(--text); font-family:var(--sans); min-hei
             </div>
           </div>
           <div class="profile-actions">
-            <button class="btn btn-ghost btn-sm" onclick="window.location='invoice.html'">+ Invoice</button>
+            <a class="btn btn-ghost btn-sm" id="det-invoice-btn" href="invoice.html">+ Invoice</a>
             <button class="btn btn-ghost btn-sm">⋯</button>
           </div>
         </div>
@@ -342,76 +342,51 @@ body { background:var(--bg); color:var(--text); font-family:var(--sans); min-hei
         <!-- TAB: PROFILE -->
         <div class="tab-body">
           <div class="tab-pane active" id="tab-profile">
+            <div style="display:flex;justify-content:flex-end;gap:8px;margin-bottom:12px;">
+              <button class="btn btn-ghost btn-sm" onclick="openEditModal()">✏ Edit</button>
+              <button class="btn btn-ghost btn-sm" style="color:var(--red);" onclick="deleteCurrentStudent()">🗑 Delete</button>
+            </div>
             <div class="info-grid">
               <div class="info-field">
                 <div class="info-label">Full Name</div>
-                <div class="info-value" id="pf-name">David Cohen</div>
+                <div class="info-value" id="pf-name">—</div>
               </div>
               <div class="info-field">
-                <div class="info-label">Student ID</div>
-                <div class="info-value mono">#1042</div>
+                <div class="info-label">Family / Group</div>
+                <div class="info-value" id="pf-family">—</div>
               </div>
               <div class="info-field">
                 <div class="info-label">Grade</div>
-                <div class="info-value" id="pf-grade">Grade 8</div>
+                <div class="info-value" id="pf-grade">—</div>
               </div>
               <div class="info-field">
                 <div class="info-label">Enrollment Year</div>
-                <div class="info-value">2022</div>
+                <div class="info-value" id="pf-enroll">—</div>
               </div>
               <div class="info-field">
                 <div class="info-label">Date of Birth</div>
-                <div class="info-value mono">Mar 14, 2012</div>
+                <div class="info-value mono" id="pf-dob">—</div>
               </div>
               <div class="info-field">
-                <div class="info-label">Gender</div>
-                <div class="info-value">Male</div>
-              </div>
-              <div class="info-field">
-                <div class="info-label">Email</div>
-                <div class="info-value">david.cohen@email.com</div>
-              </div>
-              <div class="info-field">
-                <div class="info-label">Phone</div>
-                <div class="info-value mono">+1 (646) 555-0142</div>
+                <div class="info-label">External ID</div>
+                <div class="info-value mono" id="pf-ext-id" title="ID from external system (e.g. SchoolEdTech)">—</div>
               </div>
             </div>
             <div class="divider"></div>
-            <div class="section-label">Financial Notes</div>
-            <div style="font-size:13px;color:var(--muted);line-height:1.6;">Merit scholarship applied. Credit card payment authorized. Previous year balance cleared Aug 2025.</div>
+            <div class="section-label">Notes</div>
+            <div style="font-size:13px;color:var(--muted);line-height:1.6;" id="pf-notes">—</div>
           </div>
 
           <!-- TAB: RELATED CONTACTS -->
           <div class="tab-pane" id="tab-related">
             <div class="section-label">
               Parents / Guardians
-              <button class="btn btn-ghost btn-sm" onclick="openRelatedModal('parent')">+ Add</button>
+              <button class="btn btn-ghost btn-sm" onclick="openLinkParentModal()">+ Link</button>
             </div>
             <div id="related-parents">
-              <div class="related-card" onclick="window.location='parents.html'">
-                <div class="related-av" style="background:var(--blue);">JC</div>
-                <div>
-                  <div class="related-name">Jonathan Cohen</div>
-                  <div class="related-role">Father · Primary payer</div>
-                </div>
-                <div class="related-right">
-                  <span class="badge b-blue">Parent</span>
-                  <span style="color:var(--muted2);font-size:14px;">›</span>
-                </div>
-              </div>
-              <div class="related-card" onclick="window.location='parents.html'">
-                <div class="related-av" style="background:#8e44ad;">MC</div>
-                <div>
-                  <div class="related-name">Miriam Cohen</div>
-                  <div class="related-role">Mother · Secondary contact</div>
-                </div>
-                <div class="related-right">
-                  <span class="badge b-blue">Parent</span>
-                  <span style="color:var(--muted2);font-size:14px;">›</span>
-                </div>
-              </div>
+              <div style="padding:10px 0;font-size:12.5px;color:var(--muted2);">Loading…</div>
             </div>
-            <button class="add-related-btn" onclick="openRelatedModal('parent')" style="margin-bottom:20px;">
+            <button class="add-related-btn" onclick="openLinkParentModal()" style="margin-bottom:20px;">
               + Link a parent or guardian
             </button>
 
@@ -419,40 +394,13 @@ body { background:var(--bg); color:var(--text); font-family:var(--sans); min-hei
 
             <div class="section-label">
               Siblings
-              <button class="btn btn-ghost btn-sm" onclick="openRelatedModal('sibling')">+ Add</button>
+              <button class="btn btn-ghost btn-sm" onclick="openLinkSiblingModal()">+ Link</button>
             </div>
             <div id="related-siblings">
-              <div class="related-card" onclick="selectStudent('rachel_placeholder', null)">
-                <div class="related-av" style="background:var(--accent);">RC</div>
-                <div>
-                  <div class="related-name">Rachel Cohen</div>
-                  <div class="related-role">Sister · Grade 5 · Same family account</div>
-                </div>
-                <div class="related-right">
-                  <span class="badge b-green">Sibling</span>
-                  <span style="color:var(--muted2);font-size:14px;">›</span>
-                </div>
-              </div>
+              <div style="padding:10px 0;font-size:12.5px;color:var(--muted2);">Loading…</div>
             </div>
-            <button class="add-related-btn" onclick="openRelatedModal('sibling')" style="margin-bottom:20px;">
+            <button class="add-related-btn" onclick="openLinkSiblingModal()" style="margin-bottom:20px;">
               + Link a sibling
-            </button>
-
-            <div class="divider"></div>
-
-            <div class="section-label">Emergency Contact</div>
-            <div class="related-card">
-              <div class="related-av" style="background:#7f8c8d;">GC</div>
-              <div>
-                <div class="related-name">Grandma Cohen</div>
-                <div class="related-role">Emergency contact only · +1 (646) 555-0199</div>
-              </div>
-              <div class="related-right">
-                <span class="badge b-gray">Emergency</span>
-              </div>
-            </div>
-            <button class="add-related-btn" onclick="openRelatedModal('emergency')">
-              + Add emergency contact
             </button>
           </div>
 
@@ -461,51 +409,20 @@ body { background:var(--bg); color:var(--text); font-family:var(--sans); min-hei
             <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:20px;">
               <div style="padding:12px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;">
                 <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px;">Total Invoiced</div>
-                <div style="font-family:var(--mono);font-size:18px;font-weight:700;">$18,948</div>
+                <div style="font-family:var(--mono);font-size:18px;font-weight:700;" id="bal-total">—</div>
               </div>
               <div style="padding:12px 14px;background:var(--accent-light);border:1px solid #b8dece;border-radius:8px;">
                 <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px;">Paid</div>
-                <div style="font-family:var(--mono);font-size:18px;font-weight:700;color:var(--accent);">$9,474</div>
+                <div style="font-family:var(--mono);font-size:18px;font-weight:700;color:var(--accent);" id="bal-paid">—</div>
               </div>
               <div style="padding:12px 14px;background:var(--yellow-light);border:1px solid #f0d88a;border-radius:8px;">
                 <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px;">Balance</div>
-                <div style="font-family:var(--mono);font-size:18px;font-weight:700;color:var(--yellow);">$9,474</div>
+                <div style="font-family:var(--mono);font-size:18px;font-weight:700;color:var(--yellow);" id="bal-remaining">—</div>
               </div>
             </div>
             <div class="section-label">Invoices</div>
-            <table class="bal-table">
-              <thead>
-                <tr>
-                  <th>Invoice</th><th>Year</th><th>Total</th><th>Paid</th><th>Balance</th><th>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td class="mono">#INV-1042</td>
-                  <td style="color:var(--muted);">2025–26</td>
-                  <td class="mono">$18,948</td>
-                  <td class="mono" style="color:var(--accent);">$9,474</td>
-                  <td class="mono" style="color:var(--yellow);">$9,474</td>
-                  <td><span class="badge b-yellow">◑ Partial</span></td>
-                </tr>
-                <tr>
-                  <td class="mono">#INV-0891</td>
-                  <td style="color:var(--muted);">2024–25</td>
-                  <td class="mono">$17,200</td>
-                  <td class="mono" style="color:var(--accent);">$17,200</td>
-                  <td class="mono" style="color:var(--muted2);">$0</td>
-                  <td><span class="badge b-green">● Paid</span></td>
-                </tr>
-              </tbody>
-            </table>
-
-            <div class="divider"></div>
-            <div class="section-label">
-              Account Credits
-              <span class="badge b-blue" style="font-size:11px;">$340 available</span>
-            </div>
-            <div style="padding:11px 14px;background:var(--blue-light);border:1px solid #c0d4f0;border-radius:8px;font-size:12.5px;color:var(--blue);">
-              $340 unallocated credit from Apr 12 overpayment. <a href="payments.html" style="color:var(--blue);font-weight:600;">Apply or convert to donation →</a>
+            <div id="tab-balance-invoices">
+              <div style="padding:16px;text-align:center;color:var(--muted2);font-size:12.5px;">Loading…</div>
             </div>
           </div>
 
@@ -598,16 +515,16 @@ body { background:var(--bg); color:var(--text); font-family:var(--sans); min-hei
 <div class="modal-overlay" id="add-modal" onclick="if(event.target===this)closeAddModal()">
   <div class="modal">
     <div class="modal-hd">
-      <div class="modal-title">Add New Student</div>
+      <div class="modal-title" id="add-modal-title">Add New Student</div>
       <button class="modal-close" onclick="closeAddModal()">✕</button>
     </div>
     <div class="form-row2">
-      <div class="field"><label>First Name</label><input class="input" placeholder="First name"></div>
-      <div class="field"><label>Last Name</label><input class="input" placeholder="Last name"></div>
+      <div class="field"><label>First Name</label><input class="input" id="add-firstname" placeholder="First name"></div>
+      <div class="field"><label>Last Name</label><input class="input" id="add-lastname" placeholder="Last name"></div>
     </div>
     <div class="form-row2" style="margin-top:12px;">
       <div class="field"><label>Grade</label>
-        <select class="input">
+        <select class="input" id="add-grade">
           <option>Grade 1</option><option>Grade 2</option><option>Grade 3</option>
           <option>Grade 4</option><option>Grade 5</option><option>Grade 6</option>
           <option>Grade 7</option><option>Grade 8</option><option>Grade 9</option>
@@ -615,65 +532,534 @@ body { background:var(--bg); color:var(--text); font-family:var(--sans); min-hei
         </select>
       </div>
       <div class="field"><label>Enrollment Year</label>
-        <select class="input"><option>2025–2026</option><option>2026–2027</option></select>
+        <select class="input" id="add-enroll-year"><option>2025–2026</option><option>2026–2027</option></select>
       </div>
     </div>
     <div class="form-row2" style="margin-top:12px;">
-      <div class="field"><label>Date of Birth</label><input type="date" class="input"></div>
-      <div class="field"><label>Student ID</label><input class="input" placeholder="Auto-generated" readonly style="color:var(--muted2);"></div>
+      <div class="field"><label>Date of Birth</label><input type="date" class="input" id="add-dob"></div>
+      <div class="field"><label>External ID</label><input class="input" id="add-ext-id" placeholder="e.g. SchoolEdTech ID"></div>
     </div>
     <div style="margin-top:12px;" class="field">
-      <label>Link to existing family</label>
-      <select class="input"><option>— New family —</option><option>Cohen Family</option><option>Katz Family</option><option>Goldstein Family</option></select>
+      <label>Family / Group Name</label>
+      <input class="input" id="add-family" placeholder="e.g. Cohen Family">
+    </div>
+    <div style="margin-top:12px;" class="field">
+      <label>Notes</label>
+      <input class="input" id="add-notes" placeholder="Optional notes">
     </div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeAddModal()">Cancel</button>
-      <button class="btn btn-primary" onclick="closeAddModal()">Add Student</button>
+      <button class="btn btn-primary" id="save-student-btn" onclick="saveNewStudent()">Add Student</button>
     </div>
   </div>
 </div>
 
-<script>
-const studentData = {
-  david: { av:'DC', name:'David Cohen', meta:'Grade 8 · Student ID #1042', grade:'Grade 8', bal:'$9,474', balBadge:'Balance: $9,474', balClass:'b-yellow', avBg:'' },
-  sara:  { av:'SG', name:'Sara Goldstein', meta:'Grade 5 · Student ID #1043', grade:'Grade 5', bal:'Paid', balBadge:'Paid in full', balClass:'b-green', avBg:'background:var(--blue)' },
-  yossi: { av:'YK', name:'Yossi Katz', meta:'Grade 11 · Student ID #1044', grade:'Grade 11', bal:'$20,300 overdue', balBadge:'Overdue: $20,300', balClass:'b-red', avBg:'background:#c0622b' },
-  rivka: { av:'RS', name:'Rivka Shapiro', meta:'Grade 3 · Student ID #1045', grade:'Grade 3', bal:'$10,150', balBadge:'Balance: $10,150', balClass:'b-yellow', avBg:'background:#7b52ab' },
-  moshe: { av:'MF', name:'Moshe Friedman', meta:'Grade 7 · Student ID #1046', grade:'Grade 7', bal:'Paid', balBadge:'Paid in full', balClass:'b-green', avBg:'background:#2980b9' },
-  chana: { av:'CW', name:'Chana Weiss', meta:'Grade 10 · Student ID #1047', grade:'Grade 10', bal:'$3,400', balBadge:'Balance: $3,400', balClass:'b-yellow', avBg:'background:#16a085' },
+<!-- LINK PARENT MODAL -->
+<div class="modal-overlay" id="link-parent-modal" onclick="if(event.target===this)closeLinkParentModal()" style="position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:300;display:none;align-items:center;justify-content:center;">
+  <div style="background:#fff;border:1px solid var(--border2);border-radius:12px;padding:22px;width:420px;max-width:95vw;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+      <span style="font-size:14px;font-weight:700;">Link a Parent / Guardian</span>
+      <button onclick="closeLinkParentModal()" style="width:26px;height:26px;border-radius:5px;background:var(--s2);border:none;cursor:pointer;font-size:14px;color:var(--muted);">✕</button>
+    </div>
+    <p style="font-size:12.5px;color:var(--muted);margin-bottom:14px;">Select an existing parent or payer to link to this student. They will appear in the Related Contacts tab.</p>
+    <select id="link-parent-sel" style="width:100%;height:36px;padding:0 10px;background:var(--bg);border:1.5px solid var(--border2);border-radius:7px;font-family:var(--sans);font-size:13px;color:var(--text);margin-bottom:16px;">
+      <option value="">Loading parents…</option>
+    </select>
+    <div style="display:flex;gap:8px;justify-content:flex-end;">
+      <button onclick="closeLinkParentModal()" style="padding:6px 14px;border-radius:6px;background:var(--surface);border:1px solid var(--border2);font-size:12.5px;cursor:pointer;color:var(--muted);">Cancel</button>
+      <button onclick="saveLinkParent()" style="padding:6px 14px;border-radius:6px;background:var(--accent);color:#fff;border:none;font-size:12.5px;cursor:pointer;font-weight:600;">Link →</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { initNav, loadSettings } from './nav.js';
+import {
+  getCurrentOrgId, getContacts, saveContact, deleteContact,
+  getInvoices, fmt
+} from './db.js';
+
+// ── INIT ──
+await initNav({ currentPage: 'students' });
+
+// ── LEGACY MODAL CLOSE (for any static modals in HTML) ──
+window.closeModal = function() {
+  document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('open'));
 };
 
-function selectStudent(id, el) {
-  if (!studentData[id]) return;
-  document.querySelectorAll('.student-item').forEach(i => i.classList.remove('active'));
-  if (el) el.classList.add('active');
-  const s = studentData[id];
-  document.getElementById('det-avatar').textContent = s.av;
-  if (s.avBg) document.getElementById('det-avatar').style.cssText = s.avBg;
-  document.getElementById('det-name').textContent = s.name;
-  document.getElementById('det-meta').textContent = s.meta;
-  const badge = document.getElementById('det-bal-badge');
-  badge.textContent = s.balBadge;
-  badge.className = 'badge ' + s.balClass;
-  document.getElementById('pf-name').textContent = s.name;
-  document.getElementById('pf-grade').textContent = s.grade;
+const orgId = getCurrentOrgId();
+const settings = loadSettings();
+const terms = settings.terms || {};
+document.querySelectorAll('[data-term]').forEach(el => {
+  const k = el.dataset.term; if (terms[k]) el.textContent = terms[k];
+});
+
+// ── STATE ──
+let allStudents = [];
+let allParents = [];
+let currentStudent = null;
+let currentFilter = 'all';
+
+// ── LOAD STUDENTS ──
+async function loadStudents() {
+  showListLoading(true);
+  try {
+    [allStudents, allParents] = await Promise.all([
+      getContacts(orgId, { type: 'student' }),
+      getContacts(orgId, { type: 'parent' }),
+    ]);
+    // Also fetch 'payer' type
+    const payers = await getContacts(orgId, { type: 'payer' });
+    allParents = [...allParents, ...payers];
+    renderList(allStudents);
+    if (allStudents.length > 0) await selectStudent(allStudents[0]);
+  } catch (e) {
+    showListError(e.message);
+  }
+  showListLoading(false);
 }
 
-function showTab(tab, el) {
+function showListLoading(on) {
+  const el = document.getElementById('student-list-items');
+  if (on) el.innerHTML = `<div style="padding:20px;text-align:center;color:var(--muted2);font-size:12.5px;">Loading…</div>`;
+}
+function showListError(msg) {
+  const el = document.getElementById('student-list-items');
+  el.innerHTML = `<div style="padding:20px;text-align:center;color:var(--red);font-size:12.5px;">Error: ${msg}</div>`;
+}
+
+// ── RENDER LIST ──
+function renderList(students) {
+  const wrap = document.getElementById('student-list-items');
+  if (!students.length) {
+    wrap.innerHTML = `<div style="padding:24px 16px;text-align:center;color:var(--muted2);font-size:13px;">
+      No ${(terms.students||'students').toLowerCase()} yet.<br>
+      <span style="font-size:12px;">Click "+ Add" to create one.</span>
+    </div>`;
+    return;
+  }
+  wrap.innerHTML = students.map(s => {
+    const initials = ((s.firstName||'')[0]||'') + ((s.lastName||'')[0]||'');
+    const name = `${s.firstName||''} ${s.lastName||''}`.trim() || 'Unnamed';
+    const meta = [s.grade, s.studentId ? `#${s.studentId}` : ''].filter(Boolean).join(' · ');
+    const balClass = !s.balance || s.balance===0 ? 'b-green'
+      : s.overdue ? 'b-red' : 'b-yellow';
+    const balText = !s.balance || s.balance===0 ? 'Paid'
+      : s.overdue ? `$${fmt(s.balance)} overdue` : `$${fmt(s.balance)} balance`;
+    const isActive = currentStudent?.id === s.id;
+    return `<div class="student-item${isActive?' active':''}" onclick="window._selectStudentById('${s.id}',this)">
+      <div class="student-av" style="${s.avatarColor?'background:'+s.avatarColor:''}">${initials.toUpperCase()||'?'}</div>
+      <div class="student-info">
+        <div class="student-name">${name}</div>
+        <div class="student-meta">${meta||'—'}</div>
+      </div>
+      <span class="badge ${balClass}" style="font-size:10px;">${balText}</span>
+    </div>`;
+  }).join('');
+}
+
+// ── SELECT ──
+window._selectStudentById = async function(id, el) {
+  document.querySelectorAll('.student-item').forEach(i => i.classList.remove('active'));
+  el?.classList.add('active');
+  const student = allStudents.find(s => s.id === id);
+  if (!student) return;
+  currentStudent = student;
+  await renderDetail(student);
+};
+
+async function selectStudent(student) {
+  currentStudent = student;
+  // Highlight in list
+  document.querySelectorAll('.student-item').forEach(item => {
+    item.classList.toggle('active', item.getAttribute('onclick')?.includes(student.id));
+  });
+  await renderDetail(student);
+}
+
+// ── RENDER DETAIL ──
+async function renderDetail(s) {
+  const name = `${s.firstName||''} ${s.lastName||''}`.trim() || 'Unnamed';
+  const initials = ((s.firstName||'')[0]||'') + ((s.lastName||'')[0]||'');
+
+  const av = document.getElementById('det-avatar');
+  if (av) { av.textContent = initials.toUpperCase()||'?'; if(s.avatarColor) av.style.background=s.avatarColor; }
+  setEl('det-name', name);
+  setEl('det-meta', [s.grade, s.studentId?`#${s.studentId}`:''].filter(Boolean).join(' · ') || '—');
+
+  const badge = document.getElementById('det-bal-badge');
+  if (badge) {
+    if (!s.balance || s.balance===0) { badge.textContent='Paid in full'; badge.className='badge b-green'; }
+    else if (s.overdue) { badge.textContent=`Overdue: $${fmt(s.balance)}`; badge.className='badge b-red'; }
+    else { badge.textContent=`Balance: $${fmt(s.balance)}`; badge.className='badge b-yellow'; }
+  }
+
+  setEl('pf-name', name);
+  setEl('pf-grade', s.grade||'—');
+  setEl('pf-dob', s.dob||'—');
+  setEl('pf-enroll', s.enrollYear||'—');
+  setEl('pf-notes', s.notes||'—');
+  setEl('pf-ext-id', s.externalId || (s.externalId === '' ? '—' : '—'));
+  setEl('pf-family', s.familyName||'—');
+
+  const invBtn = document.getElementById('det-invoice-btn');
+  if (invBtn) invBtn.href = `invoice.html?contactId=${s.id}&contactName=${encodeURIComponent(name)}`;
+
+  // Load related and invoices in parallel
+  await Promise.all([renderRelated(s), renderInvoices(s)]);
+}
+
+// ── RENDER RELATED CONTACTS ──
+async function renderRelated(s) {
+  const parentsWrap = document.getElementById('related-parents');
+  const siblingsWrap = document.getElementById('related-siblings');
+
+  // Parents: find parents/payers linked by familyName or linkedStudentIds
+  const linkedParents = allParents.filter(p =>
+    (s.familyName && p.familyName === s.familyName) ||
+    (p.linkedStudentIds || []).includes(s.id)
+  );
+
+  if (parentsWrap) {
+    if (!linkedParents.length) {
+      parentsWrap.innerHTML = `<div style="padding:8px 0;font-size:12.5px;color:var(--muted2);">No parents linked. Use family name or link directly.</div>`;
+    } else {
+      parentsWrap.innerHTML = linkedParents.map(p => {
+        const pName = `${p.firstName||''} ${p.lastName||''}`.trim();
+        const pInitials = ((p.firstName||'')[0]||'') + ((p.lastName||'')[0]||'');
+        const role = p.role || (terms.parent||'Parent');
+        return `<div class="related-card" onclick="location='parents.html?id=${p.id}'">
+          <div class="related-av" style="background:var(--blue);">${pInitials.toUpperCase()}</div>
+          <div>
+            <div class="related-name">${pName}</div>
+            <div class="related-role">${role}</div>
+          </div>
+          <div class="related-right">
+            <span class="badge b-blue">${terms.parent||'Parent'}</span>
+            <span style="color:var(--muted2);font-size:14px;">›</span>
+          </div>
+        </div>`;
+      }).join('');
+    }
+  }
+
+  // Siblings: other students in same family
+  const siblings = allStudents.filter(st =>
+    st.id !== s.id &&
+    s.familyName &&
+    st.familyName === s.familyName
+  );
+
+  if (siblingsWrap) {
+    if (!siblings.length) {
+      siblingsWrap.innerHTML = `<div style="padding:8px 0;font-size:12.5px;color:var(--muted2);">No siblings found. Set the same Family Name on siblings to link them.</div>`;
+    } else {
+      siblingsWrap.innerHTML = siblings.map(sib => {
+        const sibName = `${sib.firstName||''} ${sib.lastName||''}`.trim();
+        const sibInitials = ((sib.firstName||'')[0]||'') + ((sib.lastName||'')[0]||'');
+        return `<div class="related-card" onclick="window._selectStudentById('${sib.id}',null)">
+          <div class="related-av" style="background:var(--accent);">${sibInitials.toUpperCase()}</div>
+          <div>
+            <div class="related-name">${sibName}</div>
+            <div class="related-role">${sib.grade||''} · Same family</div>
+          </div>
+          <div class="related-right">
+            <span class="badge b-green">Sibling</span>
+            <span style="color:var(--muted2);font-size:14px;">›</span>
+          </div>
+        </div>`;
+      }).join('');
+    }
+  }
+}
+
+// ── RENDER INVOICES (balance tab) ──
+async function renderInvoices(s) {
+  const invoicesWrap = document.getElementById('tab-balance-invoices');
+  if (!invoicesWrap) return;
+  try {
+    const invoices = await getInvoices(orgId, { contactId: s.id });
+
+    // Compute balance summary
+    let totalInvoiced = 0, totalPaid = 0;
+    invoices.forEach(inv => {
+      totalInvoiced += inv.totalAmount || 0;
+      totalPaid += inv.totalPaid || 0;
+    });
+    const totalBalance = Math.max(totalInvoiced - totalPaid, 0);
+    setEl('bal-total', '$' + fmt(totalInvoiced));
+    setEl('bal-paid', '$' + fmt(totalPaid));
+    setEl('bal-remaining', '$' + fmt(totalBalance));
+
+    // Update student's balance field in list
+    const sIdx = allStudents.findIndex(st => st.id === s.id);
+    if (sIdx >= 0) {
+      allStudents[sIdx].balance = totalBalance;
+      allStudents[sIdx].overdue = invoices.some(inv => {
+        const bal = (inv.totalAmount||0) - (inv.totalPaid||0);
+        return bal > 0 && inv.dueDate && new Date(inv.dueDate) < new Date();
+      });
+    }
+
+    if (!invoices.length) {
+      invoicesWrap.innerHTML = `<div style="padding:20px;text-align:center;color:var(--muted2);font-size:13px;">
+        No invoices yet. <a href="invoice.html?contactId=${s.id}&contactName=${encodeURIComponent((`${s.firstName||''} ${s.lastName||''}`).trim())}" style="color:var(--accent);">Create one →</a>
+      </div>`;
+      return;
+    }
+
+    const now = new Date();
+    invoicesWrap.innerHTML = `<table style="width:100%;border-collapse:collapse;font-size:12.5px;">
+      <thead><tr>
+        <th style="text-align:left;padding:7px 10px;font-size:10.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--border);">Invoice</th>
+        <th style="text-align:left;padding:7px 10px;font-size:10.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--border);">Year</th>
+        <th style="text-align:left;padding:7px 10px;font-size:10.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--border);">Total</th>
+        <th style="text-align:left;padding:7px 10px;font-size:10.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--border);">Paid</th>
+        <th style="text-align:left;padding:7px 10px;font-size:10.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--border);">Balance</th>
+        <th style="text-align:left;padding:7px 10px;font-size:10.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--border);">Status</th>
+      </tr></thead>
+      <tbody>${invoices.map(inv => {
+        const bal = (inv.totalAmount||0) - (inv.totalPaid||0);
+        const pct = inv.totalAmount > 0 ? (inv.totalPaid||0)/inv.totalAmount*100 : 0;
+        const isOverdue = bal > 0 && inv.dueDate && new Date(inv.dueDate) < now;
+        const statusBadge = pct>=100 ? '<span class="badge b-green">Paid</span>'
+          : isOverdue ? '<span class="badge b-red">Overdue</span>'
+          : pct > 0 ? '<span class="badge b-yellow">Partial</span>'
+          : '<span class="badge" style="background:var(--s3);color:var(--muted);">Unpaid</span>';
+        return `<tr style="cursor:pointer;" onclick="location='invoice.html?id=${inv.id}&edit=1'">
+          <td style="padding:9px 10px;border-bottom:1px solid var(--border);font-family:var(--mono);">${inv.invoiceNumber||inv.id.slice(0,8)}</td>
+          <td style="padding:9px 10px;border-bottom:1px solid var(--border);color:var(--muted);">${inv.schoolYear||'—'}</td>
+          <td style="padding:9px 10px;border-bottom:1px solid var(--border);font-family:var(--mono);">$${fmt(inv.totalAmount||0)}</td>
+          <td style="padding:9px 10px;border-bottom:1px solid var(--border);font-family:var(--mono);color:var(--accent);">$${fmt(inv.totalPaid||0)}</td>
+          <td style="padding:9px 10px;border-bottom:1px solid var(--border);font-family:var(--mono);color:${bal>0?'var(--yellow)':'var(--muted2)'};">${bal>0?'$'+fmt(bal):'—'}</td>
+          <td style="padding:9px 10px;border-bottom:1px solid var(--border);">${statusBadge}</td>
+        </tr>`;
+      }).join('')}</tbody>
+    </table>`;
+  } catch (e) {
+    if (invoicesWrap) invoicesWrap.innerHTML = `<div style="padding:16px;color:var(--red);font-size:12.5px;">Could not load invoices: ${e.message}</div>`;
+  }
+}
+
+// ── LINK PARENT MODAL ──
+window.openLinkParentModal = function() {
+  if (!currentStudent) return;
+  // Populate dropdown with existing parents not already linked
+  const sel = document.getElementById('link-parent-sel');
+  if (sel) {
+    sel.innerHTML = '<option value="">— Select a parent —</option>' +
+      allParents.map(p => {
+        const name = `${p.firstName||''} ${p.lastName||''}`.trim();
+        return `<option value="${p.id}">${name} · ${p.role||terms.parent||'Parent'}</option>`;
+      }).join('');
+  }
+  document.getElementById('link-parent-modal')?.classList.add('open');
+};
+window.closeLinkParentModal = function() { document.getElementById('link-parent-modal')?.classList.remove('open'); };
+
+window.saveLinkParent = async function() {
+  const sel = document.getElementById('link-parent-sel');
+  const parentId = sel?.value;
+  if (!parentId || !currentStudent) return;
+  const parent = allParents.find(p => p.id === parentId);
+  if (!parent) return;
+  try {
+    // Add student ID to parent's linkedStudentIds
+    const existing = parent.linkedStudentIds || [];
+    if (!existing.includes(currentStudent.id)) {
+      await saveContact(orgId, parentId, { linkedStudentIds: [...existing, currentStudent.id] });
+      // Update local state
+      const idx = allParents.findIndex(p => p.id === parentId);
+      if (idx >= 0) allParents[idx].linkedStudentIds = [...existing, currentStudent.id];
+    }
+    closeLinkParentModal();
+    await renderRelated(currentStudent);
+  } catch (e) { alert('Failed to link: ' + e.message); }
+};
+
+// ── LINK SIBLING via family name hint ──
+window.openLinkSiblingModal = function() {
+  const fam = currentStudent?.familyName;
+  alert(fam
+    ? `Siblings are automatically found by matching Family Name.\n\nCurrently set to: "${fam}"\n\nTo link a sibling, make sure they have the same Family Name.`
+    : `To link siblings, set the same Family Name on both students.\n\nEdit this student and add a Family Name first.`
+  );
+};
+
+// ── SEARCH ──
+const searchInp = document.getElementById('student-search');
+if (searchInp) {
+  searchInp.addEventListener('input', () => {
+    const q = searchInp.value.toLowerCase();
+    const filtered = allStudents.filter(s =>
+      (`${s.firstName} ${s.lastName}`).toLowerCase().includes(q) ||
+      (s.grade||'').toLowerCase().includes(q) ||
+      (s.familyName||'').toLowerCase().includes(q) ||
+      (s.studentId||'').includes(q) ||
+      (s.externalId||'').includes(q)
+    );
+    renderList(filtered);
+  });
+}
+
+// ── FILTER TABS ──
+window.filterStudents = function(filter, el) {
+  currentFilter = filter;
+  document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+  el?.classList.add('active');
+  const filtered = filter === 'all' ? allStudents
+    : allStudents.filter(s => filter === 'overdue' ? s.overdue
+      : filter === 'balance' ? (s.balance > 0)
+      : filter === 'paid' ? (!s.balance || s.balance === 0)
+      : true);
+  renderList(filtered);
+};
+
+// ── TABS ──
+window.showTab = function(tab, el) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
   el.classList.add('active');
   document.getElementById('tab-' + tab).classList.add('active');
+};
+
+// ── ADD STUDENT ──
+window.openAddModal = function() {
+  ['add-firstname','add-lastname','add-grade','add-enroll-year','add-dob','add-family','add-ext-id','add-notes'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.value = '';
+  });
+  const title = document.getElementById('add-modal-title');
+  if (title) title.textContent = `Add ${terms.student||'Student'}`;
+  const btn = document.getElementById('save-student-btn');
+  if (btn) { btn.textContent = `Add ${terms.student||'Student'}`; btn.onclick = saveNewStudent; }
+  document.getElementById('add-modal').classList.add('open');
+};
+window.closeAddModal = function() { document.getElementById('add-modal').classList.remove('open'); };
+
+// Deterministic avatar color from name
+function avatarColor(name) {
+  const colors = ['#1a6b4a','#1a4a8a','#5b2d8e','#b05000','#b83232','#a07000','#2d7a6a','#2d4a8a'];
+  let h = 0; for (const c of name) h = ((h<<5)-h)+c.charCodeAt(0);
+  return colors[Math.abs(h) % colors.length];
 }
 
-function openRelatedModal(type) {
-  const titles = { parent:'Link a Parent / Guardian', sibling:'Link a Sibling', emergency:'Add Emergency Contact' };
-  document.getElementById('rel-modal-title').textContent = titles[type] || 'Link Contact';
-  document.getElementById('related-modal').classList.add('open');
+window.saveNewStudent = async function() {
+  const firstName = document.getElementById('add-firstname')?.value?.trim();
+  const lastName = document.getElementById('add-lastname')?.value?.trim();
+  if (!firstName && !lastName) { alert('Please enter at least a first or last name.'); return; }
+  const btn = document.getElementById('save-student-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
+  try {
+    const name = `${firstName||''} ${lastName||''}`.trim();
+    const data = {
+      type: 'student',
+      firstName: firstName||'',
+      lastName: lastName||'',
+      grade: document.getElementById('add-grade')?.value || '',
+      enrollYear: document.getElementById('add-enroll-year')?.value || '',
+      dob: document.getElementById('add-dob')?.value || '',
+      familyName: document.getElementById('add-family')?.value?.trim() || '',
+      externalId: document.getElementById('add-ext-id')?.value?.trim() || '',
+      notes: document.getElementById('add-notes')?.value?.trim() || '',
+      avatarColor: avatarColor(name),
+      balance: 0,
+      overdue: false,
+    };
+    await saveContact(orgId, null, data);
+    closeAddModal();
+    await loadStudents();
+  } catch (e) {
+    alert('Failed to save: ' + e.message);
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = `Add ${terms.student||'Student'}`; }
+  }
+};
+
+// ── EDIT STUDENT ──
+window.openEditModal = function() {
+  if (!currentStudent) return;
+  const s = currentStudent;
+  setValue('add-firstname', s.firstName||'');
+  setValue('add-lastname', s.lastName||'');
+  setValue('add-grade', s.grade||'');
+  setValue('add-enroll-year', s.enrollYear||'');
+  setValue('add-dob', s.dob||'');
+  setValue('add-family', s.familyName||'');
+  setValue('add-ext-id', s.externalId||'');
+  setValue('add-notes', s.notes||'');
+  const title = document.getElementById('add-modal-title');
+  if (title) title.textContent = `Edit ${terms.student||'Student'}`;
+  const btn = document.getElementById('save-student-btn');
+  if (btn) { btn.textContent = 'Save Changes'; btn.onclick = saveEditStudent; }
+  document.getElementById('add-modal').classList.add('open');
+};
+
+async function saveEditStudent() {
+  if (!currentStudent) return;
+  const btn = document.getElementById('save-student-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
+  try {
+    const firstName = document.getElementById('add-firstname')?.value?.trim()||'';
+    const lastName = document.getElementById('add-lastname')?.value?.trim()||'';
+    await saveContact(orgId, currentStudent.id, {
+      firstName, lastName,
+      grade: document.getElementById('add-grade')?.value||'',
+      enrollYear: document.getElementById('add-enroll-year')?.value||'',
+      dob: document.getElementById('add-dob')?.value||'',
+      familyName: document.getElementById('add-family')?.value?.trim()||'',
+      externalId: document.getElementById('add-ext-id')?.value?.trim()||'',
+      notes: document.getElementById('add-notes')?.value?.trim()||'',
+      avatarColor: avatarColor(`${firstName} ${lastName}`),
+    });
+    closeAddModal();
+    await loadStudents();
+  } catch (e) {
+    alert('Failed: ' + e.message);
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = 'Save Changes'; }
+  }
 }
-function closeModal() { document.getElementById('related-modal').classList.remove('open'); }
-function openAddModal() { document.getElementById('add-modal').classList.add('open'); }
-function closeAddModal() { document.getElementById('add-modal').classList.remove('open'); }
+
+// ── DELETE STUDENT ──
+window.deleteCurrentStudent = async function() {
+  if (!currentStudent) return;
+  const name = `${currentStudent.firstName||''} ${currentStudent.lastName||''}`.trim();
+  if (!confirm(`Delete ${name}? This cannot be undone. Invoices will remain.`)) return;
+  try {
+    await deleteContact(orgId, currentStudent.id);
+    currentStudent = null;
+    clearDetail();
+    await loadStudents();
+  } catch (e) { alert('Failed: ' + e.message); }
+};
+
+function clearDetail() {
+  ['det-name','det-meta','pf-name','pf-grade','pf-dob','pf-enroll','pf-notes','pf-ext-id','pf-family',
+   'bal-total','bal-paid','bal-remaining'].forEach(id => setEl(id, '—'));
+  const parWrap = document.getElementById('related-parents');
+  const sibWrap = document.getElementById('related-siblings');
+  if (parWrap) parWrap.innerHTML = '';
+  if (sibWrap) sibWrap.innerHTML = '';
+}
+
+// ── UTILS ──
+function setEl(id, val) { const e = document.getElementById(id); if (e) e.textContent = val; }
+function setValue(id, val) { const e = document.getElementById(id); if (e) e.value = val; }
+
+// ── URL PARAMS ──
+const urlParams = new URLSearchParams(window.location.search);
+const urlId = urlParams.get('id');
+const urlExtId = urlParams.get('externalId');
+
+// ── START ──
+await loadStudents();
+if (urlId) {
+  const found = allStudents.find(s => s.id === urlId);
+  if (found) await selectStudent(found);
+} else if (urlExtId) {
+  const found = allStudents.find(s => s.externalId === urlExtId);
+  if (found) await selectStudent(found);
+}
 </script>
 </body>
 </html>

@@ -207,17 +207,32 @@ select.input{cursor:pointer;}
     <!-- ═══ ORGANIZATION ═══ -->
     <div class="stab active" id="stab-org">
       <div class="section">
-        <div class="sec-hd"><div><div class="sec-title">Organization</div><div class="sec-sub">Details used on invoices and receipts</div></div></div>
+        <div class="sec-hd"><div><div class="sec-title">Organization</div><div class="sec-sub">Details used on invoices, receipts, and the parent portal</div></div></div>
         <div class="sec-body">
+          <!-- Logo upload -->
+          <div class="field" style="margin-bottom:16px;">
+            <label>Organization Logo</label>
+            <div style="display:flex;align-items:center;gap:14px;">
+              <div id="logo-preview" style="width:64px;height:64px;border:1.5px solid var(--border2);border-radius:8px;background:var(--s2);display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--muted2);overflow:hidden;">
+                No logo
+              </div>
+              <div>
+                <input type="file" id="logo-file" accept="image/*" style="display:none;" onchange="handleLogoUpload(this)">
+                <button class="btn btn-g btn-sm" onclick="document.getElementById('logo-file').click()">Upload Logo</button>
+                <button class="btn btn-g btn-sm" onclick="clearLogo()" style="margin-left:6px;">Remove</button>
+                <div style="font-size:11px;color:var(--muted);margin-top:5px;">PNG or JPG. Appears on invoices and the parent portal.</div>
+              </div>
+            </div>
+          </div>
           <div class="g2" style="margin-bottom:14px;">
             <div class="field"><label>Organization Name</label><input class="input" id="org-name" value="Ninaviguas School"></div>
-            <div class="field"><label>Tax ID / EIN</label><input class="input" placeholder="12-3456789"></div>
+            <div class="field"><label>Tax ID / EIN</label><input class="input" id="org-tax-id" placeholder="12-3456789"></div>
           </div>
           <div class="g2" style="margin-bottom:14px;">
             <div class="field"><label>Fiscal Year Start</label><select class="input"><option>September</option><option>January</option><option>July</option></select></div>
             <div class="field"><label>Default Currency</label><select class="input"><option>USD — $</option><option>ILS — ₪</option><option>EUR — €</option><option>GBP — £</option></select></div>
           </div>
-          <div class="field" style="margin-bottom:14px;"><label>Invoice Footer Text</label><input class="input" value="Thank you for your payment. Please contact us with any questions."></div>
+          <div class="field" style="margin-bottom:14px;"><label>Invoice Footer Text</label><input class="input" id="org-footer" value="Thank you for your payment. Please contact us with any questions."></div>
           <div class="field"><label>Address</label><input class="input" placeholder="School address..."></div>
           <div style="margin-top:16px;"><button class="btn btn-p btn-sm" onclick="saveOrg()">Save Changes</button></div>
         </div>
@@ -608,25 +623,49 @@ select.input{cursor:pointer;}
 
 <script type="module">
 import { initNav, loadSettings, saveSettings, getNextInvoiceNumber, getNextPaymentNumber } from './nav.js';
+import { getCurrentOrgId, getOrgSettings, saveOrgSettings, updateOrg } from './db.js';
 
 // ── INIT ──
 await initNav({ currentPage: 'settings' });
 const S = loadSettings();
+const orgId = getCurrentOrgId();
+
+// Load from Firestore on start and merge into localStorage
+if (orgId) {
+  try {
+    const orgSettings = await getOrgSettings(orgId);
+    if (orgSettings) {
+      const merged = { ...S, ...orgSettings };
+      saveSettings(merged);
+      // Reload the merged settings for this page session
+      Object.assign(S, merged);
+    }
+  } catch(e) { console.warn('Could not load org settings:', e.message); }
+}
+
+// Helper: save to BOTH localStorage and Firestore
+async function persistSettings(s) {
+  saveSettings(s);
+  if (orgId) {
+    try { await saveOrgSettings(orgId, s); }
+    catch(e) { console.warn('Firestore save failed:', e.message); }
+  }
+}
 
 // ── SIDEBAR ──
-// handled by nav.js
 window.toggleSidebar = function(){ window._ftToggleSidebar(); };
 
 // ── TABS ──
-function showTab(id, el) {
+window.showTab = function(id, el) {
   document.querySelectorAll('.stab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.sn-item').forEach(i => i.classList.remove('active'));
-  document.getElementById('stab-' + id).classList.add('active');
-  el.classList.add('active');
-}
+  const tab = document.getElementById('stab-' + id);
+  if (tab) tab.classList.add('active');
+  if (el) el.classList.add('active');
+};
 
 // ── ADD ROWS ──
-function addChargeRow() {
+window.addChargeRow = function() {
   const tbody = document.getElementById('charge-types-tbody');
   const tr = document.createElement('tr');
   tr.innerHTML = `<td><input class="input" placeholder="Type name"></td><td><div class="ipfx"><span class="pfx">$</span><input class="input mono" type="number" value="0" step="0.01"></div></td><td><button class="tog on" onclick="this.classList.toggle('on')"></button></td><td><button class="del-btn" onclick="this.closest('tr').remove()">×</button></td>`;
@@ -634,7 +673,7 @@ function addChargeRow() {
   tr.querySelector('input').focus();
 }
 
-function addCreditRow() {
+window.addCreditRow = function() {
   const tbody = document.getElementById('credit-types-tbody');
   const tr = document.createElement('tr');
   tr.innerHTML = `<td><input class="input" placeholder="Credit name"></td><td><div class="ipfx"><span class="pfx">$</span><input class="input mono" type="number" value="" placeholder="manual" step="0.01"></div></td><td><button class="tog on" onclick="this.classList.toggle('on')"></button></td><td><button class="del-btn" onclick="this.closest('tr').remove()">×</button></td>`;
@@ -642,7 +681,7 @@ function addCreditRow() {
   tr.querySelector('input').focus();
 }
 
-function addInstTypeRow() {
+window.addInstTypeRow = function() {
   const tbody = document.getElementById('inst-types-tbody');
   const tr = document.createElement('tr');
   tr.innerHTML = `<td><input class="input" placeholder="Label"></td><td><button class="tog" onclick="this.classList.toggle('on')"></button></td><td><button class="del-btn" onclick="this.closest('tr').remove()">×</button></td>`;
@@ -650,7 +689,7 @@ function addInstTypeRow() {
   tr.querySelector('input').focus();
 }
 
-function addPayFeeRow() {
+window.addPayFeeRow = function() {
   const tbody = document.getElementById('pay-fees-tbody');
   const tr = document.createElement('tr');
   tr.innerHTML = `
@@ -664,7 +703,7 @@ function addPayFeeRow() {
 }
 
 // ── FEE EXAMPLE ──
-function calcExample(inp) {
+window.calcExample = function(inp) {
   const row = inp.closest('tr');
   const inputs = row.querySelectorAll('input[type=number]');
   const flat = parseFloat(inputs[0]?.value) || 0;
@@ -675,7 +714,7 @@ function calcExample(inp) {
 }
 
 // ── FUND CARDS ──
-function addFundCard() {
+window.addFundCard = function() {
   const body = document.getElementById('funds-body');
   const colors = ['#1a6b4a','#1a4a8a','#5b2d8e','#a07000'];
   const c = colors[body.children.length % colors.length];
@@ -718,7 +757,7 @@ function addFundCard() {
   div.querySelector('input').focus();
 }
 
-function toggleFundActive(btn) {
+window.toggleFundActive = function(btn) {
   const card = btn.closest('.fund-card');
   const isOn = btn.classList.contains('on');
   card.dataset.active = isOn ? 'true' : 'false';
@@ -727,7 +766,7 @@ function toggleFundActive(btn) {
   if (badge) { badge.textContent = isOn ? 'Active' : 'Inactive'; badge.className = 'badge ' + (isOn ? 'b-g' : 'b-gr'); }
 }
 
-function filterFunds() {
+window.filterFunds = function() {
   const hide = document.getElementById('hide-inactive-funds').checked;
   document.querySelectorAll('.fund-card').forEach(card => {
     if (hide && card.dataset.active === 'false') card.style.display = 'none';
@@ -735,12 +774,12 @@ function filterFunds() {
   });
 }
 
-function updateFundCircle(inp) {
+window.updateFundCircle = function(inp) {
   // Placeholder — in production would recalculate the SVG arc
 }
 
 // ── TOGGLE NAV — saves module visibility immediately ──
-window.toggleNav = function(key, btn) {
+window.toggleNav = async function(key, btn) {
   const s = loadSettings();
   s.modules[key] = btn.classList.contains('on');
   saveSettings(s);
@@ -748,7 +787,7 @@ window.toggleNav = function(key, btn) {
 };
 
 // ── LOAD MODULE TOGGLE STATES from settings ──
-function loadModuleToggles() {
+window.loadModuleToggles = function() {
   const s = loadSettings();
   const map = { tuition:'tog-tuition', donations:'tog-donations', payments:'tog-payments', vendors:'tog-vendors', students:'tog-students', parents:'tog-parents', reports:'tog-reports' };
   Object.entries(map).forEach(([key, id]) => {
@@ -761,7 +800,7 @@ function loadModuleToggles() {
 }
 
 // ── LOAD TERMINOLOGY INPUTS ──
-function loadTermInputs() {
+window.loadTermInputs = function() {
   const s = loadSettings();
   const fields = ['tuition','donations','payments','vendors','students','parents','reports','student','parent','vendor'];
   fields.forEach(k => {
@@ -771,19 +810,19 @@ function loadTermInputs() {
 }
 
 // ── SAVE TERMINOLOGY ──
-window.saveTerminology = function() {
+window.saveTerminology = async function() {
   const s = loadSettings();
   const fields = ['tuition','donations','payments','vendors','students','parents','reports','student','parent','vendor'];
   fields.forEach(k => {
     const el = document.getElementById('term-' + k);
     if (el && el.value.trim()) s.terms[k] = el.value.trim();
   });
-  saveSettings(s);
+  await persistSettings(s);
   showToast('Terminology saved');
 };
 
 // ── SAVE PREFERENCES ──
-window.savePreferences = function() {
+window.savePreferences = async function() {
   const s = loadSettings();
   const dp = document.querySelector('input[name="date-pref"]:checked');
   if (dp) s.datePref = dp.value;
@@ -795,21 +834,59 @@ window.savePreferences = function() {
   if (in_) s.invoiceNext = parseInt(in_.value) || s.invoiceNext;
   if (pp) s.paymentPrefix = pp.value;
   if (pn) s.paymentNext = parseInt(pn.value) || s.paymentNext;
-  saveSettings(s);
+  await persistSettings(s);
   showToast('Preferences saved');
 };
 
 // ── SAVE ORG ──
-window.saveOrg = function() {
+window.saveOrg = async function() {
   const s = loadSettings();
   const name = document.getElementById('org-name');
+  const taxId = document.getElementById('org-tax-id');
+  const footer = document.getElementById('org-footer');
   if (name) s.orgName = name.value.trim() || s.orgName;
-  saveSettings(s);
+  if (taxId) s.orgTaxId = taxId.value.trim();
+  if (footer) s.invoiceFooter = footer.value.trim();
+  await persistSettings(s);
+  if (orgId) { try { await updateOrg(orgId, { name: s.orgName, taxId: s.orgTaxId }); } catch(e) {} }
   showToast('Organization saved');
 };
 
+// ── LOGO UPLOAD (stored as base64 in localStorage — small logos only) ──
+window.handleLogoUpload = function(input) {
+  const file = input.files[0];
+  if (!file) return;
+  if (file.size > 200 * 1024) { alert('Logo must be under 200KB. Please resize the image first.'); return; }
+  const reader = new FileReader();
+  reader.onload = async e => {
+    const dataUrl = e.target.result;
+    const s = loadSettings();
+    s.orgLogo = dataUrl;
+    await persistSettings(s);
+    showLogoPreview(dataUrl);
+    showToast('Logo saved');
+  };
+  reader.readAsDataURL(file);
+};
+
+window.clearLogo = async function() {
+  const s = loadSettings();
+  delete s.orgLogo;
+  await persistSettings(s);
+  const preview = document.getElementById('logo-preview');
+  if (preview) preview.innerHTML = '<span style="font-size:11px;color:var(--muted2);">No logo</span>';
+  showToast('Logo removed');
+};
+
+function showLogoPreview(dataUrl) {
+  const preview = document.getElementById('logo-preview');
+  if (preview && dataUrl) {
+    preview.innerHTML = `<img src="${dataUrl}" style="width:100%;height:100%;object-fit:contain;border-radius:6px;">`;
+  }
+}
+
 // ── SAVE CHARGE TYPES ──
-window.saveChargeTypes = function() {
+window.saveChargeTypes = async function() {
   const s = loadSettings();
   s.chargeTypes = [];
   document.querySelectorAll('#charge-types-tbody tr').forEach(tr => {
@@ -827,12 +904,12 @@ window.saveChargeTypes = function() {
     const amount = parseFloat(inputs[1]?.value) || null;
     if (name) s.creditTypes.push({ name, amount, active: tog?.classList.contains('on') ?? true });
   });
-  saveSettings(s);
+  await persistSettings(s);
   showToast('Charge & credit types saved');
 };
 
 // ── SAVE PAYMENT FEES ──
-window.savePayFees = function() {
+window.savePayFees = async function() {
   const s = loadSettings();
   s.paymentFees = [];
   document.querySelectorAll('#pay-fees-tbody tr').forEach(tr => {
@@ -842,12 +919,12 @@ window.savePayFees = function() {
     const pct = parseFloat(inputs[2]?.value) || 0;
     if (method) s.paymentFees.push({ method, flat, pct });
   });
-  saveSettings(s);
+  await persistSettings(s);
   showToast('Payment fees saved');
 };
 
 // ── SAVE INSTALLMENT TYPES ──
-window.saveInstTypes = function() {
+window.saveInstTypes = async function() {
   const s = loadSettings();
   s.instTypes = [];
   document.querySelectorAll('#inst-types-tbody tr').forEach(tr => {
@@ -857,12 +934,12 @@ window.saveInstTypes = function() {
     if (label) s.instTypes.push({ label, isDeposit: tog?.classList.contains('on') ?? false });
   });
   localStorage.setItem('instTypes', JSON.stringify(s.instTypes.map(t => t.label)));
-  saveSettings(s);
+  await persistSettings(s);
   showToast('Installment types saved');
 };
 
 // ── LOAD PREFERENCES INTO FORM ──
-function loadPreferencesForm() {
+window.loadPreferencesForm = function() {
   const s = loadSettings();
   const radio = document.querySelector(`input[name="date-pref"][value="${s.datePref}"]`);
   if (radio) radio.checked = true;
@@ -895,6 +972,16 @@ function showToast(msg) {
 loadModuleToggles();
 loadTermInputs();
 loadPreferencesForm();
+
+// Populate org fields from merged settings
+const _s = loadSettings();
+const orgNameInp = document.getElementById('org-name');
+const orgTaxIdInp = document.getElementById('org-tax-id');
+if (orgNameInp) orgNameInp.value = _s.orgName || '';
+if (orgTaxIdInp) orgTaxIdInp.value = _s.orgTaxId || '';
+const orgFooterInp = document.getElementById('org-footer');
+if (orgFooterInp && _s.invoiceFooter) orgFooterInp.value = _s.invoiceFooter;
+if (_s.orgLogo) showLogoPreview(_s.orgLogo);
 </script>
 </body>
 </html>
