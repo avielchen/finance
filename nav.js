@@ -158,6 +158,77 @@ window._ftToggleSidebar = function() {
   if (ab) ab.style.left = _sidebarOpen ? 'var(--se)' : 'var(--sc)';
 };
 
+// ── MULTI-ORG SWITCHER ────────────────────────────────────────────
+window._showOrgSwitcher = async function() {
+  const listEl = document.getElementById('org-switcher-list');
+  if (!listEl) return;
+
+  // Show loading
+  listEl.style.display = 'block';
+  listEl.innerHTML = `<div style="padding:6px 10px;font-size:12px;color:var(--muted2);">Loading…</div>`;
+
+  try {
+    const { getUserOrgs } = await import('./db.js');
+    const auth = getFirebaseAuth();
+    const uid = auth.currentUser?.uid;
+    if (!uid) return;
+
+    const orgs = await getUserOrgs(uid);
+    const currentOrgId = localStorage.getItem('ft_orgId');
+
+    if (!orgs || orgs.length <= 1) {
+      listEl.innerHTML = `
+        <div style="padding:6px 10px;font-size:12px;color:var(--muted2);margin-bottom:2px;">You only belong to one organization.</div>
+        <div onclick="window._createNewOrg()" style="padding:7px 10px;border-radius:5px;font-size:12.5px;color:var(--blue);cursor:pointer;display:flex;align-items:center;gap:6px;"
+          onmouseover="this.style.background='var(--bl)'" onmouseout="this.style.background=''">＋ Create a new organization</div>`;
+      return;
+    }
+
+    listEl.innerHTML = `
+      <div style="padding:4px 10px;font-size:10px;font-weight:700;color:var(--muted2);text-transform:uppercase;letter-spacing:.06em;">Switch Organization</div>
+      ${orgs.map(org => {
+        const isCurrent = org.orgId === currentOrgId;
+        return `<div onclick="${isCurrent ? '' : `window._switchOrg('${org.orgId}','${(org.orgName||'').replace(/'/g,"\\'")}')`}"
+          style="padding:7px 10px;border-radius:5px;font-size:12.5px;cursor:${isCurrent?'default':'pointer'};display:flex;align-items:center;gap:8px;${isCurrent?'opacity:.6;':''}"
+          onmouseover="${isCurrent?'':'this.style.background=\"var(--s2)\"'}" onmouseout="this.style.background=''">
+          <span style="width:8px;height:8px;border-radius:50%;background:${isCurrent?'var(--accent)':'var(--border2)'};flex-shrink:0;"></span>
+          <div style="flex:1;">
+            <div style="font-weight:600;">${org.orgName||'Organization'}</div>
+            <div style="font-size:10.5px;color:var(--muted2);">${org.role||'member'}</div>
+          </div>
+          ${isCurrent ? '<span style="font-size:10px;color:var(--accent);font-weight:700;">Current</span>' : ''}
+        </div>`;
+      }).join('')}
+      <div onclick="window._createNewOrg()" style="padding:7px 10px;border-radius:5px;font-size:12.5px;color:var(--blue);cursor:pointer;display:flex;align-items:center;gap:6px;"
+        onmouseover="this.style.background='var(--bl)'" onmouseout="this.style.background=''">＋ Create a new organization</div>`;
+  } catch(e) {
+    listEl.innerHTML = `<div style="padding:6px 10px;font-size:12px;color:var(--red);">Error: ${e.message}</div>`;
+  }
+};
+
+window._switchOrg = async function(newOrgId, orgName) {
+  localStorage.setItem('ft_orgId', newOrgId);
+  // Load the new org's settings
+  try {
+    const { getOrgSettings } = await import('./db.js');
+    const s = await getOrgSettings(newOrgId);
+    if (s) {
+      const { saveSettings } = await import('./nav.js').catch(() => ({ saveSettings: () => {} }));
+      const merged = { ...loadSettings(), ...s, orgName };
+      localStorage.setItem('ft_settings', JSON.stringify(merged));
+    }
+  } catch(e) { /* use defaults */ }
+  // Close menu and reload page
+  document.getElementById('user-menu')?.classList.add('hidden');
+  window.location.reload();
+};
+
+window._createNewOrg = function() {
+  // Keep auth but clear org so onboarding creates a new one
+  localStorage.removeItem('ft_orgId');
+  window.location.href = 'onboarding.html';
+};
+
 // ── USER CHIP ─────────────────────────────────────────────────────────────
 function renderUserChip(user) {
   const chip = document.getElementById('user-chip');
@@ -198,12 +269,15 @@ function renderUserChip(user) {
           <div style="font-size:10px;color:var(--muted2);font-family:var(--mono);margin-top:2px;">${orgId.slice(0,12)}…</div>
         </div>
 
+        <!-- Other orgs (loaded async) -->
+        <div id="org-switcher-list" style="padding:2px 0;border-bottom:1px solid var(--border);margin-bottom:4px;display:none;"></div>
+
         <!-- Actions -->
         <a href="settings.html" style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:6px;font-size:13px;color:var(--text);text-decoration:none;"
           onmouseover="this.style.background='var(--s2)'" onmouseout="this.style.background=''">⚙ Settings</a>
-        <a href="onboarding.html" onclick="localStorage.removeItem('ft_orgId')"
-          style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:6px;font-size:13px;color:var(--blue);text-decoration:none;"
-          onmouseover="this.style.background='var(--bl)'" onmouseout="this.style.background=''">＋ Create / Switch Org</a>
+        <div onclick="window._showOrgSwitcher()"
+          style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:6px;font-size:13px;color:var(--blue);cursor:pointer;"
+          onmouseover="this.style.background='var(--bl)'" onmouseout="this.style.background=''">⇄ Switch / Add Organization</div>
         <div onclick="window._ftSignOut()"
           style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:6px;font-size:13px;color:var(--red);cursor:pointer;"
           onmouseover="this.style.background='var(--rl)'" onmouseout="this.style.background=''">→ Sign Out</div>
@@ -313,9 +387,23 @@ export async function initNav(options = {}) {
         return;
       }
 
-      // Logged in but no org set — go to onboarding
+      // Logged in but no org in localStorage — check Firestore before redirecting
       const orgId = localStorage.getItem('ft_orgId');
       if (user && requireOrg && !orgId) {
+        try {
+          const { getUserOrgs, getOrgSettings } = await import('./db.js');
+          const orgs = await getUserOrgs(user.uid);
+          if (orgs && orgs.length > 0) {
+            const first = orgs[0];
+            localStorage.setItem('ft_orgId', first.orgId);
+            try {
+              const s = await getOrgSettings(first.orgId);
+              if (s) localStorage.setItem('ft_settings', JSON.stringify({ ...s, orgName: first.orgName }));
+            } catch(e) { /* use defaults */ }
+            window.location.reload();
+            return;
+          }
+        } catch(e) { /* Firestore unavailable */ }
         window.location.href = 'onboarding.html';
         return;
       }

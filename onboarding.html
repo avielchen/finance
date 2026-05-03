@@ -84,6 +84,10 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
 .btn-g{background:var(--surface);color:var(--muted);border:1.5px solid var(--border2);}.btn-g:hover{background:var(--s2);color:var(--text);}
 .btn-xl{padding:12px 24px;font-size:14px;}
 
+/* REMOVE INVITE */
+.rm-invite{width:32px;height:40px;flex-shrink:0;background:none;border:1.5px solid var(--border2);border-radius:8px;cursor:pointer;font-size:16px;color:var(--muted2);display:flex;align-items:center;justify-content:center;transition:all .15s;}
+.rm-invite:hover{background:var(--rl);border-color:#e8b8b8;color:var(--red);}
+
 /* SPINNER */
 .spinner{width:18px;height:18px;border:2.5px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -233,8 +237,10 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
             <select class="role-sel">
               <option value="admin">Admin</option>
               <option value="accountant" selected>Accountant</option>
+              <option value="staff">Staff</option>
               <option value="viewer">Viewer</option>
             </select>
+            <button class="rm-invite" onclick="removeInviteRow(this)" title="Remove">×</button>
           </div>
         </div>
         <button class="btn btn-g" style="font-size:12.5px;padding:6px 12px;margin-top:4px;" onclick="addInviteRow()">+ Add another</button>
@@ -255,12 +261,9 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
       </div>
       <div class="card-footer">
         <button class="btn btn-g" onclick="goStep(2)">← Back</button>
-        <div style="display:flex;gap:10px;">
-          <button class="btn btn-g" onclick="skipInvites()">Skip for now</button>
-          <button class="btn btn-p" id="finish-btn" onclick="finishSetup()">
-            <span id="finish-lbl">Create Organization →</span>
-          </button>
-        </div>
+        <button class="btn btn-p" id="finish-btn" onclick="finishSetup()">
+          <span id="finish-lbl">Create Organization →</span>
+        </button>
       </div>
     </div>
   </div>
@@ -283,9 +286,8 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
 </div><!-- /wrap -->
 
 <script type="module">
-import { getFirebaseAuth } from './db.js';
-import { createOrg, addUserOrgMirror, getTemplateSettings, inviteMember } from './db.js';
-import { setCurrentOrgId } from './db.js';
+import { getFirebaseAuth, createOrg, addUserOrgMirror, getTemplateSettings,
+         inviteMember, setCurrentOrgId, getUserOrgs, getOrgSettings } from './db.js';
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
 let currentUser = null;
@@ -294,14 +296,25 @@ let currentStep = 1;
 
 // ── AUTH CHECK ──
 const auth = getFirebaseAuth();
-onAuthStateChanged(auth, user => {
+onAuthStateChanged(auth, async user => {
   if (!user) { window.location.href = 'login.html'; return; }
   currentUser = user;
-  // Check if already has an org
+  // If localStorage has an org, go straight to dashboard
   const existingOrg = localStorage.getItem('ft_orgId');
-  if (existingOrg) {
-    window.location.href = 'index.html';
-  }
+  if (existingOrg) { window.location.href = 'index.html'; return; }
+  // No localStorage entry — check Firestore (covers new device / cleared storage)
+  try {
+    const orgs = await getUserOrgs(user.uid);
+    if (orgs && orgs.length > 0) {
+      const first = orgs[0];
+      localStorage.setItem('ft_orgId', first.orgId);
+      try {
+        const s = await getOrgSettings(first.orgId);
+        if (s) localStorage.setItem('ft_settings', JSON.stringify({ ...s, orgName: first.orgName }));
+      } catch(e) { /* use defaults */ }
+      window.location.href = 'index.html';
+    }
+  } catch(e) { /* Firestore unavailable, stay on onboarding */ }
 });
 
 // ── STEP NAVIGATION ──
@@ -354,9 +367,11 @@ function showTemplatePreview(tpl) {
     ['Donations', settings.modules.donations ? 'Enabled' : 'Disabled'],
     ['Charge types', (settings.chargeTypes || []).map(c => c.name).join(', ') || 'None preset'],
   ];
-  rows.innerHTML = previewData.map(([k, v]) =>
-    `<div class="prev-row"><span class="prev-key">${k}</span><span class="prev-val">${v}</span></div>`
-  ).join('');
+  rows.innerHTML = previewData
+    .filter(([k, v]) => v !== 'Disabled')
+    .map(([k, v]) =>
+      `<div class="prev-row"><span class="prev-key">${k}</span><span class="prev-val">${v}</span></div>`
+    ).join('');
   preview.style.display = '';
 }
 
@@ -370,13 +385,20 @@ window.addInviteRow = function() {
     <select class="role-sel">
       <option value="admin">Admin</option>
       <option value="accountant" selected>Accountant</option>
+      <option value="staff">Staff</option>
       <option value="viewer">Viewer</option>
-    </select>`;
+    </select>
+    <button class="rm-invite" onclick="removeInviteRow(this)" title="Remove">×</button>`;
   wrap.appendChild(div);
   div.querySelector('input').focus();
 };
 
-window.skipInvites = function() { finishSetup(true); };
+window.removeInviteRow = function(btn) {
+  const wrap = document.getElementById('invite-rows');
+  if (wrap.querySelectorAll('.invite-row').length > 1) {
+    btn.closest('.invite-row').remove();
+  }
+};
 
 // ── FINISH SETUP ──
 window.finishSetup = async function(skipInvites = false) {

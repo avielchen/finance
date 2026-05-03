@@ -1,0 +1,71 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isMember(orgId) {
+      return request.auth != null &&
+        exists(/databases/$(database)/documents/orgs/$(orgId)/members/$(request.auth.uid));
+    }
+
+    function role(orgId) {
+      return get(/databases/$(database)/documents/orgs/$(orgId)/members/$(request.auth.uid)).data.role;
+    }
+
+    function canWrite(orgId) {
+      return isMember(orgId) && role(orgId) in ['owner', 'admin', 'accountant'];
+    }
+
+    // Org root document
+    match /orgs/{orgId} {
+      allow read: if isMember(orgId);
+      allow create: if request.auth != null;  // any authenticated user can start a new org
+      allow update, delete: if isMember(orgId) && role(orgId) == 'owner';
+    }
+
+    // Members — members can read all, owners/admins can write, users can update themselves
+    match /orgs/{orgId}/members/{uid} {
+      allow read: if isMember(orgId);
+      allow create: if request.auth != null && (
+        // Bootstrap: creating yourself as owner of a brand new org
+        (request.auth.uid == uid && request.resource.data.role == 'owner' &&
+          !exists(/databases/$(database)/documents/orgs/$(orgId))) ||
+        // Owner/admin adding a member to an existing org
+        (isMember(orgId) && role(orgId) in ['owner', 'admin'])
+      );
+      allow update: if isMember(orgId) && (role(orgId) in ['owner', 'admin'] || request.auth.uid == uid);
+      allow delete: if isMember(orgId) && role(orgId) == 'owner';
+    }
+
+    // Invites — members can read, owners/admins can write
+    match /orgs/{orgId}/invites/{inviteId} {
+      allow read: if isMember(orgId);
+      allow write: if isMember(orgId) && role(orgId) in ['owner', 'admin'];
+    }
+
+    // All other org collections (contacts, invoices, payments, donations, funds, settings)
+    match /orgs/{orgId}/{col}/{docId} {
+      allow read: if isMember(orgId);
+      allow create: if canWrite(orgId) ||
+        // Bootstrap: allow settings doc creation when the org itself doesn't exist yet
+        (request.auth != null && !exists(/databases/$(database)/documents/orgs/$(orgId)));
+      allow update, delete: if canWrite(orgId);
+    }
+
+    // Subcollections (line items, etc.)
+    match /orgs/{orgId}/{col}/{docId}/{sub}/{subId} {
+      allow read: if isMember(orgId);
+      allow write: if canWrite(orgId);
+    }
+
+    // User→org mirror (private to each user)
+    match /users/{uid}/orgs/{orgId} {
+      allow read, write: if request.auth.uid == uid;
+    }
+
+    // Invite tokens (written by Cloud Function, read by anyone with the token)
+    match /inviteTokens/{token} {
+      allow read: if true;   // token itself is the secret
+      allow write: if false; // only Cloud Functions can write
+    }
+  }
+}
