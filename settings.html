@@ -154,7 +154,7 @@ select.input{cursor:pointer;}
   </div>
   <div class="nav-sec"><a class="ni" href="index.html"><span class="nic">⊞</span><span class="nl">Dashboard</span></a></div>
   <div class="nav-sec">
-    <a class="ni" href="invoice.html"><span class="nic">📄</span><span class="nl">Tuition</span></a>
+    <a class="ni" href="tuition.html"><span class="nic">📄</span><span class="nl">Tuition</span></a>
     <a class="ni" href="donations.html"><span class="nic">🤝</span><span class="nl">Donations</span></a>
     <a class="ni" href="payments.html"><span class="nic">💳</span><span class="nl">Payments</span></a>
     <a class="ni" href="vendors.html"><span class="nic">🏢</span><span class="nl">Vendors</span></a>
@@ -197,6 +197,7 @@ select.input{cursor:pointer;}
     </div>
     <div class="sn-grp">
       <div class="sn-lbl">System</div>
+      <a class="sn-item" onclick="showTab('team',this)">Team Members</a>
       <a class="sn-item" onclick="showTab('notifs',this)">Notifications</a>
     </div>
   </div>
@@ -318,6 +319,17 @@ select.input{cursor:pointer;}
               <div class="field"><label>Student (singular)</label><input class="input" id="term-student" placeholder="Student"></div>
               <div class="field"><label>Parent (singular)</label><input class="input" id="term-parent" placeholder="Parent"></div>
               <div class="field"><label>Vendor (singular)</label><input class="input" id="term-vendor" placeholder="Vendor"></div>
+            </div>
+          </div>
+          <!-- CONTACT TAGS -->
+          <div style="margin-top:20px;">
+            <div style="font-size:12.5px;font-weight:700;margin-bottom:6px;">Contact Tags</div>
+            <div style="font-size:12px;color:var(--muted);margin-bottom:12px;">Custom labels you can assign to parents &amp; contacts. These appear as filter options on the Parents page.</div>
+            <div id="contact-tags-list" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;min-height:28px;"></div>
+            <div style="display:flex;gap:8px;align-items:center;">
+              <input class="input" id="new-tag-input" placeholder="New tag (e.g. Academic, Financial)" style="max-width:300px;"
+                onkeydown="if(event.key==='Enter'){addContactTag();}">
+              <button class="btn btn-g btn-sm" onclick="addContactTag()">+ Add</button>
             </div>
           </div>
           <div style="display:flex;gap:8px;margin-top:16px;">
@@ -600,6 +612,55 @@ select.input{cursor:pointer;}
       </div>
     </div>
 
+    <!-- ═══ TEAM MEMBERS ═══ -->
+    <div class="stab" id="stab-team">
+      <div class="section">
+        <div class="sec-hd">
+          <div><div class="sec-title">Team Members</div><div class="sec-sub">People with access to this organization</div></div>
+        </div>
+        <div class="sec-body" style="padding:0;">
+          <table class="dt">
+            <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Joined</th><th></th></tr></thead>
+            <tbody id="members-tbody">
+              <tr><td colspan="5" style="padding:16px;text-align:center;color:var(--muted2);">Loading…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="sec-hd"><div class="sec-title">Invite a Team Member</div></div>
+        <div class="sec-body">
+          <div id="invite-error" style="background:var(--rl);border:1px solid var(--rb);border-radius:7px;padding:9px 13px;font-size:12.5px;color:var(--red);margin-bottom:12px;display:none;"></div>
+          <div id="invite-success" style="background:var(--al);border:1px solid #b0d8c0;border-radius:7px;padding:9px 13px;font-size:12.5px;color:var(--accent);margin-bottom:12px;display:none;"></div>
+          <div class="g2" style="margin-bottom:12px;">
+            <div class="field"><label>Email Address</label><input class="input" type="email" id="invite-email" placeholder="colleague@organization.com"></div>
+            <div class="field"><label>Role</label>
+              <select class="input" id="invite-role">
+                <option value="admin">Admin — full access + settings</option>
+                <option value="accountant" selected>Accountant — create invoices, record payments</option>
+                <option value="viewer">Viewer — read only</option>
+                <option value="staff">Staff — limited access</option>
+              </select>
+            </div>
+          </div>
+          <button class="btn btn-p btn-sm" onclick="sendTeamInvite()">Send Invitation Email</button>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="sec-hd"><div class="sec-title">Pending Invitations</div></div>
+        <div class="sec-body" style="padding:0;">
+          <table class="dt">
+            <thead><tr><th>Email</th><th>Role</th><th>Invited</th><th>Status</th><th></th></tr></thead>
+            <tbody id="invites-tbody">
+              <tr><td colspan="5" style="padding:16px;text-align:center;color:var(--muted2);">Loading…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
     <!-- ═══ NOTIFICATIONS ═══ -->
     <div class="stab" id="stab-notifs">
       <div class="section">
@@ -623,7 +684,9 @@ select.input{cursor:pointer;}
 
 <script type="module">
 import { initNav, loadSettings, saveSettings, getNextInvoiceNumber, getNextPaymentNumber } from './nav.js';
-import { getCurrentOrgId, getOrgSettings, saveOrgSettings, updateOrg } from './db.js';
+import { getCurrentOrgId, getOrgSettings, saveOrgSettings, updateOrg, getOrgMembers, inviteMember, getDB } from './db.js';
+import { collection, getDocs, orderBy, query } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-functions.js";
 
 // ── INIT ──
 await initNav({ currentPage: 'settings' });
@@ -778,7 +841,99 @@ window.updateFundCircle = function(inp) {
   // Placeholder — in production would recalculate the SVG arc
 }
 
-// ── TOGGLE NAV — saves module visibility immediately ──
+// ── TEAM MEMBERS ──
+async function loadTeamMembers() {
+  const db = getDB();
+  try {
+    const members = await getOrgMembers(orgId);
+    const tbody = document.getElementById('members-tbody');
+    if (!tbody) return;
+    if (!members.length) { tbody.innerHTML = '<tr><td colspan="5" style="padding:16px;text-align:center;color:var(--muted2);">No members found.</td></tr>'; return; }
+    const roleLabel = { owner:'Owner', admin:'Admin', accountant:'Accountant', viewer:'Viewer', staff:'Staff' };
+    tbody.innerHTML = members.map(m => {
+      const joinedStr = m.joinedAt?.toDate ? m.joinedAt.toDate().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '—';
+      return `<tr>
+        <td style="font-weight:600;">${m.displayName || '—'}</td>
+        <td style="font-size:12px;color:var(--muted);">${m.email || '—'}</td>
+        <td><span class="badge b-gr">${roleLabel[m.role] || m.role}</span></td>
+        <td style="font-size:12px;color:var(--muted2);">${joinedStr}</td>
+        <td><select onchange="changeMemberRole('${m.uid}',this.value)" style="font-size:11.5px;padding:2px 6px;border:1px solid var(--border2);border-radius:5px;background:var(--bg);"><option value="">Change role…</option><option value="admin">Admin</option><option value="accountant">Accountant</option><option value="viewer">Viewer</option><option value="staff">Staff</option></select></td>
+      </tr>`;
+    }).join('');
+
+    // Load pending invites
+    const invitesSnap = await getDocs(query(collection(db, 'orgs', orgId, 'invites')));
+    const invitesTbody = document.getElementById('invites-tbody');
+    if (invitesTbody) {
+      const pending = invitesSnap.docs.filter(d => d.data().status === 'pending');
+      if (!pending.length) { invitesTbody.innerHTML = '<tr><td colspan="5" style="padding:12px;text-align:center;color:var(--muted2);">No pending invitations.</td></tr>'; }
+      else {
+        invitesTbody.innerHTML = pending.map(d => {
+          const inv = d.data();
+          const invitedStr = inv.invitedAt?.toDate ? inv.invitedAt.toDate().toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '—';
+          return `<tr><td style="font-weight:600;">${inv.email}</td><td><span class="badge b-gr">${roleLabel[inv.role]||inv.role}</span></td><td style="font-size:12px;color:var(--muted2);">${invitedStr}</td><td><span class="badge b-y">Pending</span></td><td><button class="btn btn-g btn-sm" onclick="resendInvite('${d.id}','${inv.email}','${inv.role}')">Resend</button></td></tr>`;
+        }).join('');
+      }
+    }
+  } catch(e) {
+    const tbody = document.getElementById('members-tbody');
+    if (tbody) tbody.innerHTML = `<tr><td colspan="5" style="padding:12px;text-align:center;color:var(--red);">Error: ${e.message}</td></tr>`;
+  }
+}
+
+window.sendTeamInvite = async function() {
+  const email = document.getElementById('invite-email')?.value?.trim();
+  const role = document.getElementById('invite-role')?.value || 'accountant';
+  const errEl = document.getElementById('invite-error');
+  const succEl = document.getElementById('invite-success');
+  if (errEl) errEl.style.display = 'none';
+  if (succEl) succEl.style.display = 'none';
+  if (!email) { if(errEl){errEl.textContent='Please enter an email address.';errEl.style.display='block';} return; }
+
+  try {
+    // Save invite record to Firestore
+    const inviteId = await inviteMember(orgId, email, role, (await import('./db.js')).getCurrentOrgId());
+
+    // Call Cloud Function to send the email
+    const functions = getFunctions();
+    const sendInvite = httpsCallable(functions, 'sendInvite');
+    await sendInvite({ orgId, email, role, inviteId });
+
+    if (succEl) { succEl.textContent = `✓ Invitation sent to ${email}`; succEl.style.display = 'block'; }
+    const emailInp = document.getElementById('invite-email');
+    if (emailInp) emailInp.value = '';
+    await loadTeamMembers();
+  } catch(e) {
+    if (errEl) { errEl.textContent = e.message || 'Failed to send invitation.'; errEl.style.display = 'block'; }
+  }
+};
+
+window.resendInvite = async function(inviteId, email, role) {
+  try {
+    const functions = getFunctions();
+    const sendInvite = httpsCallable(functions, 'sendInvite');
+    await sendInvite({ orgId, email, role, inviteId });
+    showToast('Invitation resent to ' + email);
+  } catch(e) { alert('Failed to resend: ' + e.message); }
+};
+
+window.changeMemberRole = async function(uid, newRole) {
+  if (!newRole) return;
+  const db = getDB();
+  try {
+    const { doc, updateDoc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+    await updateDoc(doc(db, 'orgs', orgId, 'members', uid), { role: newRole });
+    showToast('Role updated');
+    await loadTeamMembers();
+  } catch(e) { alert('Failed to update role: ' + e.message); }
+};
+
+// Load team on tab open
+const _origShowTab = window.showTab;
+window.showTab = function(id, el) {
+  _origShowTab(id, el);
+  if (id === 'team') loadTeamMembers();
+};
 window.toggleNav = async function(key, btn) {
   const s = loadSettings();
   s.modules[key] = btn.classList.contains('on');
@@ -953,6 +1108,47 @@ window.loadPreferencesForm = function() {
   if (pn) pn.value = s.paymentNext;
 }
 
+// ── CONTACT TAGS ──
+function renderContactTags() {
+  const wrap = document.getElementById('contact-tags-list');
+  if (!wrap) return;
+  const tags = (loadSettings().contactTags||[]);
+  if (!tags.length) {
+    wrap.innerHTML = `<span style="font-size:12px;color:var(--muted2);">No tags yet.</span>`;
+    return;
+  }
+  wrap.innerHTML = tags.map((t, i) =>
+    `<div style="display:inline-flex;align-items:center;gap:5px;padding:3px 10px;background:var(--bl);color:var(--blue);border:1px solid var(--bb);border-radius:5px;font-size:12.5px;font-weight:500;">
+      ${t}
+      <button onclick="removeContactTag(${i})" style="border:none;background:none;cursor:pointer;color:var(--muted);font-size:15px;line-height:1;padding:0;margin-left:2px;" title="Remove">×</button>
+    </div>`
+  ).join('');
+}
+
+window.addContactTag = async function() {
+  const inp = document.getElementById('new-tag-input');
+  const val = inp?.value?.trim();
+  if (!val) { inp?.focus(); return; }
+  const s = loadSettings();
+  if (!s.contactTags) s.contactTags = [];
+  if (!s.contactTags.includes(val)) {
+    s.contactTags.push(val);
+    await persistSettings(s);
+    showToast('Tag added');
+  }
+  if (inp) inp.value = '';
+  renderContactTags();
+};
+
+window.removeContactTag = async function(idx) {
+  const s = loadSettings();
+  if (!s.contactTags) return;
+  s.contactTags.splice(idx, 1);
+  await persistSettings(s);
+  renderContactTags();
+  showToast('Tag removed');
+};
+
 // ── TOAST ──
 function showToast(msg) {
   let t = document.getElementById('settings-toast');
@@ -972,6 +1168,7 @@ function showToast(msg) {
 loadModuleToggles();
 loadTermInputs();
 loadPreferencesForm();
+renderContactTags();
 
 // Populate org fields from merged settings
 const _s = loadSettings();

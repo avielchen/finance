@@ -86,6 +86,22 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
 .ls-spin{width:32px;height:32px;border:3px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;}
 .ls-txt{font-family:var(--mono);font-size:13px;color:var(--muted);}
 @keyframes spin{to{transform:rotate(360deg)}}
+/* Chart card */
+.chart-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:16px;}
+.chart-body{padding:16px 18px 14px;}
+.chart-tabs{display:flex;gap:6px;padding:0 18px 12px;}
+.chart-tab{font-size:11.5px;font-weight:600;padding:4px 10px;border-radius:6px;cursor:pointer;border:1px solid transparent;color:var(--muted);transition:all .15s;}
+.chart-tab.active{background:var(--al);color:var(--accent);border-color:rgba(26,107,74,.2);}
+.chart-tab:hover:not(.active){background:var(--s2);}
+canvas{display:block;}
+/* Stat row below chart */
+.chart-stats{display:flex;gap:0;border-top:1px solid var(--border);margin-top:6px;}
+.cs-item{flex:1;padding:10px 14px;border-right:1px solid var(--border);text-align:center;}
+.cs-item:last-child{border-right:none;}
+.cs-val{font-family:var(--mono);font-size:14px;font-weight:700;letter-spacing:-.2px;}
+.cs-lbl{font-size:10.5px;color:var(--muted);margin-top:2px;}
+/* Mini sparkline bars */
+.spark-bar{display:inline-block;width:6px;border-radius:2px 2px 0 0;transition:height .4s;}
 @keyframes fu{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
 .fi{animation:fu .25s ease both;}
 </style>
@@ -110,7 +126,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
   </div>
   <div class="nav-sec"><a class="ni active" href="index.html"><span class="nic">⊞</span><span class="nl">Dashboard</span></a></div>
   <div class="nav-sec">
-    <a class="ni" href="invoice.html"><span class="nic">📄</span><span class="nl">Tuition</span></a>
+    <a class="ni" href="tuition.html"><span class="nic">📄</span><span class="nl">Tuition</span></a>
     <a class="ni" href="donations.html"><span class="nic">🤝</span><span class="nl">Donations</span></a>
     <a class="ni" href="payments.html"><span class="nic">💳</span><span class="nl">Payments</span></a>
     <a class="ni" href="vendors.html"><span class="nic">🏢</span><span class="nl">Vendors</span></a>
@@ -154,11 +170,32 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
       <a href="donations.html" class="kpi"><div class="kpi-l">Donations</div><div class="kpi-v" id="kpi-donations">—</div><div class="kpi-d up" id="kpi-donations-d">All campaigns</div></a>
     </div>
 
+    <!-- CHART ROW -->
+    <div class="chart-card fi">
+      <div class="card-hd">
+        <div><div class="card-t">Financial Overview</div><div class="card-s">Last 6 months</div></div>
+        <div class="chart-tabs">
+          <div class="chart-tab active" onclick="switchChart('collected',this)">Collected</div>
+          <div class="chart-tab" onclick="switchChart('invoiced',this)">Invoiced</div>
+          <div class="chart-tab" onclick="switchChart('both',this)">Both</div>
+        </div>
+      </div>
+      <div class="chart-body">
+        <canvas id="main-chart" height="180"></canvas>
+      </div>
+      <div class="chart-stats">
+        <div class="cs-item"><div class="cs-val" id="cs-total-collected">—</div><div class="cs-lbl">6-month collected</div></div>
+        <div class="cs-item"><div class="cs-val" id="cs-total-invoiced">—</div><div class="cs-lbl">6-month invoiced</div></div>
+        <div class="cs-item"><div class="cs-val" id="cs-collection-rate">—</div><div class="cs-lbl">Collection rate</div></div>
+        <div class="cs-item"><div class="cs-val" id="cs-avg-monthly">—</div><div class="cs-lbl">Avg / month</div></div>
+      </div>
+    </div>
+
     <div class="grid2r fi">
       <div class="card">
         <div class="card-hd">
           <div><div class="card-t">Recent Invoices</div></div>
-          <a href="payments.html" class="lnk">All →</a>
+          <a href="tuition.html" class="lnk">All →</a>
         </div>
         <table class="tbl">
           <thead><tr><th>Student</th><th>Amount</th><th>Due</th><th>Status</th></tr></thead>
@@ -195,12 +232,9 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
       <div class="card">
         <div class="card-hd"><div><div class="card-t">Recent Payments</div></div><a href="payments.html" class="lnk">All →</a></div>
         <table class="tbl">
-          <thead><tr><th>Student</th><th>Amount</th><th>Method</th><th>Date</th></tr></thead>
-          <tbody>
-            <tr onclick="location='payments.html'"><td><b>David Cohen</b></td><td class="mono" style="color:var(--accent);">$5,482</td><td style="color:var(--muted);font-size:12px;">Credit Card</td><td class="mono" style="font-size:11px;color:var(--muted2);">Apr 12</td></tr>
-            <tr onclick="location='payments.html'"><td><b>Rachel Cohen</b></td><td class="mono" style="color:var(--accent);">$15,552</td><td style="color:var(--muted);font-size:12px;">Bank Transfer</td><td class="mono" style="font-size:11px;color:var(--muted2);">Mar 1</td></tr>
-            <tr onclick="location='payments.html'"><td><b>Sara Goldstein</b></td><td class="mono" style="color:var(--accent);">$16,000</td><td style="color:var(--muted);font-size:12px;">Check</td><td class="mono" style="font-size:11px;color:var(--muted2);">Jan 10</td></tr>
-            <tr onclick="location='payments.html'"><td><b>Miriam Levy</b><div style="font-size:10.5px;color:var(--blue);">Donation</div></td><td class="mono" style="color:var(--blue);">$2,000</td><td style="color:var(--muted);font-size:12px;">Wire</td><td class="mono" style="font-size:11px;color:var(--muted2);">Apr 12</td></tr>
+          <thead><tr><th>Name</th><th>Amount</th><th>Method</th><th>Date</th></tr></thead>
+          <tbody id="recent-payments-tbody">
+            <tr><td colspan="4" style="text-align:center;color:var(--muted2);font-size:12.5px;padding:16px;">Loading…</td></tr>
           </tbody>
         </table>
       </div>
@@ -210,148 +244,271 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
 </main>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script type="module">
 import { initNav, loadSettings } from './nav.js';
-import { getCurrentOrgId, getDashboardStats, getFunds, getDonations, fmt } from './db.js';
+import { getCurrentOrgId, getDashboardStats, getFunds, fmt } from './db.js';
 
-// Auth + nav
 const user = await initNav({ currentPage: 'dashboard', requireLogin: true, showLoadingScreen: true });
 
-// Personalize greeting
+// ── GREETING ──
 const name = user?.displayName?.split(' ')[0] || 'there';
 const settings = loadSettings();
+const terms = settings.terms || {};
 document.getElementById('wb-name').textContent = `Welcome back, ${name}`;
 const now = new Date();
 const dateStr = now.toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric', year:'numeric' });
 document.getElementById('today-date').textContent = dateStr;
 document.getElementById('wb-date').textContent = dateStr;
 
-// Update terminology labels on dashboard
-const terms = settings.terms || {};
-document.querySelectorAll('.kpi-l').forEach((el, i) => {
-  // Update "students past due" label based on terminology
-  if (el.textContent.includes('students')) el.textContent = el.textContent.replace('students', (terms.students || 'contacts').toLowerCase());
-});
+// ── CHART STATE ──
+let chartInstance = null;
+let currentChartMode = 'collected';
+let chartData = { labels:[], collected:[], invoiced:[] };
 
-// ── LOAD LIVE DATA ──
+function buildChart(mode) {
+  const canvas = document.getElementById('main-chart');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+
+  // Compute chart style variables from CSS
+  const accent  = '#1a6b4a';
+  const blue    = '#1a4a8a';
+  const accentL = 'rgba(26,107,74,0.12)';
+  const blueL   = 'rgba(26,74,138,0.10)';
+  const muted   = '#a0a098';
+  const border  = '#e0e0d8';
+  const textCol = '#1c1c1a';
+
+  if (chartInstance) chartInstance.destroy();
+
+  let datasets = [];
+  if (mode === 'collected' || mode === 'both') {
+    datasets.push({
+      label: 'Collected',
+      data: chartData.collected,
+      backgroundColor: accentL,
+      borderColor: accent,
+      borderWidth: 2,
+      fill: true,
+      tension: 0.35,
+      pointBackgroundColor: accent,
+      pointRadius: 4,
+      pointHoverRadius: 6,
+    });
+  }
+  if (mode === 'invoiced' || mode === 'both') {
+    datasets.push({
+      label: 'Invoiced',
+      data: chartData.invoiced,
+      backgroundColor: blueL,
+      borderColor: blue,
+      borderWidth: 2,
+      fill: mode === 'invoiced',
+      tension: 0.35,
+      pointBackgroundColor: blue,
+      pointRadius: 4,
+      pointHoverRadius: 6,
+    });
+  }
+
+  chartInstance = new Chart(ctx, {
+    type: 'line',
+    data: { labels: chartData.labels, datasets },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: {
+          display: mode === 'both',
+          position: 'top',
+          align: 'end',
+          labels: {
+            font: { family: "'IBM Plex Sans', sans-serif", size: 11 },
+            color: muted,
+            boxWidth: 10,
+            boxHeight: 10,
+            usePointStyle: true,
+            pointStyle: 'circle',
+          },
+        },
+        tooltip: {
+          backgroundColor: '#1c1c1a',
+          titleColor: '#fff',
+          bodyColor: 'rgba(255,255,255,.75)',
+          padding: 10,
+          cornerRadius: 8,
+          titleFont: { family: "'IBM Plex Mono', monospace", size: 11 },
+          bodyFont: { family: "'IBM Plex Mono', monospace", size: 12 },
+          callbacks: {
+            label: ctx => ` ${ctx.dataset.label}: $${fmt(ctx.parsed.y)}`,
+          },
+        },
+      },
+      scales: {
+        x: {
+          grid: { color: border, drawBorder: false },
+          ticks: { color: muted, font: { family: "'IBM Plex Sans', sans-serif", size: 11 } },
+        },
+        y: {
+          grid: { color: border, drawBorder: false },
+          ticks: {
+            color: muted,
+            font: { family: "'IBM Plex Mono', monospace", size: 11 },
+            callback: v => '$' + (v >= 1000 ? (v/1000).toFixed(0)+'k' : v),
+          },
+          beginAtZero: true,
+        },
+      },
+    },
+  });
+}
+
+window.switchChart = function(mode, el) {
+  currentChartMode = mode;
+  document.querySelectorAll('.chart-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  buildChart(mode);
+};
+
+// ── LOAD DATA ──
 const orgId = getCurrentOrgId();
 if (orgId) {
-  // Show loading skeletons on KPIs
-  document.querySelectorAll('.kpi-v').forEach(el => {
-    el.style.color = 'var(--muted2)';
-    el.textContent = '—';
-  });
+  document.querySelectorAll('.kpi-v').forEach(el => { el.style.color = 'var(--muted2)'; el.textContent = '—'; });
 
   try {
-    const stats = await getDashboardStats(orgId);
+    const [stats, funds] = await Promise.all([getDashboardStats(orgId), getFunds(orgId)]);
 
-    // KPI 1: Collected this month
-    const kpi1 = document.getElementById('kpi-collected');
-    if (kpi1) {
-      kpi1.textContent = '$' + fmt(stats.collectedThisMonth);
-      kpi1.style.color = '';
+    // ── KPIs ──
+    const el = id => document.getElementById(id);
+    el('kpi-collected').textContent = '$' + fmt(stats.collectedThisMonth);
+    el('kpi-collected').style.color = '';
+    el('kpi-outstanding').textContent = '$' + fmt(stats.totalOutstanding);
+    el('kpi-outstanding').style.color = '';
+    el('kpi-outstanding-d').textContent = stats.openInvoiceCount + ' open invoices';
+    el('kpi-overdue').textContent = '$' + fmt(stats.totalOverdue);
+    el('kpi-overdue').style.color = stats.totalOverdue > 0 ? 'var(--red)' : '';
+    const contactLabel = (terms.students || 'contacts').toLowerCase();
+    el('kpi-overdue-d').textContent = stats.overdueCount + ' ' + contactLabel + ' past due';
+
+    // ── CHART ──
+    if (stats.monthlyData?.length) {
+      chartData.labels    = stats.monthlyData.map(m => m.label);
+      chartData.collected = stats.monthlyData.map(m => m.collected);
+      chartData.invoiced  = stats.monthlyData.map(m => m.invoiced);
+      buildChart('collected');
+
+      // Chart summary stats
+      const totalCol = chartData.collected.reduce((s,v) => s+v, 0);
+      const totalInv = chartData.invoiced.reduce((s,v) => s+v, 0);
+      const rate = totalInv > 0 ? Math.round(totalCol/totalInv*100) : 0;
+      const avg = Math.round(totalCol / Math.max(chartData.collected.filter(v=>v>0).length, 1));
+      el('cs-total-collected').textContent = '$' + (totalCol >= 1000 ? (totalCol/1000).toFixed(1)+'k' : fmt(totalCol));
+      el('cs-total-invoiced').textContent  = '$' + (totalInv >= 1000 ? (totalInv/1000).toFixed(1)+'k' : fmt(totalInv));
+      el('cs-collection-rate').textContent = rate + '%';
+      el('cs-avg-monthly').textContent     = '$' + (avg >= 1000 ? (avg/1000).toFixed(1)+'k' : fmt(avg));
     }
 
-    // KPI 2: Outstanding
-    const kpi2 = document.getElementById('kpi-outstanding');
-    const kpi2d = document.getElementById('kpi-outstanding-d');
-    if (kpi2) { kpi2.textContent = '$' + fmt(stats.totalOutstanding); kpi2.style.color = ''; }
-    if (kpi2d) kpi2d.textContent = stats.openInvoiceCount + ' open invoices';
-
-    // KPI 3: Overdue
-    const kpi3 = document.getElementById('kpi-overdue');
-    const kpi3d = document.getElementById('kpi-overdue-d');
-    if (kpi3) { kpi3.textContent = '$' + fmt(stats.totalOverdue); kpi3.style.color = stats.totalOverdue > 0 ? 'var(--red)' : ''; }
-    if (kpi3d) {
-      const contactLabel = (terms.students || 'contacts').toLowerCase();
-      kpi3d.textContent = stats.overdueCount + ' ' + contactLabel + ' past due';
+    // ── RECENT INVOICES ──
+    const invTbody = el('recent-invoices-tbody');
+    if (invTbody) {
+      if (stats.recentInvoices.length === 0) {
+        invTbody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:var(--muted2);font-size:12.5px;padding:20px;">No invoices yet. <a href="invoice.html" style="color:var(--accent);">Create your first →</a></td></tr>`;
+      } else {
+        invTbody.innerHTML = stats.recentInvoices.map(inv => {
+          const bal = (inv.totalAmount||0) - (inv.totalPaid||0);
+          const pct = inv.totalAmount > 0 ? (inv.totalPaid||0)/inv.totalAmount*100 : 0;
+          const isOverdue = bal > 0 && inv.dueDate && new Date(inv.dueDate) < now;
+          const badge = pct>=100 ? '<span class="badge b-g">Paid</span>'
+            : isOverdue ? '<span class="badge b-r">Overdue</span>'
+            : pct>0 ? '<span class="badge b-y">Partial</span>'
+            : '<span class="badge b-gr">Unpaid</span>';
+          const dueStr = inv.dueDate
+            ? new Date(inv.dueDate+'T12:00').toLocaleDateString('en-US',{month:'short',day:'numeric'})
+            : '—';
+          return `<tr onclick="location='invoice.html?id=${inv.id}&edit=1'">
+            <td><b>${inv.contactName||'—'}</b>${inv.schoolYear?`<div style="font-size:10.5px;color:var(--muted);">${inv.schoolYear}</div>`:''}</td>
+            <td class="mono">$${fmt(inv.totalAmount||0)}</td>
+            <td class="mono" style="font-size:11px;color:${isOverdue?'var(--red)':'var(--muted2)'};">${dueStr}</td>
+            <td>${badge}</td>
+          </tr>`;
+        }).join('');
+      }
     }
 
-    // Recent invoices table
-    const tbody = document.getElementById('recent-invoices-tbody');
-    if (tbody && stats.recentInvoices.length > 0) {
-      tbody.innerHTML = stats.recentInvoices.map(inv => {
-        const bal = (inv.totalAmount || 0) - (inv.totalPaid || 0);
-        const pct = inv.totalAmount > 0 ? (inv.totalPaid || 0) / inv.totalAmount * 100 : 0;
-        const statusBadge = pct >= 100
-          ? '<span class="badge b-g">● Paid</span>'
-          : bal > 0 && inv.dueDate && new Date(inv.dueDate) < now
-            ? '<span class="badge b-r">⚠ Overdue</span>'
-            : pct > 0
-              ? '<span class="badge b-y">◑ Partial</span>'
-              : '<span class="badge b-gr">○ Unpaid</span>';
-        const dueStr = inv.dueDate
-          ? new Date(inv.dueDate + 'T12:00').toLocaleDateString('en-US', { month:'short', day:'numeric' })
-          : '—';
-        const contactName = inv.contactName || 'Unknown';
-        const sub = inv.schoolYear || inv.contactGroup || '';
-        return `<tr onclick="location='invoice.html?id=${inv.id}'">
-          <td><b>${contactName}</b>${sub ? `<div style="font-size:10.5px;color:var(--muted);">${sub}</div>` : ''}</td>
-          <td class="mono">$${fmt(inv.totalAmount || 0)}</td>
-          <td class="mono" style="font-size:11px;color:var(--muted2);">${dueStr}</td>
-          <td>${statusBadge}</td>
-        </tr>`;
-      }).join('');
-    } else if (tbody && stats.recentInvoices.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:var(--muted2);font-size:12.5px;padding:20px;">No invoices yet. <a href="invoice.html" style="color:var(--accent);">Create your first →</a></td></tr>`;
-    }
-
-    // Alerts
-    const alertsEl = document.getElementById('alerts-list');
+    // ── ALERTS ──
+    const alertsEl = el('alerts-list');
     if (alertsEl) {
       const alerts = [];
-      if (stats.overdueCount > 0) {
-        alerts.push({ color: 'var(--red)', title: `${stats.overdueCount} invoice${stats.overdueCount > 1 ? 's' : ''} overdue`, sub: `$${fmt(stats.totalOverdue)} total past due` });
-      }
-      if (stats.totalOutstanding > 0) {
-        alerts.push({ color: 'var(--yellow)', title: `$${fmt(stats.totalOutstanding)} outstanding`, sub: `${stats.openInvoiceCount} open invoices` });
-      }
-      if (alerts.length === 0) {
-        alerts.push({ color: 'var(--accent)', title: 'All invoices up to date', sub: 'No overdue or outstanding items' });
-      }
-      alertsEl.innerHTML = alerts.map(a => `
-        <a href="payments.html" class="alert-item">
+      if (stats.overdueCount > 0)
+        alerts.push({ color:'var(--red)', href:'payments.html', title:`${stats.overdueCount} invoice${stats.overdueCount>1?'s':''} overdue`, sub:`$${fmt(stats.totalOverdue)} total past due` });
+      if (stats.totalOutstanding > 0)
+        alerts.push({ color:'var(--yellow)', href:'payments.html', title:`$${fmt(stats.totalOutstanding)} outstanding`, sub:`${stats.openInvoiceCount} open invoices` });
+      if (alerts.length === 0)
+        alerts.push({ color:'var(--accent)', href:'payments.html', title:'All invoices up to date', sub:'No overdue or outstanding items' });
+      alertsEl.innerHTML = alerts.map(a =>
+        `<a href="${a.href}" class="alert-item">
           <div class="alert-dot" style="background:${a.color};"></div>
           <div><div style="font-size:12.5px;"><b>${a.title}</b></div><div style="font-size:11px;color:var(--muted);margin-top:1px;">${a.sub}</div></div>
-        </a>`).join('');
+        </a>`
+      ).join('');
     }
 
-    // Load donation funds
-    try {
-      const funds = await getFunds(orgId);
-      const fundsEl = document.getElementById('donation-funds-list');
-      if (fundsEl && funds.length > 0) {
-        fundsEl.innerHTML = funds.filter(f => f.active !== false).slice(0, 3).map(f => {
-          const pct = f.goal > 0 ? Math.min((f.raised || 0) / f.goal * 100, 100) : 0;
+    // ── DONATIONS ──
+    const fundsEl = el('donation-funds-list');
+    if (fundsEl) {
+      const active = funds.filter(f => f.active !== false);
+      if (!active.length) {
+        fundsEl.innerHTML = `<div style="font-size:12.5px;color:var(--muted2);text-align:center;padding:12px 0;">No active campaigns. <a href="settings.html" style="color:var(--accent);">Set one up →</a></div>`;
+      } else {
+        fundsEl.innerHTML = active.slice(0,3).map(f => {
+          const pct = f.goal>0 ? Math.min((f.raised||0)/f.goal*100,100) : 0;
           return `<div>
             <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;">
               <span style="font-weight:600;">${f.name}</span>
-              <span class="mono" style="color:var(--accent);">$${fmt(f.raised || 0)} / $${fmt(f.goal || 0)}</span>
+              <span class="mono" style="color:var(--accent);">$${fmt(f.raised||0)} / $${fmt(f.goal||0)}</span>
             </div>
             <div class="prog"><div class="prog-fill" style="width:${pct.toFixed(1)}%;background:var(--accent);"></div></div>
           </div>`;
         }).join('');
-      } else if (fundsEl) {
-        fundsEl.innerHTML = `<div style="font-size:12.5px;color:var(--muted2);text-align:center;padding:12px 0;">No active campaigns. <a href="settings.html" style="color:var(--accent);">Set one up →</a></div>`;
       }
-
-      // KPI 4: Donations total
-      const kpi4 = document.getElementById('kpi-donations');
+      const kpi4 = el('kpi-donations');
       if (kpi4 && funds.length > 0) {
-        const total = funds.reduce((s, f) => s + (f.raised || 0), 0);
-        kpi4.textContent = '$' + fmt(total);
+        kpi4.textContent = '$' + fmt(funds.reduce((s,f)=>s+(f.raised||0),0));
         kpi4.style.color = '';
       }
-    } catch (e) {
-      // Donations disabled or no funds yet
     }
 
-  } catch (e) {
-    console.warn('Dashboard stats error:', e.message);
-    // Leave skeleton state — data will show on next load
+    // ── RECENT PAYMENTS (live from Firestore) ──
+    const payTbody = el('recent-payments-tbody');
+    if (payTbody) {
+      const payments = stats.recentPayments || [];
+      if (!payments.length) {
+        payTbody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:var(--muted2);font-size:12.5px;padding:16px;">No payments yet.</td></tr>`;
+      } else {
+        // Build invoice→contactName lookup from recentInvoices
+        const nameMap = {};
+        (stats.recentInvoices || []).forEach(inv => { nameMap[inv.id] = inv.contactName; });
+        payTbody.innerHTML = payments.map(p => {
+          const pName = p.contactName || nameMap[p.invoiceId] || '—';
+          const dStr = p.date
+            ? new Date(p.date+'T12:00').toLocaleDateString('en-US',{month:'short',day:'numeric'})
+            : '—';
+          return `<tr onclick="location='payments.html'">
+            <td><b>${pName}</b>${p.paymentNumber?`<div style="font-size:10.5px;color:var(--muted);font-family:var(--mono);">${p.paymentNumber}</div>`:''}</td>
+            <td class="mono" style="color:var(--accent);">$${fmt(p.amount||0)}</td>
+            <td style="color:var(--muted);font-size:12px;">${p.method||'—'}</td>
+            <td class="mono" style="font-size:11px;color:var(--muted2);">${dStr}</td>
+          </tr>`;
+        }).join('');
+      }
+    }
+
+  } catch(e) {
+    console.warn('Dashboard error:', e.message);
   }
 } else {
-  // No org — shouldn't get here but handle gracefully
   document.querySelectorAll('.kpi-v').forEach(el => { el.textContent = '—'; });
 }
 </script>

@@ -261,7 +261,7 @@ input[type=date].input{min-width:128px;padding-right:4px;font-size:12.5px;}
   </div>
   <div class="nav-sec"><a class="ni" href="index.html"><span class="nic">⊞</span><span class="nl">Dashboard</span></a></div>
   <div class="nav-sec">
-    <a class="ni active" href="invoice.html"><span class="nic">📄</span><span class="nl">Tuition</span></a>
+    <a class="ni active" href="tuition.html"><span class="nic">📄</span><span class="nl">Tuition</span></a>
     <a class="ni" href="donations.html"><span class="nic">🤝</span><span class="nl">Donations</span></a>
     <a class="ni" href="payments.html"><span class="nic">💳</span><span class="nl">Payments</span></a>
     <a class="ni" href="vendors.html"><span class="nic">🏢</span><span class="nl">Vendors</span></a>
@@ -291,12 +291,15 @@ input[type=date].input{min-width:128px;padding-right:4px;font-size:12.5px;}
       <button class="btn btn-g btn-sm" onclick="toggleMenu()">⚙ Options</button>
       <div class="amenu hidden" id="amenu">
         <div class="am-lbl">Invoice</div>
-        <div class="am-item"><input type="checkbox" checked style="accent-color:var(--accent);"><label style="cursor:pointer;">Auto-increment invoice #</label></div>
+        <div class="am-item" onclick="duplicateInvoice()">📋 Duplicate invoice</div>
+        <div class="am-item" onclick="openSendReminderModal()">🔔 Send payment reminder</div>
+        <div class="am-div"></div>
+        <div class="am-item"><input type="checkbox" id="auto-increment-cb" checked style="accent-color:var(--accent);"><label for="auto-increment-cb" style="cursor:pointer;">Auto-increment invoice #</label></div>
       </div>
     </div>
     <button class="btn btn-g btn-sm" onclick="previewPDF()">👁 Preview PDF</button>
     <button class="btn btn-g btn-sm" onclick="window._saveInvoice(false)">💾 Draft</button>
-    <button class="btn btn-p btn-sm" id="save-btn" onclick="window._saveInvoice(false)">✉ Send →</button>
+    <button class="btn btn-p btn-sm" id="save-btn" onclick="openSendModal()">✉ Send →</button>
   </div>
 </div>
 
@@ -1365,6 +1368,203 @@ window._addFeeRowWithTypes = function() {
   }
 };
 
+// ── SEND MODAL ──
+window.openSendModal = async function() {
+  // Save first if it's a new invoice
+  if (!window._invoiceId) {
+    await window._saveInvoice(false);
+    if (!window._invoiceId) return; // save failed
+  }
+
+  // Pre-populate recipient from contact record if we have one
+  const emailInp = document.getElementById('send-email');
+  const nameInp = document.getElementById('send-name');
+  if (nameInp && window._contactName) nameInp.value = window._contactName;
+
+  // Try to load contact email from Firestore
+  if (window._contactId && emailInp && !emailInp.value) {
+    try {
+      const { getContact } = await import('./db.js');
+      const contact = await getContact(orgId, window._contactId);
+      if (contact?.email) emailInp.value = contact.email;
+      // If student, also look for parent email
+      if (!contact?.email && contact?.familyName) {
+        const { getContacts } = await import('./db.js');
+        const parents = await getContacts(orgId, { type: 'parent' });
+        const parent = parents.find(p => p.familyName === contact.familyName && p.email);
+        if (parent) {
+          emailInp.value = parent.email;
+          if (nameInp && !nameInp.value) nameInp.value = `${parent.firstName||''} ${parent.lastName||''}`.trim();
+        }
+      }
+    } catch(e) { /* email stays blank, user fills it */ }
+  }
+
+  document.getElementById('send-modal').style.display = 'flex';
+};
+
+window.closeSendModal = function() {
+  document.getElementById('send-modal').style.display = 'none';
+  const errEl = document.getElementById('send-modal-error');
+  if (errEl) errEl.style.display = 'none';
+};
+
+window.confirmSend = async function() {
+  const email = document.getElementById('send-email')?.value?.trim();
+  const name  = document.getElementById('send-name')?.value?.trim();
+  const msg   = document.getElementById('send-message')?.value?.trim();
+  const errEl = document.getElementById('send-modal-error');
+  const btn   = document.getElementById('send-confirm-btn');
+
+  if (!email) {
+    if (errEl) { errEl.textContent = 'Please enter a recipient email address.'; errEl.style.display = 'block'; }
+    return;
+  }
+  if (errEl) errEl.style.display = 'none';
+  if (btn) { btn.disabled = true; btn.textContent = 'Sending…'; }
+
+  try {
+    // Call the Firebase Function
+    const { getFunctions, httpsCallable } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-functions.js');
+    const { getApp } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js');
+    const functions = getFunctions(getApp());
+    const sendInvoice = httpsCallable(functions, 'sendInvoice');
+
+    await sendInvoice({
+      orgId,
+      invoiceId: window._invoiceId,
+      recipientEmail: email,
+      recipientName: name,
+      message: msg,
+    });
+
+    closeSendModal();
+    showToast('Invoice sent to ' + email + ' ✓');
+
+    // Update mode label to show sent status
+    const ml = document.getElementById('page-mode-label');
+    if (ml) ml.textContent = 'Sent ✓';
+
+  } catch(e) {
+    if (errEl) {
+      errEl.textContent = e.message || 'Failed to send. Please try again.';
+      errEl.style.display = 'block';
+    }
+    if (btn) { btn.disabled = false; btn.textContent = 'Send Invoice'; }
+  }
+};
+
+// ── DUPLICATE INVOICE ──
+window.duplicateInvoice = async function() {
+  if (!window._invoiceId && !window._contactId) {
+    alert('Please save the invoice first before duplicating.');
+    return;
+  }
+  toggleMenu(); // close options menu
+
+  // Collect current invoice data
+  const data = collectInvoiceData();
+  if (!data.lineItems?.length) {
+    alert('Add at least one line item before duplicating.');
+    return;
+  }
+
+  // Adjust invoice number
+  const autoInc = document.getElementById('auto-increment-cb')?.checked !== false;
+  if (autoInc) {
+    data.invoiceNumber = getNextInvoiceNumber();
+  } else {
+    data.invoiceNumber = (data.invoiceNumber || '') + ' (copy)';
+  }
+
+  // Reset paid amounts and status
+  data.totalPaid = 0;
+  data.status = 'unpaid';
+  if (data.lineItems) {
+    data.lineItems = data.lineItems.map(li => ({ ...li, paid: 0 }));
+  }
+  if (data.installments) {
+    data.installments = data.installments.map(inst => ({ ...inst, paid: 0 }));
+  }
+
+  try {
+    const newId = await saveInvoice(orgId, null, data);
+    if (autoInc) bumpInvoiceNumber();
+    showToast('Invoice duplicated ✓');
+    // Navigate to the new invoice
+    window.location.href = `invoice.html?id=${newId}&edit=1`;
+  } catch(e) {
+    alert('Failed to duplicate: ' + e.message);
+  }
+};
+
+// ── SEND REMINDER (from invoice page) ──
+window.openSendReminderModal = async function() {
+  if (!window._invoiceId) {
+    alert('Save the invoice first before sending a reminder.');
+    return;
+  }
+  toggleMenu();
+
+  // Try to pre-fill email from contact
+  const emailInp = document.getElementById('reminder-email');
+  const nameInp  = document.getElementById('reminder-name');
+  if (nameInp && window._contactName) nameInp.value = window._contactName;
+
+  if (window._contactId && emailInp && !emailInp.value) {
+    try {
+      const { getContact, getContacts } = await import('./db.js');
+      const contact = await getContact(orgId, window._contactId);
+      if (contact?.email) {
+        emailInp.value = contact.email;
+      } else if (contact?.familyName) {
+        const parents = await getContacts(orgId, { type: 'parent' });
+        const parent = parents.find(p => p.familyName === contact.familyName && p.email);
+        if (parent) {
+          emailInp.value = parent.email;
+          if (nameInp && !nameInp.value) nameInp.value = `${parent.firstName||''} ${parent.lastName||''}`.trim();
+        }
+      }
+    } catch(e) { /* email stays blank */ }
+  }
+
+  document.getElementById('reminder-modal').style.display = 'flex';
+};
+
+window.closeReminderModal = function() {
+  document.getElementById('reminder-modal').style.display = 'none';
+};
+
+window.confirmSendReminder = async function() {
+  const email = document.getElementById('reminder-email')?.value?.trim();
+  const name  = document.getElementById('reminder-name')?.value?.trim();
+  const type  = document.querySelector('input[name="reminder-type"]:checked')?.value || 'overdue';
+  const errEl = document.getElementById('reminder-error');
+  const btn   = document.getElementById('reminder-confirm-btn');
+
+  if (!email) { if(errEl){errEl.textContent='Please enter a recipient email.';errEl.style.display='block';} return; }
+  if (errEl) errEl.style.display = 'none';
+  if (btn) { btn.disabled = true; btn.textContent = 'Sending…'; }
+
+  try {
+    const { getFunctions, httpsCallable } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-functions.js');
+    const { getApp } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js');
+    const sendReminder = httpsCallable(getFunctions(getApp()), 'sendPaymentReminder');
+    await sendReminder({
+      orgId,
+      invoiceId: window._invoiceId,
+      recipientEmail: email,
+      recipientName: name,
+      reminderType: type,
+    });
+    closeReminderModal();
+    showToast('Reminder sent to ' + email + ' ✓');
+  } catch(e) {
+    if(errEl){errEl.textContent = e.message||'Failed to send.'; errEl.style.display='block';}
+    if(btn){btn.disabled=false;btn.textContent='Send Reminder';}
+  }
+};
+
 // ── PDF PREVIEW / PRINT ──
 window.previewPDF = function() {
   const s = loadSettings();
@@ -1415,5 +1615,86 @@ if (isEdit && invoiceId) {
   }
 }
 </script>
+<!-- SEND INVOICE MODAL -->
+<div id="send-modal" style="position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:300;display:none;align-items:center;justify-content:center;padding:20px;">
+  <div style="background:#fff;border-radius:14px;width:100%;max-width:480px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.2);">
+    <div style="padding:18px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+      <div style="font-size:15px;font-weight:700;">✉ Send Invoice</div>
+      <button onclick="closeSendModal()" style="width:28px;height:28px;border:none;background:var(--s2);border-radius:6px;cursor:pointer;font-size:14px;color:var(--muted);">✕</button>
+    </div>
+    <div style="padding:22px;">
+      <div id="send-modal-error" style="background:var(--rl);border:1px solid var(--rb);border-radius:7px;padding:9px 13px;font-size:12.5px;color:var(--red);margin-bottom:14px;display:none;"></div>
+
+      <!-- Recipient -->
+      <div style="margin-bottom:14px;">
+        <label style="font-size:10.5px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:5px;">Recipient Email</label>
+        <input id="send-email" type="email" placeholder="parent@email.com"
+          style="width:100%;height:36px;padding:0 11px;background:var(--bg);border:1.5px solid var(--border2);border-radius:7px;font-family:var(--sans);font-size:13px;outline:none;">
+      </div>
+      <div style="margin-bottom:14px;">
+        <label style="font-size:10.5px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:5px;">Recipient Name</label>
+        <input id="send-name" type="text" placeholder="Parent / Guardian name"
+          style="width:100%;height:36px;padding:0 11px;background:var(--bg);border:1.5px solid var(--border2);border-radius:7px;font-family:var(--sans);font-size:13px;outline:none;">
+      </div>
+      <div style="margin-bottom:18px;">
+        <label style="font-size:10.5px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:5px;">Personal Message (optional)</label>
+        <textarea id="send-message" rows="3" placeholder="Add a personal note to the email…"
+          style="width:100%;padding:9px 11px;background:var(--bg);border:1.5px solid var(--border2);border-radius:7px;font-family:var(--sans);font-size:13px;outline:none;resize:vertical;"></textarea>
+      </div>
+
+      <!-- What will be sent -->
+      <div style="background:var(--s2);border-radius:8px;padding:11px 14px;font-size:12px;color:var(--muted);margin-bottom:18px;">
+        📎 A PDF copy of this invoice will be attached to the email.
+      </div>
+
+      <div style="display:flex;gap:8px;justify-content:flex-end;">
+        <button onclick="closeSendModal()" style="padding:8px 16px;border-radius:7px;background:var(--surface);border:1.5px solid var(--border2);font-size:13px;cursor:pointer;color:var(--muted);">Cancel</button>
+        <button id="send-confirm-btn" onclick="confirmSend()"
+          style="padding:8px 20px;border-radius:7px;background:var(--accent);color:#fff;border:none;font-size:13px;font-weight:600;cursor:pointer;">
+          Send Invoice
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PAYMENT REMINDER MODAL -->
+<div id="reminder-modal" style="position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:300;display:none;align-items:center;justify-content:center;padding:20px;" onclick="if(event.target===this)closeReminderModal()">
+  <div style="background:#fff;border-radius:14px;width:100%;max-width:440px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.2);">
+    <div style="padding:16px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+      <div style="font-size:15px;font-weight:700;">🔔 Send Payment Reminder</div>
+      <button onclick="closeReminderModal()" style="width:28px;height:28px;border:none;background:var(--s2);border-radius:6px;cursor:pointer;font-size:14px;color:var(--muted);">✕</button>
+    </div>
+    <div style="padding:20px 22px;">
+      <div id="reminder-error" style="background:var(--rl);border:1px solid var(--rb);border-radius:7px;padding:9px 13px;font-size:12.5px;color:var(--red);margin-bottom:12px;display:none;"></div>
+      <div style="margin-bottom:12px;">
+        <label style="font-size:10.5px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:5px;">Recipient Email</label>
+        <input id="reminder-email" type="email" placeholder="parent@email.com" style="width:100%;height:36px;padding:0 11px;background:var(--bg);border:1.5px solid var(--border2);border-radius:7px;font-family:var(--sans);font-size:13px;outline:none;">
+      </div>
+      <div style="margin-bottom:14px;">
+        <label style="font-size:10.5px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:5px;">Recipient Name</label>
+        <input id="reminder-name" type="text" placeholder="Parent / Guardian" style="width:100%;height:36px;padding:0 11px;background:var(--bg);border:1.5px solid var(--border2);border-radius:7px;font-family:var(--sans);font-size:13px;outline:none;">
+      </div>
+      <div style="margin-bottom:18px;">
+        <label style="font-size:10.5px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:8px;">Reminder Type</label>
+        <div style="display:flex;flex-direction:column;gap:7px;">
+          <label style="display:flex;align-items:flex-start;gap:8px;padding:9px 12px;border:1.5px solid var(--border2);border-radius:7px;cursor:pointer;font-size:13px;background:var(--bg);">
+            <input type="radio" name="reminder-type" value="upcoming" style="margin-top:2px;accent-color:var(--yellow);">
+            <div><strong style="color:var(--yellow);">Upcoming reminder</strong><div style="font-size:11.5px;color:var(--muted);margin-top:2px;">Friendly reminder that payment is coming due soon</div></div>
+          </label>
+          <label style="display:flex;align-items:flex-start;gap:8px;padding:9px 12px;border:1.5px solid var(--border2);border-radius:7px;cursor:pointer;font-size:13px;background:var(--bg);">
+            <input type="radio" name="reminder-type" value="overdue" checked style="margin-top:2px;accent-color:var(--red);">
+            <div><strong style="color:var(--red);">Overdue notice</strong><div style="font-size:11.5px;color:var(--muted);margin-top:2px;">Payment is past due — please pay as soon as possible</div></div>
+          </label>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;">
+        <button onclick="closeReminderModal()" style="padding:8px 16px;border-radius:7px;background:var(--surface);border:1.5px solid var(--border2);font-size:13px;cursor:pointer;color:var(--muted);">Cancel</button>
+        <button id="reminder-confirm-btn" onclick="confirmSendReminder()" style="padding:8px 20px;border-radius:7px;background:var(--accent);color:#fff;border:none;font-size:13px;font-weight:600;cursor:pointer;">Send Reminder</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>

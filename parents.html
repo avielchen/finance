@@ -55,7 +55,20 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
 
 /* CONTENT */
 .content{padding:24px 28px;flex:1;}
-.two-col{display:grid;grid-template-columns:320px 1fr;gap:20px;align-items:start;}
+.filter-bar{display:flex;gap:10px;align-items:center;margin-bottom:16px;flex-wrap:wrap;}
+.srch-wrap{flex:1;min-width:180px;display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--border2);border-radius:7px;padding:0 12px;height:36px;}
+.srch-wrap input{flex:1;border:none;background:none;font-family:var(--sans);font-size:13px;color:var(--text);outline:none;}
+.filter-sel{height:36px;padding:0 10px;border:1px solid var(--border2);border-radius:6px;font-family:var(--sans);font-size:12.5px;background:var(--surface);color:var(--text);outline:none;cursor:pointer;}
+.tog-btn{width:28px;height:28px;border:1px solid var(--border2);border-radius:6px;background:none;cursor:pointer;font-size:13px;color:var(--muted);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.tog-btn:hover{background:var(--surface2);color:var(--text);}
+.back-btn{display:inline-flex;align-items:center;gap:6px;margin-bottom:14px;color:var(--muted);font-size:13px;cursor:pointer;border:none;background:none;padding:0;font-family:var(--sans);}
+.back-btn:hover{color:var(--text);}
+.detail-grid{display:grid;grid-template-columns:300px 1fr;gap:20px;align-items:start;}
+.mini-list-col{overflow:hidden;transition:all .22s ease;min-width:0;}
+.detail-content-col{min-width:0;}
+.mini-list-col.collapsed{max-width:0 !important;opacity:0;pointer-events:none;}
+.tag-chip{display:inline-flex;align-items:center;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:500;background:var(--blue-light);color:var(--blue);}
+.primary-on{background:var(--accent-light) !important;color:var(--accent) !important;border-color:var(--accent-mid) !important;}
 
 /* LIST */
 .list-panel{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;}
@@ -185,7 +198,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
     <a class="ni" href="index.html"><span class="nic">⊞</span><span class="nl">Dashboard</span></a>
   </div>
   <div class="nav-sec">
-    <a class="ni" href="invoice.html"><span class="nic">📄</span><span class="nl">Tuition</span></a>
+    <a class="ni" href="tuition.html"><span class="nic">📄</span><span class="nl">Tuition</span></a>
     <a class="ni" href="donations.html"><span class="nic">🤝</span><span class="nl">Donations</span></a>
     <a class="ni" href="payments.html"><span class="nic">💳</span><span class="nl">Payments</span></a>
     <a class="ni" href="vendors.html"><span class="nic">🏢</span><span class="nl">Vendors</span></a>
@@ -214,269 +227,184 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
   </div>
 
   <div class="content">
-    <div class="two-col">
 
-      <!-- LEFT: LIST -->
-      <div class="list-panel fi">
-        <div class="list-hd">
-          <div class="list-hd-title">All Parents <span style="font-family:var(--mono);font-size:11px;color:var(--muted);font-weight:400;margin-left:6px;">84</span></div>
-          <select style="font-size:12px;border:1px solid var(--border2);background:var(--surface2);border-radius:5px;padding:4px 8px;color:var(--muted);outline:none;">
-            <option>All</option><option>Primary Payers</option><option>Has Balance</option>
-          </select>
-        </div>
-        <div class="search-box">
+    <!-- LIST VIEW -->
+    <div id="view-list">
+      <div class="filter-bar">
+        <div class="srch-wrap">
           <span style="color:var(--muted2);font-size:14px;">⌕</span>
-          <input type="text" placeholder="Search parents...">
+          <input type="text" id="list-search" placeholder="Search parents...">
         </div>
-
-        <div class="parent-item active" onclick="window._selectParentById('jonathan',this)">
-          <div class="av" style="background:var(--blue);">JC</div>
-          <div>
-            <div class="pi-name">Jonathan Cohen</div>
-            <div class="pi-meta">Father · 2 students</div>
-          </div>
-          <div class="pi-right">
-            <span class="badge b-y">$9,134 due</span>
-          </div>
-        </div>
-
-        <div class="parent-item" onclick="window._selectParentById('miriam_cohen',this)">
-          <div class="av" style="background:#8e44ad;">MC</div>
-          <div>
-            <div class="pi-name">Miriam Cohen</div>
-            <div class="pi-meta">Mother · 2 students</div>
-          </div>
-          <div class="pi-right">
-            <span class="badge b-gr">Secondary</span>
-          </div>
-        </div>
-
-        <div class="parent-item" onclick="window._selectParentById('reuven',this)">
-          <div class="av" style="background:#c0622b;">RK</div>
-          <div>
-            <div class="pi-name">Reuven Katz</div>
-            <div class="pi-meta">Father · 1 student</div>
-          </div>
-          <div class="pi-right">
-            <span class="badge b-r">$20,300 overdue</span>
-          </div>
-        </div>
-
-        <div class="parent-item" onclick="window._selectParentById('devorah',this)">
-          <div class="av" style="background:#16a085;">DK</div>
-          <div>
-            <div class="pi-name">Devorah Katz</div>
-            <div class="pi-meta">Mother · 1 student</div>
-          </div>
-          <div class="pi-right">
-            <span class="badge b-gr">Secondary</span>
-          </div>
-        </div>
-
-        <div class="parent-item" onclick="window._selectParentById('avraham',this)">
-          <div class="av" style="background:#7b52ab;">AS</div>
-          <div>
-            <div class="pi-name">Avraham Shapiro</div>
-            <div class="pi-meta">Father · 1 student</div>
-          </div>
-          <div class="pi-right">
-            <span class="badge b-y">$10,150 due</span>
-          </div>
-        </div>
-
-        <div class="parent-item" onclick="window._selectParentById('miriam_levy',this)">
-          <div class="av" style="background:var(--accent);">ML</div>
-          <div>
-            <div class="pi-name">Miriam Levy</div>
-            <div class="pi-meta">Donor only</div>
-          </div>
-          <div class="pi-right">
-            <span class="badge b-b">Donor</span>
-          </div>
-        </div>
-
+        <button class="btn btn-g btn-sm" id="btn-primary-filter" onclick="togglePrimaryFilter()">Primary only</button>
+        <select class="filter-sel" id="filter-tag" onchange="applyListFilter()">
+          <option value="">All tags</option>
+        </select>
       </div>
-
-      <!-- RIGHT: DETAIL -->
-      <div class="detail fi" id="detail">
-
-        <!-- PROFILE HEADER -->
-        <div class="prof-hd">
-          <div class="prof-av" id="d-av" style="background:var(--blue);">JC</div>
-          <div>
-            <div class="prof-name" id="d-name">Jonathan Cohen</div>
-            <div class="prof-meta" id="d-meta">Father · Primary Payer · Cohen Family</div>
-            <div class="prof-badges">
-              <span class="badge b-b">Parent</span>
-              <span class="badge b-y" id="d-bal">Balance: $9,134</span>
-            </div>
-          </div>
-          <div class="prof-actions">
-            <button class="btn btn-g btn-sm" onclick="openEditParentModal()">✏ Edit</button>
-            <button class="btn btn-g btn-sm" onclick="window.location='payments.html'">💳 Pay</button>
-            <button class="btn btn-g btn-sm" style="color:var(--red);" onclick="deleteCurrentParent()">🗑</button>
-          </div>
-        </div>
-
-        <!-- TABS -->
-        <div class="tabs">
-          <div class="tab active" onclick="showTab('profile',this)">Profile</div>
-          <div class="tab" onclick="showTab('related',this)">Related Contacts</div>
-          <div class="tab" onclick="showTab('billing',this)">Billing</div>
-          <div class="tab" onclick="showTab('notes',this)">Notes</div>
-        </div>
-
-        <div class="tab-body">
-
-          <!-- PROFILE TAB -->
-          <div class="tab-pane active" id="tab-profile">
-            <div class="info-grid">
-              <div class="if"><div class="il">Full Name</div><div class="iv">Jonathan Cohen</div></div>
-              <div class="if"><div class="il">Role</div><div class="iv">Father / Primary Payer</div></div>
-              <div class="if"><div class="il">Email</div><div class="iv">jonathan.cohen@email.com</div></div>
-              <div class="if"><div class="il">Phone</div><div class="iv mono">+1 (646) 555-0142</div></div>
-              <div class="if"><div class="il">Preferred Contact</div><div class="iv">Email</div></div>
-              <div class="if"><div class="il">Language</div><div class="iv">English</div></div>
-              <div class="if"><div class="il">Address</div><div class="iv">42 Maple St, Brooklyn NY 11201</div></div>
-              <div class="if"><div class="il">Member Since</div><div class="iv mono">Sep 2022</div></div>
-            </div>
-            <div class="divider"></div>
-            <div class="sec-lbl">Linked Students</div>
-            <div class="student-chips" id="student-chips">
-              <div class="chip" onclick="window.location='students.html'">
-                <div class="chip-av" style="background:var(--accent);">DC</div>
-                <div><div class="chip-name">David Cohen</div><div class="chip-grade">Grade 8</div></div>
-              </div>
-              <div class="chip" onclick="window.location='students.html'">
-                <div class="chip-av" style="background:var(--blue);">RC</div>
-                <div><div class="chip-name">Rachel Cohen</div><div class="chip-grade">Grade 5</div></div>
-              </div>
-              <div class="chip" onclick="openLinkStudentModal()" style="border-style:dashed;color:var(--accent);">
-                + Link student
-              </div>
-            </div>
-          </div>
-
-          <!-- RELATED CONTACTS TAB -->
-          <div class="tab-pane" id="tab-related">
-
-            <div class="sec-lbl">
-              Spouse / Partner
-              <button class="btn btn-g btn-sm" onclick="openSpouseModal()">Edit</button>
-            </div>
-            <div class="spouse-card" id="spouse-card">
-              <div class="spouse-av">MC</div>
-              <div>
-                <div class="spouse-name">Miriam Cohen</div>
-                <div class="spouse-role">Wife · Secondary contact · miriam.cohen@email.com</div>
-              </div>
-              <div class="spouse-right">
-                <span class="badge b-b">Spouse</span>
-                <button class="btn btn-g btn-sm" onclick="window._selectParentById('miriam_cohen', null)">View →</button>
-              </div>
-            </div>
-
-            <div class="divider"></div>
-
-            <div class="sec-lbl">
-              Children / Students
-              <button class="btn btn-g btn-sm" onclick="openLinkStudentModal()">+ Link</button>
-            </div>
-            <div class="rel-card" onclick="window.location='students.html'">
-              <div class="rel-av" style="background:var(--accent);">DC</div>
-              <div>
-                <div class="rel-name">David Cohen</div>
-                <div class="rel-role">Son · Grade 8 · Balance: $9,474</div>
-              </div>
-              <div class="rel-right">
-                <span class="badge b-y">$9,474</span>
-                <span style="color:var(--muted2);font-size:14px;">›</span>
-              </div>
-            </div>
-            <div class="rel-card" onclick="window.location='students.html'">
-              <div class="rel-av" style="background:var(--blue);">RC</div>
-              <div>
-                <div class="rel-name">Rachel Cohen</div>
-                <div class="rel-role">Daughter · Grade 5 · Paid in full</div>
-              </div>
-              <div class="rel-right">
-                <span class="badge b-g">Paid</span>
-                <span style="color:var(--muted2);font-size:14px;">›</span>
-              </div>
-            </div>
-            <button class="add-rel" onclick="openLinkStudentModal()">+ Link another student</button>
-
-            <div class="divider"></div>
-
-            <div class="sec-lbl">
-              Other Contacts
-              <button class="btn btn-g btn-sm" onclick="openRelatedModal()">+ Add</button>
-            </div>
-            <div class="rel-card">
-              <div class="rel-av" style="background:#7f8c8d;">GC</div>
-              <div>
-                <div class="rel-name">Grandma Cohen</div>
-                <div class="rel-role">Emergency contact · +1 (646) 555-0199</div>
-              </div>
-              <div class="rel-right">
-                <span class="badge b-gr">Emergency</span>
-              </div>
-            </div>
-            <button class="add-rel" onclick="openRelatedModal()">+ Add another contact</button>
-          </div>
-
-          <!-- BILLING TAB -->
-          <div class="tab-pane" id="tab-billing">
-            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:20px;">
-              <div style="padding:12px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;">
-                <div class="il" style="margin-bottom:5px;">Total Invoiced</div>
-                <div style="font-family:var(--mono);font-size:18px;font-weight:700;" id="p-bal-total">—</div>
-              </div>
-              <div style="padding:12px 14px;background:var(--accent-light);border:1px solid #b8dece;border-radius:8px;">
-                <div class="il" style="margin-bottom:5px;">Paid</div>
-                <div style="font-family:var(--mono);font-size:18px;font-weight:700;color:var(--accent);" id="p-bal-paid">—</div>
-              </div>
-              <div style="padding:12px 14px;background:var(--yellow-light);border:1px solid #f0d88a;border-radius:8px;">
-                <div class="il" style="margin-bottom:5px;">Balance</div>
-                <div style="font-family:var(--mono);font-size:18px;font-weight:700;color:var(--yellow);" id="p-bal-remaining">—</div>
-              </div>
-            </div>
-
-            <div class="sec-lbl">Invoices</div>
-            <div id="parent-billing-invoices">
-              <div style="padding:16px;text-align:center;color:var(--muted2);font-size:12.5px;">Loading…</div>
-            </div>
-
-            <div style="margin-top:16px;display:flex;gap:8px;">
-              <button class="btn btn-p" onclick="window.location='payments.html'">💳 Record Payment</button>
-            </div>
-          </div>
-
-          <!-- NOTES TAB -->
-          <div class="tab-pane" id="tab-notes">
-            <div class="sec-lbl">
-              Internal Notes
-              <button class="btn btn-g btn-sm" onclick="addNote()">+ Add Note</button>
-            </div>
-            <div id="notes-list">
-              <div style="padding:12px 14px;background:var(--yellow-light);border:1px solid #f0d88a;border-radius:8px;margin-bottom:10px;">
-                <div style="font-size:11px;font-weight:600;color:var(--muted);margin-bottom:5px;">Apr 10, 2026 — Admin</div>
-                <div style="font-size:13px;line-height:1.6;">Father called to discuss installment 3. Requested extension to December 1. Approved by director.</div>
-              </div>
-              <div style="padding:12px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;margin-bottom:10px;">
-                <div style="font-size:11px;font-weight:600;color:var(--muted);margin-bottom:5px;">Sep 5, 2025 — Admin</div>
-                <div style="font-size:13px;line-height:1.6;">Scholarship application submitted. Merit scholarship of $2,500 approved for David Cohen.</div>
-              </div>
-            </div>
-            <textarea id="new-note" style="width:100%;height:80px;padding:10px;background:var(--bg);border:1px solid var(--border2);border-radius:8px;font-family:var(--sans);font-size:13px;color:var(--text);outline:none;resize:vertical;margin-top:8px;" placeholder="Add a note..."></textarea>
-            <div style="margin-top:8px;display:flex;justify-content:flex-end;">
-              <button class="btn btn-p btn-sm" onclick="saveNote()">Save Note</button>
-            </div>
-          </div>
-
+      <div class="list-panel fi">
+        <div id="list-view-body">
+          <div style="padding:20px;text-align:center;color:var(--muted2);font-size:12.5px;">Loading…</div>
         </div>
       </div>
     </div>
+
+    <!-- DETAIL VIEW -->
+    <div id="view-detail" style="display:none">
+      <button class="back-btn" onclick="showListView()">← All Parents</button>
+      <div class="detail-grid">
+
+        <!-- LEFT: MINI LIST -->
+        <div class="mini-list-col" id="mini-list-col">
+          <div class="list-panel fi">
+            <div class="list-hd">
+              <div class="list-hd-title">Parents <span id="mini-count" style="font-family:var(--mono);font-size:11px;color:var(--muted);font-weight:400;"></span></div>
+              <button class="tog-btn" onclick="toggleMiniList()" id="tog-btn" title="Collapse list">◂</button>
+            </div>
+            <div class="search-box">
+              <span style="color:var(--muted2);font-size:14px;">⌕</span>
+              <input type="text" id="mini-search" placeholder="Search..." style="flex:1;border:none;background:none;font-family:var(--sans);font-size:13px;color:var(--text);outline:none;">
+            </div>
+            <div id="parent-list-items"></div>
+          </div>
+        </div>
+
+        <!-- RIGHT: DETAIL -->
+        <div class="detail-content-col">
+          <div class="detail fi" id="detail">
+
+            <!-- PROFILE HEADER -->
+            <div class="prof-hd">
+              <div class="prof-av" id="d-av" style="background:var(--blue);">?</div>
+              <div>
+                <div class="prof-name" id="d-name">—</div>
+                <div class="prof-meta" id="d-meta">—</div>
+                <div class="prof-badges">
+                  <span class="badge b-b">Parent</span>
+                  <span class="badge b-y" id="d-bal">—</span>
+                </div>
+              </div>
+              <div class="prof-actions">
+                <button class="btn btn-g btn-sm" onclick="openEditParentModal()">✏ Edit</button>
+                <button class="btn btn-g btn-sm" onclick="window.location='payments.html'">💳 Pay</button>
+                <button class="btn btn-g btn-sm" style="color:var(--red);" onclick="deleteCurrentParent()">🗑</button>
+              </div>
+            </div>
+
+            <!-- TABS -->
+            <div class="tabs">
+              <div class="tab active" onclick="showTab('profile',this)">Profile</div>
+              <div class="tab" onclick="showTab('related',this)">Related Contacts</div>
+              <div class="tab" onclick="showTab('billing',this)">Billing</div>
+              <div class="tab" onclick="showTab('notes',this)">Notes</div>
+            </div>
+
+            <div class="tab-body">
+
+              <!-- PROFILE TAB -->
+              <div class="tab-pane active" id="tab-profile">
+                <div class="info-grid">
+                  <div class="if"><div class="il">Full Name</div><div class="iv" id="pf-name">—</div></div>
+                  <div class="if"><div class="il">Role</div><div class="iv" id="pf-role">—</div></div>
+                  <div class="if"><div class="il">Email</div><div class="iv" id="pf-email">—</div></div>
+                  <div class="if"><div class="il">Phone</div><div class="iv mono" id="pf-phone">—</div></div>
+                  <div class="if"><div class="il">Family Name</div><div class="iv" id="pf-family">—</div></div>
+                  <div class="if"><div class="il">Address</div><div class="iv" id="pf-address">—</div></div>
+                  <div class="if"><div class="il">External ID</div><div class="iv mono" id="pf-ext-id">—</div></div>
+                  <div class="if"><div class="il">Notes</div><div class="iv" id="pf-notes">—</div></div>
+                </div>
+                <div style="margin-top:14px;padding:14px 16px;background:var(--surface2);border:1px solid var(--border);border-radius:9px;display:flex;align-items:center;justify-content:space-between;">
+                  <div>
+                    <div style="font-size:13px;font-weight:700;">Family Portal Access</div>
+                    <div style="font-size:12px;color:var(--muted);margin-top:3px;" id="portal-access-desc">
+                      When enabled, this parent can log into the portal with their email address to view invoices and make payments.
+                    </div>
+                  </div>
+                  <button id="portal-toggle-btn" onclick="togglePortalAccess()"
+                    style="padding:6px 14px;border-radius:20px;font-size:12.5px;font-weight:600;border:1.5px solid var(--border2);background:var(--surface);color:var(--muted);cursor:pointer;white-space:nowrap;margin-left:16px;transition:all .15s;">
+                    Disabled
+                  </button>
+                </div>
+                <div class="divider"></div>
+                <div class="sec-lbl">Linked Students</div>
+                <div class="student-chips" id="student-chips">
+                  <div style="padding:8px 0;font-size:12.5px;color:var(--muted2);">Loading…</div>
+                </div>
+              </div>
+
+              <!-- RELATED CONTACTS TAB -->
+              <div class="tab-pane" id="tab-related">
+                <div class="sec-lbl">
+                  Spouse / Partner
+                  <button class="btn btn-g btn-sm" onclick="openSpouseModal()">Edit</button>
+                </div>
+                <div class="spouse-card" id="spouse-card">
+                  <div class="spouse-av" id="spouse-av">—</div>
+                  <div>
+                    <div class="spouse-name" id="spouse-name">—</div>
+                    <div class="spouse-role" id="spouse-role">—</div>
+                  </div>
+                  <div class="spouse-right"><span class="badge b-b">Spouse</span></div>
+                </div>
+                <div class="divider"></div>
+                <div class="sec-lbl">
+                  Children / Students
+                  <button class="btn btn-g btn-sm" onclick="openLinkStudentModal()">+ Link</button>
+                </div>
+                <div id="linked-students-list">
+                  <div style="padding:10px 0;font-size:12.5px;color:var(--muted2);">Loading…</div>
+                </div>
+                <button class="add-rel" onclick="openLinkStudentModal()">+ Link another student</button>
+                <div class="divider"></div>
+                <div class="sec-lbl">
+                  Other Contacts
+                  <button class="btn btn-g btn-sm" onclick="openRelatedModal()">+ Add</button>
+                </div>
+                <button class="add-rel" onclick="openRelatedModal()">+ Add another contact</button>
+              </div>
+
+              <!-- BILLING TAB -->
+              <div class="tab-pane" id="tab-billing">
+                <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:20px;">
+                  <div style="padding:12px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;">
+                    <div class="il" style="margin-bottom:5px;">Total Invoiced</div>
+                    <div style="font-family:var(--mono);font-size:18px;font-weight:700;" id="p-bal-total">—</div>
+                  </div>
+                  <div style="padding:12px 14px;background:var(--accent-light);border:1px solid #b8dece;border-radius:8px;">
+                    <div class="il" style="margin-bottom:5px;">Paid</div>
+                    <div style="font-family:var(--mono);font-size:18px;font-weight:700;color:var(--accent);" id="p-bal-paid">—</div>
+                  </div>
+                  <div style="padding:12px 14px;background:var(--yellow-light);border:1px solid #f0d88a;border-radius:8px;">
+                    <div class="il" style="margin-bottom:5px;">Balance</div>
+                    <div style="font-family:var(--mono);font-size:18px;font-weight:700;color:var(--yellow);" id="p-bal-remaining">—</div>
+                  </div>
+                </div>
+                <div class="sec-lbl">Invoices</div>
+                <div id="parent-billing-invoices">
+                  <div style="padding:16px;text-align:center;color:var(--muted2);font-size:12.5px;">Loading…</div>
+                </div>
+                <div style="margin-top:16px;display:flex;gap:8px;">
+                  <button class="btn btn-p" onclick="window.location='payments.html'">💳 Record Payment</button>
+                </div>
+              </div>
+
+              <!-- NOTES TAB -->
+              <div class="tab-pane" id="tab-notes">
+                <div class="sec-lbl">
+                  Internal Notes
+                  <button class="btn btn-g btn-sm" onclick="addNote()">+ Add Note</button>
+                </div>
+                <div id="notes-list"></div>
+                <textarea id="new-note" style="width:100%;height:80px;padding:10px;background:var(--bg);border:1px solid var(--border2);border-radius:8px;font-family:var(--sans);font-size:13px;color:var(--text);outline:none;resize:vertical;margin-top:8px;" placeholder="Add a note..."></textarea>
+                <div style="margin-top:8px;display:flex;justify-content:flex-end;">
+                  <button class="btn btn-p btn-sm" onclick="saveNote()">Save Note</button>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div>
 </main>
 
@@ -504,9 +432,13 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
     <div class="field"><label>Notes</label>
       <input class="input" id="add-p-notes" placeholder="Optional notes">
     </div>
-    <div style="display:flex;align-items:center;gap:8px;margin-top:4px;">
-      <input type="checkbox" id="is-payer" checked style="accent-color:var(--accent);width:15px;height:15px;">
-      <label for="is-payer" style="font-size:13px;cursor:pointer;">This contact is a financial payer</label>
+    <div style="display:flex;align-items:center;gap:8px;margin-top:8px;">
+      <input type="checkbox" id="is-primary" style="accent-color:var(--accent);width:15px;height:15px;">
+      <label for="is-primary" style="font-size:13px;cursor:pointer;">Primary contact for this family</label>
+    </div>
+    <div class="field" id="tags-field" style="margin-top:10px;">
+      <label>Contact Tags</label>
+      <div id="tag-checkboxes" style="display:flex;flex-wrap:wrap;gap:10px;margin-top:6px;"></div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-g" onclick="closeModal('add-modal')">Cancel</button>
@@ -615,29 +547,38 @@ import {
   getInvoices, fmt
 } from './db.js';
 
-// ── INIT ──
 await initNav({ currentPage: 'parents' });
-
-// Global select by ID (used by static list items before Firestore loads)
-window._selectParentById = async function(id, el) {
-  document.querySelectorAll('.parent-item').forEach(i => i.classList.remove('active'));
-  el?.classList.add('active');
-  const parent = allParents.find(p => p.id === id);
-  if (parent) await selectParent(parent);
-};
 
 const orgId = getCurrentOrgId();
 const settings = loadSettings();
 const terms = settings.terms || {};
 
-// ── STATE ──
 let allParents = [];
-let allStudents_p = []; // students for billing lookup
+let allStudents_p = [];
 let currentParent = null;
+let primaryFilterOn = false;
+
+// ── VIEW SWITCHING ──
+function showListView() {
+  document.getElementById('view-list').style.display = '';
+  document.getElementById('view-detail').style.display = 'none';
+}
+function showDetailView() {
+  document.getElementById('view-list').style.display = 'none';
+  document.getElementById('view-detail').style.display = '';
+}
+window.showListView = showListView;
+
+window.toggleMiniList = function() {
+  const col = document.getElementById('mini-list-col');
+  const btn = document.getElementById('tog-btn');
+  const collapsed = col.classList.toggle('collapsed');
+  if (btn) btn.textContent = collapsed ? '▸' : '◂';
+};
 
 // ── LOAD ──
 async function loadParents() {
-  const wrap = document.getElementById('parent-list-items') || document.querySelector('.parent-list');
+  const wrap = document.getElementById('list-view-body');
   if (wrap) wrap.innerHTML = `<div style="padding:20px;text-align:center;color:var(--muted2);font-size:12.5px;">Loading…</div>`;
   try {
     const [parents, payers, students] = await Promise.all([
@@ -648,49 +589,122 @@ async function loadParents() {
     allParents = [...parents, ...payers];
     allStudents_p = students;
     allParents.sort((a,b) => (a.lastName||'').localeCompare(b.lastName||''));
-    renderParentList(allParents);
-    if (allParents.length > 0) await selectParent(allParents[0]);
+    renderListView(allParents);
+    populateTagFilter();
+    showListView();
   } catch (e) {
-    if (wrap) wrap.innerHTML = `<div style="padding:20px;text-align:center;color:var(--red);font-size:12.5px;">Error: ${e.message}</div>`;
+    const wrap2 = document.getElementById('list-view-body');
+    if (wrap2) wrap2.innerHTML = `<div style="padding:20px;text-align:center;color:var(--red);font-size:12.5px;">Error: ${e.message}</div>`;
   }
 }
 
-function renderParentList(parents) {
-  const wrap = document.getElementById('parent-list-items') || document.querySelector('.parent-list');
+// ── LIST VIEW TABLE ──
+function renderListView(parents) {
+  const wrap = document.getElementById('list-view-body');
   if (!wrap) return;
   if (!parents.length) {
-    wrap.innerHTML = `<div style="padding:24px 16px;text-align:center;color:var(--muted2);font-size:13px;">
-      No ${(terms.parents||'parents').toLowerCase()} yet.<br><span style="font-size:12px;">Click "+ Add" to create one.</span>
-    </div>`;
+    wrap.innerHTML = `<div style="padding:32px;text-align:center;color:var(--muted2);font-size:13px;">No contacts found.</div>`;
+    return;
+  }
+  wrap.innerHTML = `<table class="tbl">
+    <thead><tr>
+      <th>Name</th><th>Role</th><th>Family</th><th>Tags</th><th>Balance</th><th></th>
+    </tr></thead>
+    <tbody>${parents.map(p => {
+      const name = `${p.firstName||''} ${p.lastName||''}`.trim() || 'Unnamed';
+      const initials = ((p.firstName||'')[0]||'') + ((p.lastName||'')[0]||'');
+      const tags = (p.tags||[]).map(t => `<span class="tag-chip">${t}</span>`).join(' ');
+      const balText = p.balance > 0 ? `$${fmt(p.balance)}` : '—';
+      const balColor = p.balance > 0 ? (p.overdue ? 'var(--red)' : 'var(--yellow)') : 'var(--muted2)';
+      const primaryBadge = p.isPrimary ? ' <span class="badge b-g" style="margin-left:4px;font-size:10px;">Primary</span>' : '';
+      return `<tr style="cursor:pointer;" onclick="window._selectParentById('${p.id}')">
+        <td><div style="display:flex;align-items:center;gap:10px;">
+          <div class="av" style="background:${p.avatarColor||'var(--accent)'};">${initials.toUpperCase()||'?'}</div>
+          <div class="pi-name">${name}${primaryBadge}</div>
+        </div></td>
+        <td style="color:var(--muted);">${p.role||'Parent'}</td>
+        <td style="color:var(--muted);">${p.familyName||'—'}</td>
+        <td>${tags||'—'}</td>
+        <td style="font-family:var(--mono);color:${balColor};">${balText}</td>
+        <td><button class="btn btn-g btn-sm" onclick="event.stopPropagation();window._selectParentById('${p.id}')">View →</button></td>
+      </tr>`;
+    }).join('')}</tbody>
+  </table>`;
+}
+
+window.applyListFilter = function() {
+  const q = (document.getElementById('list-search')?.value||'').toLowerCase();
+  const tag = document.getElementById('filter-tag')?.value||'';
+  const filtered = allParents.filter(p => {
+    const name = `${p.firstName||''} ${p.lastName||''}`.toLowerCase();
+    const matchQ = !q || name.includes(q) || (p.email||'').toLowerCase().includes(q) || (p.familyName||'').toLowerCase().includes(q);
+    const matchPrimary = !primaryFilterOn || p.isPrimary;
+    const matchTag = !tag || (p.tags||[]).includes(tag);
+    return matchQ && matchPrimary && matchTag;
+  });
+  renderListView(filtered);
+};
+
+window.togglePrimaryFilter = function() {
+  primaryFilterOn = !primaryFilterOn;
+  document.getElementById('btn-primary-filter')?.classList.toggle('primary-on', primaryFilterOn);
+  window.applyListFilter();
+};
+
+function populateTagFilter() {
+  const sel = document.getElementById('filter-tag');
+  if (!sel) return;
+  const orgTags = settings.contactTags||[];
+  sel.innerHTML = `<option value="">All tags</option>` + orgTags.map(t => `<option value="${t}">${t}</option>`).join('');
+  sel.style.display = orgTags.length ? '' : 'none';
+}
+
+document.getElementById('list-search')?.addEventListener('input', window.applyListFilter);
+
+// ── MINI LIST ──
+function renderParentList(parents) {
+  const wrap = document.getElementById('parent-list-items');
+  if (!wrap) return;
+  const cnt = document.getElementById('mini-count');
+  if (cnt) cnt.textContent = parents.length;
+  if (!parents.length) {
+    wrap.innerHTML = `<div style="padding:24px 16px;text-align:center;color:var(--muted2);font-size:13px;">No contacts found.</div>`;
     return;
   }
   wrap.innerHTML = parents.map(p => {
     const initials = ((p.firstName||'')[0]||'') + ((p.lastName||'')[0]||'');
     const name = `${p.firstName||''} ${p.lastName||''}`.trim() || 'Unnamed';
-    const meta = [p.familyName, p.role || (p.type==='payer'?terms.parent||'Payer':'Parent')].filter(Boolean).join(' · ');
+    const meta = [p.familyName, p.role||'Parent'].filter(Boolean).join(' · ');
     const isActive = currentParent?.id === p.id;
-    const balText = p.balance > 0 ? `$${fmt(p.balance)} balance` : 'No balance';
-    const balClass = p.balance > 0 ? (p.overdue ? 'b-r' : 'b-y') : 'b-gr';
-    return `<div class="parent-item${isActive?' active':''}" onclick="window._selectParentById('${p.id}',this)">
-      <div class="parent-av" style="${p.avatarColor?'background:'+p.avatarColor:''}">${initials.toUpperCase()||'?'}</div>
-      <div class="parent-info">
-        <div class="parent-name">${name}</div>
-        <div class="parent-meta">${meta||'—'}</div>
+    return `<div class="parent-item${isActive?' active':''}" data-id="${p.id}" onclick="window._selectParentById('${p.id}')">
+      <div class="av" style="background:${p.avatarColor||'var(--accent)'};">${initials.toUpperCase()||'?'}</div>
+      <div>
+        <div class="pi-name">${name}</div>
+        <div class="pi-meta">${meta||'—'}</div>
       </div>
-      <span class="badge ${balClass}" style="font-size:10px;">${balText}</span>
+      ${p.balance > 0 ? `<span class="badge ${p.overdue?'b-r':'b-y'}" style="font-size:10px;margin-left:auto;">$${fmt(p.balance)}</span>` : ''}
     </div>`;
   }).join('');
 }
 
-window._selectParentById = async function(id, el) {
-  document.querySelectorAll('.parent-item').forEach(i => i.classList.remove('active'));
-  el?.classList.add('active');
+document.getElementById('mini-search')?.addEventListener('input', function() {
+  const q = this.value.toLowerCase();
+  renderParentList(allParents.filter(p =>
+    (`${p.firstName||''} ${p.lastName||''}`).toLowerCase().includes(q) ||
+    (p.familyName||'').toLowerCase().includes(q)
+  ));
+});
+
+window._selectParentById = async function(id) {
   const parent = allParents.find(p => p.id === id);
   if (parent) await selectParent(parent);
 };
 
 async function selectParent(p) {
   currentParent = p;
+  showDetailView();
+  renderParentList(allParents);
+
   const name = `${p.firstName||''} ${p.lastName||''}`.trim() || 'Unnamed';
   const initials = ((p.firstName||'')[0]||'') + ((p.lastName||'')[0]||'');
 
@@ -715,7 +729,14 @@ async function selectParent(p) {
   setEl('pf-notes', p.notes||'—');
   setEl('pf-ext-id', p.externalId||'—');
 
-  await Promise.all([renderLinkedStudents(p), renderParentBilling(p)]);
+  updatePortalToggle(p.portalAccess || false, p.email);
+  await renderLinkedStudents(p);
+  await renderParentBilling(p);
+
+  document.querySelectorAll('.tabs .tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-pane').forEach(t => t.classList.remove('active'));
+  document.querySelector('.tabs .tab')?.classList.add('active');
+  document.getElementById('tab-profile')?.classList.add('active');
 }
 
 async function renderParentBilling(p) {
@@ -812,19 +833,6 @@ async function renderLinkedStudents(p) {
   }
 }
 
-// ── SEARCH ──
-const searchInp = document.getElementById('parent-search') || document.querySelector('.search-input');
-if (searchInp) {
-  searchInp.addEventListener('input', () => {
-    const q = searchInp.value.toLowerCase();
-    const filtered = allParents.filter(p =>
-      (`${p.firstName} ${p.lastName}`).toLowerCase().includes(q) ||
-      (p.email||'').toLowerCase().includes(q) ||
-      (p.familyName||'').toLowerCase().includes(q)
-    );
-    renderParentList(filtered);
-  });
-}
 
 // ── TABS ──
 window.showTab = function(tab, el) {
@@ -832,15 +840,35 @@ window.showTab = function(tab, el) {
   document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
   el.classList.add('active');
   document.getElementById('tab-' + tab).classList.add('active');
+  if (tab === 'notes' && currentParent) loadParentNotes(currentParent.id);
+  if (tab === 'billing' && currentParent) renderParentBilling(currentParent);
 };
 
-// ── ADD PARENT ──
+// ── ADD / EDIT MODAL ──
+function populateModalTags(selectedTags=[]) {
+  const wrap = document.getElementById('tag-checkboxes');
+  const field = document.getElementById('tags-field');
+  if (!wrap) return;
+  const orgTags = settings.contactTags||[];
+  if (!orgTags.length) { if(field) field.style.display='none'; return; }
+  if(field) field.style.display='';
+  wrap.innerHTML = orgTags.map(t => `<label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:12.5px;padding:3px 0;">
+    <input type="checkbox" value="${t}" ${selectedTags.includes(t)?'checked':''} style="accent-color:var(--accent);">
+    ${t}
+  </label>`).join('');
+}
+
 window.openAddModal = function() {
-  ['add-p-firstname','add-p-lastname','add-p-email','add-p-phone','add-p-family','add-p-role','add-p-notes'].forEach(id => {
+  ['add-p-firstname','add-p-lastname','add-p-email','add-p-phone','add-p-family','add-p-notes'].forEach(id => {
     const el = document.getElementById(id); if(el) el.value = '';
   });
+  const role = document.getElementById('add-p-role'); if(role) role.value = 'Father';
+  const isPrimary = document.getElementById('is-primary'); if(isPrimary) isPrimary.checked = false;
   const title = document.getElementById('add-parent-title');
   if (title) title.textContent = `Add ${terms.parent||'Parent'}`;
+  const btn = document.getElementById('save-parent-btn');
+  if (btn) { btn.textContent = `Add ${terms.parent||'Contact'}`; btn.onclick = saveNewParent; }
+  populateModalTags([]);
   document.getElementById('add-modal').classList.add('open');
 };
 window.closeAddModal = function() { document.getElementById('add-modal').classList.remove('open'); };
@@ -856,6 +884,7 @@ window.saveNewParent = async function() {
   const btn = document.getElementById('save-parent-btn');
   if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
   try {
+    const tags = [...document.querySelectorAll('#tag-checkboxes input:checked')].map(i => i.value);
     await saveContact(orgId, null, {
       type: 'parent',
       firstName: firstName||'',
@@ -865,6 +894,8 @@ window.saveNewParent = async function() {
       familyName: document.getElementById('add-p-family')?.value?.trim()||'',
       role: document.getElementById('add-p-role')?.value||'Parent',
       notes: document.getElementById('add-p-notes')?.value?.trim()||'',
+      isPrimary: document.getElementById('is-primary')?.checked||false,
+      tags,
       balance: 0,
     });
     closeAddModal();
@@ -872,7 +903,7 @@ window.saveNewParent = async function() {
   } catch (e) {
     alert('Failed: ' + e.message);
   } finally {
-    if (btn) { btn.disabled = false; btn.textContent = `Add ${terms.parent||'Parent'}`; }
+    if (btn) { btn.disabled = false; btn.textContent = `Add ${terms.parent||'Contact'}`; }
   }
 };
 
@@ -882,24 +913,92 @@ window.deleteCurrentParent = async function() {
   if (!confirm(`Delete ${name}?`)) return;
   await deleteContact(orgId, currentParent.id);
   currentParent = null;
+  showListView();
   await loadParents();
 };
 
 // Notes
 window.addNote = function() { document.getElementById('new-note')?.focus(); };
-window.saveNote = function() {
-  const txt = document.getElementById('new-note')?.value?.trim();
-  if (!txt) return;
-  const list = document.getElementById('notes-list');
-  if (!list) return;
-  const d = document.createElement('div');
-  d.style.cssText = 'padding:12px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;margin-bottom:10px;';
-  d.innerHTML = `<div style="font-size:11px;font-weight:600;color:var(--muted);margin-bottom:5px;">Now — Admin</div><div style="font-size:13px;line-height:1.6;">${txt}</div>`;
-  list.prepend(d);
-  document.getElementById('new-note').value = '';
+
+window.saveNote = async function() {
+  if (!currentParent) return;
+  const inp = document.getElementById('new-note');
+  const txt = inp?.value?.trim();
+  if (!txt) { inp?.focus(); return; }
+  const btn = document.querySelector('#tab-notes .btn-p');
+  if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
+  try {
+    const { getDB, getFirebaseAuth } = await import('./db.js');
+    const { collection, addDoc, serverTimestamp } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
+    const db = getDB();
+    await addDoc(collection(db, 'orgs', orgId, 'contacts', currentParent.id, 'notes'), {
+      text: txt,
+      authorName: getFirebaseAuth().currentUser?.displayName || 'Admin',
+      authorId:   getFirebaseAuth().currentUser?.uid || '',
+      createdAt: serverTimestamp(),
+    });
+    if (inp) inp.value = '';
+    await loadParentNotes(currentParent.id);
+  } catch(e) { alert('Failed to save note: ' + e.message); }
+  finally { if (btn) { btn.disabled = false; btn.textContent = 'Save Note'; } }
 };
 
-// ── EDIT PARENT ──
+async function loadParentNotes(parentId) {
+  const wrap = document.getElementById('notes-list');
+  if (!wrap) return;
+  wrap.innerHTML = `<div style="text-align:center;padding:12px;color:var(--muted2);font-size:13px;">Loading…</div>`;
+  try {
+    const { getDB } = await import('./db.js');
+    const { collection, query, orderBy, getDocs } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
+    const snap = await getDocs(query(collection(getDB(), 'orgs', orgId, 'contacts', parentId, 'notes'), orderBy('createdAt', 'desc')));
+    if (snap.empty) { wrap.innerHTML = `<div style="text-align:center;padding:16px;color:var(--muted2);font-size:13px;">No notes yet.</div>`; return; }
+    wrap.innerHTML = snap.docs.map(d => {
+      const n = d.data();
+      const date = n.createdAt?.toDate ? n.createdAt.toDate().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '—';
+      return `<div style="padding:12px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;margin-bottom:8px;">
+        <div style="display:flex;justify-content:space-between;margin-bottom:5px;">
+          <div style="font-size:11.5px;font-weight:600;color:var(--muted);">${n.authorName||'Admin'}</div>
+          <div style="font-size:11px;color:var(--muted2);">${date}</div>
+        </div>
+        <div style="font-size:13px;line-height:1.6;">${String(n.text||'').replace(/&/g,'&amp;').replace(/</g,'&lt;')}</div>
+      </div>`;
+    }).join('');
+  } catch(e) { wrap.innerHTML = `<div style="color:var(--red);font-size:12.5px;">Error: ${e.message}</div>`; }
+}
+
+// ── PORTAL ACCESS TOGGLE ──
+window.togglePortalAccess = async function() {
+  if (!currentParent) return;
+  const newState = !currentParent.portalAccess;
+  const btn = document.getElementById('portal-toggle-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
+  try {
+    await saveContact(orgId, currentParent.id, { portalAccess: newState });
+    currentParent.portalAccess = newState;
+    updatePortalToggle(newState, currentParent.email);
+  } catch(e) { alert('Failed: ' + e.message); }
+  finally { if (btn) btn.disabled = false; }
+};
+
+function updatePortalToggle(enabled, email) {
+  const btn = document.getElementById('portal-toggle-btn');
+  const desc = document.getElementById('portal-access-desc');
+  if (btn) {
+    btn.textContent = enabled ? 'Enabled ✓' : 'Disabled';
+    btn.style.background = enabled ? 'var(--accent-light)' : 'var(--surface)';
+    btn.style.color = enabled ? 'var(--accent)' : 'var(--muted)';
+    btn.style.borderColor = enabled ? '#b0d8c0' : 'var(--border2)';
+  }
+  if (desc) {
+    if (enabled && email) {
+      desc.innerHTML = `<span style="color:var(--accent);">✓ Active</span> — ${email} can log into the portal to view invoices and pay.`;
+    } else if (!email) {
+      desc.innerHTML = `<span style="color:var(--yellow);">⚠ No email set</span> — Add an email address to this parent to enable portal access.`;
+    } else {
+      desc.textContent = 'When enabled, this parent can log into the portal with their email address to view invoices and make payments.';
+    }
+  }
+}
 window.openEditParentModal = function() {
   if (!currentParent) return;
   const p = currentParent;
@@ -910,10 +1009,13 @@ window.openEditParentModal = function() {
   setValue('add-p-family', p.familyName||'');
   setValue('add-p-role', p.role||'Parent');
   setValue('add-p-notes', p.notes||'');
+  const isPrimary = document.getElementById('is-primary');
+  if (isPrimary) isPrimary.checked = !!p.isPrimary;
   const title = document.getElementById('add-parent-title');
   if (title) title.textContent = `Edit ${terms.parent||'Parent'}`;
   const btn = document.getElementById('save-parent-btn');
   if (btn) { btn.textContent = 'Save Changes'; btn.onclick = saveEditParent; }
+  populateModalTags(p.tags||[]);
   document.getElementById('add-modal').classList.add('open');
 };
 
@@ -924,6 +1026,7 @@ async function saveEditParent() {
   try {
     const firstName = document.getElementById('add-p-firstname')?.value?.trim()||'';
     const lastName = document.getElementById('add-p-lastname')?.value?.trim()||'';
+    const tags = [...document.querySelectorAll('#tag-checkboxes input:checked')].map(i => i.value);
     await saveContact(orgId, currentParent.id, {
       firstName, lastName,
       email: document.getElementById('add-p-email')?.value?.trim()||'',
@@ -931,16 +1034,16 @@ async function saveEditParent() {
       familyName: document.getElementById('add-p-family')?.value?.trim()||'',
       role: document.getElementById('add-p-role')?.value||'Parent',
       notes: document.getElementById('add-p-notes')?.value?.trim()||'',
+      isPrimary: document.getElementById('is-primary')?.checked||false,
+      tags,
       avatarColor: avatarColor(`${firstName} ${lastName}`),
     });
-    closeAddModal();
+    window.closeModal('add-modal');
     await loadParents();
   } catch (e) {
     alert('Failed: ' + e.message);
   } finally {
     if (btn) { btn.disabled = false; btn.textContent = 'Save Changes'; }
-    const btn2 = document.getElementById('save-parent-btn');
-    if (btn2) btn2.onclick = saveNewParent;
   }
 }
 
